@@ -1,0 +1,50 @@
+{
+  "name": "mapyourworld-backend",
+  "version": "1.0.0",
+  "description": "Backend para la aplicación MapYourWorld",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:auth\" \"npm run start:user\" \"npm run start:map\" \"npm run start:notification\" \"npm run start:social\" \"npm run start:gateway\"",
+    "start:auth": "cd auth-service && npm start",
+    "start:user": "cd user-service && npm start",
+    "start:map": "cd map-service && npm start",
+    "start:notification": "cd notification-service && npm start",
+    "start:social": "cd social-service && npm start",
+    "start:gateway": "cd api-gateway && npm start",
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:notification\" \"npm run dev:social\" \"npm run dev:gateway\"",
+    "dev:auth": "cd auth-service && npm run dev",
+    "dev:user": "cd user-service && npm run dev",
+    "dev:map": "cd map-service && npm run dev",
+    "dev:notification": "cd notification-service && npm run dev",
+    "dev:social": "cd social-service && npm run dev",
+    "dev:gateway": "cd api-gateway && npm run dev",
+    "build": "npm run build:types && tsc -b",
+    "build:auth": "cd auth-service && npm run build",
+    "build:user": "cd user-service && npm run build",
+    "build:map": "cd map-service && npm run build",
+    "build:notification": "cd notification-service && npm run build",
+    "build:social": "cd social-service && npm run build",
+    "build:gateway": "cd api-gateway && npm run build",
+    "lint": "eslint . --ext .ts",
+    "test": "jest",
+    "build:types": "tsc -p tsconfig.types.json",
+    "postinstall": "npm run build:types"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.25",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
+  }
+}

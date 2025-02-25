@@ -1,0 +1,71 @@
+{
+  "name": "mapyourworld-mobile",
+  "version": "1.0.0",
+  "description": "Aplicación móvil de MapYourWorld con React Native",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/nodemailer": "6.4.17",
+    "@types/react-native-vector-icons": "^6.4.18",
+    "@types/socket.io": "^3.0.1",
+    "@types/socket.io-client": "^1.4.36",
+    "crypto-js": "^4.2.0",
+    "expo": "49.0.20",
+    "expo-camera": "13.4.4",
+    "expo-file-system": "15.4.5",
+    "expo-image-picker": "14.3.2",
+    "expo-location": "16.1.0",
+    "expo-notifications": "0.20.1",
+    "expo-status-bar": "1.6.0",
+    "jsonwebtoken": "9.0.2",
+    "lottie-react-native": "5.1.6",
+    "nativewind": "^4.1.23",
+    "nodemailer": "6.10.0",
+    "react-native-maps": "1.7.1",
+    "react-native-reanimated": "3.3.0",
+    "react-native-svg": "13.9.0",
+    "react-native-vector-icons": "^10.2.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "7.24.3",
+    "@testing-library/react-native": "12.4.3",
+    "@types/amqplib": "^0.10.6",
+    "@types/jsonwebtoken": "9.0.9",
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^19.0.4",
+    "@types/react-native": "0.73.0",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "autoprefixer": "^10.4.20",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "babel-preset-expo": "9.5.2",
+    "jest": "29.7.0",
+    "jest-expo": "49.0.0",
+    "postcss": "^8.5.3",
+    "react-test-renderer": "18.2.0",
+    "tailwindcss": "^3.3.2",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
+    ]
+  },
+  "private": true
+}

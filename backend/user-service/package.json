@@ -1,0 +1,30 @@
+{
+  "name": "user-service",
+  "version": "1.0.0",
+  "description": "Servicio de gestión de usuarios para MapYourWorld",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "9.0.9",
+    "@types/nodemailer": "6.4.17",
+    "amqplib": "0.10.3",
+    "cors": "2.8.5",
+    "dotenv": "16.4.5",
+    "express": "4.19.2",
+    "express-validator": "7.0.1",
+    "helmet": "7.1.0",
+    "jsonwebtoken": "9.0.2",
+    "nodemailer": "6.10.0",
+    "pg": "8.11.3",
+    "pg-hstore": "2.3.4",
+    "sequelize": "6.37.1"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "nodemon": "3.1.0"
+  }
+}
