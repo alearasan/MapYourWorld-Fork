@@ -3,7 +3,7 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 // Interfaz para los datos del usuario
