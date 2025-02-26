@@ -4,8 +4,18 @@
 
 import { Request } from 'express';
 
-// Importar desde la estructura centralizada de tipos usando alias
-import { Auth, Social, Map } from '@types';
+// Importar desde nuestros tipos dummy locales
+import { Social, Map } from '../services/dummy-types';
+
+// Definición básica para Auth.UserData
+namespace Auth {
+  export interface UserData {
+    userId: string;
+    email: string;
+    username?: string;
+    role: string;
+  }
+}
 
 /** Solicitud autenticada con datos de usuario */
 export interface AuthenticatedRequest extends Request {
@@ -82,5 +92,6 @@ export interface SocialServiceConfig {
 // Re-exportar tipos específicos
 export type {
   Social,
-  Map
+  Map,
+  Auth
 }; 

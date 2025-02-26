@@ -192,7 +192,7 @@ export class SecureWebSocketServer {
       try {
         const socketWithData = socket as any;
         if (socketWithData.encryptionKey) {
-          const decryptedData = decryptAES(message.data, socketWithData.encryptionKey);
+          const decryptedData = decryptAES(message.data);
           message = JSON.parse(decryptedData);
         }
       } catch (error) {
@@ -217,7 +217,7 @@ export class SecureWebSocketServer {
       
       // Cifrar mensaje si es necesario
       if (this.options.useEncryption && socketWithData.encryptionKey) {
-        const encryptedData = encryptAES(messageData, socketWithData.encryptionKey);
+        const encryptedData = encryptAES(messageData);
         messageData = JSON.stringify({
           encrypted: true,
           data: encryptedData

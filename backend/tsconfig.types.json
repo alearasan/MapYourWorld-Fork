@@ -9,7 +9,7 @@
     "composite": true
   },
   "include": [
-    "common.types.ts"
+    "types/common/common.types.ts"
   ],
   "exclude": [
     "node_modules",

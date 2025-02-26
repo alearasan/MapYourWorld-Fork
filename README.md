@@ -2,6 +2,33 @@
 
 Una aplicación que permite a los usuarios registrar lugares visitados con elementos de gamificación.
 
+<div align="center">
+  <h2>🚀 ¡ACTUALIZACIÓN IMPORTANTE! 🚀</h2>
+  <p>Hemos simplificado la ejecución de la aplicación</p>
+  <code>npm run app</code>
+</div>
+
+## 🚨 IMPORTANTE: Cambios Recientes en la Ejecución del Proyecto
+
+Hemos realizado varias mejoras para simplificar la ejecución del proyecto:
+
+1. **Nuevo Comando de Ejecución Sin Errores**: 
+   ```bash
+   npm run app
+   ```
+   Este comando inicia solamente los componentes funcionales (API Gateway y Frontend Web) evitando errores de los microservicios que aún no están completamente implementados.
+
+2. **Script Visual Mejorado**:
+   ```bash
+   node scripts/start-minimal.js
+   ```
+   Proporciona una interfaz visual mejorada con mensajes claros durante el inicio de la aplicación.
+
+3. **Documentación de Instalación Detallada**:
+   Revisa el archivo `README-INSTALACION.md` para obtener instrucciones detalladas sobre la instalación y ejecución.
+
+> **Nota**: Debido a la estructura de workspaces de npm, cuando ejecutas `npm run` sin especificar un comando exacto, se muestran los scripts de todos los workspaces. Siempre usa el nombre completo del script.
+
 ## 📋 Tabla de Contenidos
 
 - [Estructura del Proyecto](#estructura-del-proyecto)
@@ -72,7 +99,7 @@ npx tsc --noEmit
 
 Si ves algunos errores relacionados con `ts-expect-error` o imports faltantes, no te preocupes, son normales en esta etapa del desarrollo y se resolverán más adelante.
 
-### 4. Configurar variables de entorno
+### 4. Configurar variables de entorno (aún no listo) 
 
 Copia los archivos de ejemplo de variables de entorno y personalízalos según sea necesario:
 
@@ -88,6 +115,20 @@ cp frontend/mobile/.env.example frontend/mobile/.env
 ```
 
 ## 💻 Desarrollo
+
+### Ejecutar la aplicación sin errores (Recomendado)
+
+Este comando iniciará solo los componentes que funcionan correctamente:
+
+```bash
+npm run app
+```
+
+O con una interfaz visual mejorada:
+
+```bash
+node scripts/start-minimal.js
+```
 
 ### Ejecutar todo el proyecto en modo desarrollo-debug
 
@@ -111,7 +152,7 @@ Este comando iniciará todos los microservicios del backend en modo desarrollo c
 npm run dev:web
 ```
 
-Esto ejecutará la aplicación web en modo desarrollo, accesible en `http://localhost:3000` por defecto.
+Esto ejecutará la aplicación web en modo desarrollo, accesible en `http://localhost:3001` por defecto.
 
 ### Ejecutar solo la aplicación móvil
 
@@ -213,6 +254,14 @@ npm run docker:down
 
 ## ❓ Solución de Problemas Comunes
 
+### Problemas con la ejecución de scripts npm
+
+Si encuentras problemas al ejecutar los scripts npm:
+
+1. Asegúrate de estar en la raíz del proyecto
+2. Usa el nombre completo del script (por ejemplo, `npm run app`)
+3. Si los comandos muestran scripts no esperados, es debido a la estructura de workspaces de npm
+
 ### Error de dependencias faltantes
 
 Si encuentras errores como "Cannot find module..." después de la instalación:
@@ -248,9 +297,6 @@ Si tienes problemas con la autenticación:
 
 1. Verifica que el servicio de autenticación esté en ejecución
 2. Comprueba que las variables de entorno relacionadas con JWT estén configuradas correctamente
-3. Asegúrate de que las rutas de API estén correctamente protegidas
-
-
 
 ## 🤝 Contribuir
 

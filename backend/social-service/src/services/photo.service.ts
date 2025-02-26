@@ -3,8 +3,7 @@
  * Gestiona la subida, procesamiento y recuperación de fotos
  */
 
-import { Map } from '@types';
-import { publishEvent } from '@shared/libs/rabbitmq';
+import { Map, publishEvent } from './dummy-types';
 
 /**
  * Sube una nueva foto

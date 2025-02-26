@@ -45,7 +45,7 @@ class CircuitBreaker {
       rollingCountBuckets: 10 // 10 buckets
     };
     
-    this.breaker = CircuitBreakerFactory(async (operation: () => Promise<any>) => {
+    this.breaker = new CircuitBreakerFactory(async (operation: () => Promise<any>) => {
       return await operation();
     }, { ...defaultOptions, ...options });
     

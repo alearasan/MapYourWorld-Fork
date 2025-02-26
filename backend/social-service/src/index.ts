@@ -7,9 +7,15 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
+// import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
 import socialRouter from './routes/social.routes';
 import photoRouter from './routes/photo.routes';
+
+// Dummy RabbitMQ connect function for development
+const connectRabbitMQ = async () => {
+  console.log('[DUMMY] Conectando a RabbitMQ de forma simulada...');
+  return true;
+};
 
 // Cargar variables de entorno
 dotenv.config();

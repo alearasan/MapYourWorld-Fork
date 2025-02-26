@@ -3,12 +3,8 @@
  * Gestiona comentarios, likes, fotos y seguimiento entre usuarios
  */
 
-import { Social } from '@types';
-import { publishEvent } from '@shared/libs/rabbitmq';
-import type { FriendshipStatus } from '@backend/types/social/social.types';
-
-// Importando el enum directamente de su ubicación para poder usarlo como valor
-import { FriendshipStatus as FriendshipStatusEnum } from '@backend/types/social/social.types';
+// Importar desde el módulo de tipos dummy local para facilitar la compilación
+import { Social, publishEvent, FriendshipStatus as FriendshipStatusEnum } from './dummy-types';
 
 /**
  * Publica un comentario en una foto o punto de interés
