@@ -12,7 +12,7 @@
     "start:social": "cd social-service && npm start",
     "start:gateway": "cd api-gateway && npm start",
     "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:notification\" \"npm run dev:social\" \"npm run dev:gateway\" \"npm run dev:db\" ",
-    "dev:db": "ts-node db.ts",
+    "dev:db": "cd database && ts-node db.ts",
     "dev:auth": "cd auth-service && npm run dev",
     "dev:user": "cd user-service && npm run dev",
     "dev:map": "cd map-service && npm run dev",

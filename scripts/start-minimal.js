@@ -18,7 +18,7 @@ console.log('\n');
 
 // Directorios de los servicios
 const apiGatewayDir = path.join(__dirname, '../backend/api-gateway');
-const baseDatosDir = path.join(__dirname, '../backend');
+const baseDatosDir = path.join(__dirname, '../backend/database');
 
 const webFrontendDir = path.join(__dirname, '../frontend/web');
 
