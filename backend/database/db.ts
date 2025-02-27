@@ -36,8 +36,11 @@ db.none(`
 
   `)
   .then(() => {
-    console.log('Tabla de usuarios creada exitosamente');
+    console.log('Tablas creadas satisfactoriamente');
   })
   .catch((error) => {
     console.error('Error al crear la tabla:', error);
   });
+
+
+  export default db

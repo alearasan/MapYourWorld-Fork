@@ -4,6 +4,7 @@
  */
 
 import { publishEvent } from '@shared/libs/rabbitmq';
+import db from '@backend/database/db';
 
 /**
  * Tipo para representar un distrito
@@ -20,7 +21,7 @@ export interface District {
     latitude: number;
     longitude: number;
   };
-  isBloqued: boolean;
+  isBlocked: boolean;
 
 }
 
@@ -30,15 +31,58 @@ export interface District {
  * @param userId ID del usuario administrador que crea el distrito
  */
 export const createDistrict = async (
-  districtData: Omit<District, 'id' | 'createdAt' | 'updatedAt'>,
+  districtData: Omit<District, 'id'>,
   userId: string
 ): Promise<District> => {
-  // TODO: Implementar la creación de un distrito
-  // 1. Validar los datos del distrito
-  // 2. Verificar que el usuario tiene permisos de administrador
-  // 3. Validar que los límites geográficos no se solapan con otros distritos
-  // 4. Guardar el distrito en la base de datos
-  // 5. Publicar evento de distrito creado
+
+  try {
+      // TODO: Implementar la creación de un distrito
+      // 1. Validar los datos del distrito
+      if (!districtData.name || !districtData.center || !districtData.boundaries || !districtData.description){
+        throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+      }
+
+      // 2. Verificar que el usuario tiene permisos de administrador
+
+      // 3. Validar que los límites geográficos no se solapan con otros distritos
+      const existingDistrict = await db.oneOrNone(`
+        SELECT 1 
+        FROM district 
+        WHERE ST_Intersects(boundaries, ST_GeomFromText($1, 4326))
+      `, [districtData.boundaries]);
+
+      if (existingDistrict){
+        throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
+      }
+
+
+
+      // 4. Guardar el distrito en la base de datos
+
+      const result = await db.none(`
+        INSERT INTO district (name, description, boundaries, center, isBlocked)
+        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_SetSRID(ST_MakePoint($4), 4326), $5)
+      `, [districtData.name, districtData.description, districtData.boundaries, districtData.center, districtData.isBlocked]);
+
+      const createdDistrict = await db.one(`
+        SELECT * FROM district WHERE name = $1 AND description = $2
+      `, [districtData.name, districtData.description]);
+
+      // 5. Publicar evento de distrito creado
+      await publishEvent('district.created', {
+        districtId: createdDistrict.id,
+        name: createdDistrict.name,
+        description: createdDistrict.description,
+        boundaries: createdDistrict.boundaries,
+        center: createdDistrict.center,
+        timestamp: new Date()
+      });
+    
+  } catch (error) {
+    console.log(error)
+  }
+
+
   
   throw new Error('Método no implementado');
 };
@@ -113,6 +157,8 @@ export const canUnlockDistrict = async (
   
   throw new Error('Método no implementado');
 };
+
+
 
 /**
  * Desbloquea un distrito para un usuario
