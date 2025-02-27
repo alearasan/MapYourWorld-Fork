@@ -20,24 +20,8 @@ export interface District {
     latitude: number;
     longitude: number;
   };
-  level: number;
-  unlockRequirements: {
-    points?: number;
-    previousDistricts?: string[];
-    tasks?: {
-      type: 'visit_poi' | 'take_photo' | 'complete_quiz';
-      target: string;
-      count: number;
-    }[];
-  };
-  rewards: {
-    points: number;
-    badges?: string[];
-    items?: string[];
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  isBloqued: boolean;
+
 }
 
 /**

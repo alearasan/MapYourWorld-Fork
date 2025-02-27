@@ -15,12 +15,25 @@ const db = pgPromise()({
 
 
 db.none(`
+
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username VARCHAR(50) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    DROP TABLE IF EXISTS district;
+
+    CREATE TABLE IF NOT EXISTS district (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      description TEXT,
+      boundaries GEOMETRY(Polygon, 4326),  -- Usando tipo GEOMETRY para almacenar polígonos
+      center GEOMETRY(Point, 4326),  -- Usando tipo GEOMETRY para almacenar el punto central
+      isBlocked BOOLEAN DEFAULT FALSE  -- Booleano para marcar si está bloqueado
+    );
+
   `)
   .then(() => {
     console.log('Tabla de usuarios creada exitosamente');
