@@ -14,6 +14,7 @@
     "@types/nodemailer": "6.4.17",
     "amqplib": "0.10.3",
     "aws-sdk": "2.1586.0",
+    "class-validator": "0.14.1",
     "cors": "2.8.5",
     "dotenv": "16.4.5",
     "express": "4.19.2",
@@ -25,7 +26,8 @@
     "pg": "8.11.3",
     "pg-hstore": "2.3.4",
     "sequelize": "6.37.1",
-    "sharp": "0.33.3"
+    "sharp": "0.33.3",
+    "typeorm": "0.3.20"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.5",

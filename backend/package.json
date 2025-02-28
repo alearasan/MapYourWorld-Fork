@@ -11,7 +11,8 @@
     "start:notification": "cd notification-service && npm start",
     "start:social": "cd social-service && npm start",
     "start:gateway": "cd api-gateway && npm start",
-    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:notification\" \"npm run dev:social\" \"npm run dev:gateway\"",
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:notification\" \"npm run dev:social\" \"npm run dev:gateway\" \"npm run dev:db\" ",
+    "dev:db": "cd database && ts-node db.ts",
     "dev:auth": "cd auth-service && npm run dev",
     "dev:user": "cd user-service && npm run dev",
     "dev:map": "cd map-service && npm run dev",
@@ -31,7 +32,11 @@
     "postinstall": "npm run build:types"
   },
   "dependencies": {
+    "class-validator": "0.14.1",
     "dotenv": "^16.4.5",
+    "pg": "8.13.3",
+    "pg-promise": "^10.9.0",
+    "typeorm": "0.3.20",
     "typescript": "^5.4.2"
   },
   "devDependencies": {

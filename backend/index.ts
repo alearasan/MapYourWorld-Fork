@@ -7,6 +7,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import districtRoutes from './map-service/src/routes/district.routes';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -22,6 +23,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Puerto para el servidor de desarrollo
 const PORT = process.env.PORT || 3000;
+
+
+// Definir las rutas
+
+
+app.use('/api/districts', districtRoutes)
+
 
 // Interfaz para los servicios
 interface Service {
