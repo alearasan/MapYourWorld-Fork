@@ -7,7 +7,7 @@
 // npm install nodemailer
 // npm install --save-dev @types/nodemailer
 // import * as nodemailer from 'nodemailer';
-import { emailConfig } from '@backend/auth-service/src/config/email.config';
+import { emailConfig } from '../config/email.config';
 import { text } from 'stream/consumers';
 
 // Define tipos manualmente para no depender de @types/nodemailer
@@ -45,7 +45,7 @@ export interface EmailResult {
  * Crea un transportador de correo basado en la configuración
  * @returns Transportador configurado
  */
-const createTransporter = (): any => {
+export const createTransporter = (): any => {
   // TODO: Implementar la creación del transportador
   // 1. Usar nodemailer.createTransport con la configuración de email
   // 2. Configurar opciones SSL/TLS según el entorno

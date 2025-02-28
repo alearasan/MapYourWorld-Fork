@@ -18,7 +18,8 @@
     "paths": {
       "@shared/*": ["shared/*"],
       "@backend/*": ["backend/*"],
-      "@frontend/*": ["frontend/*"]
+      "@frontend/*": ["frontend/*"],
+      "@backend/auth-service/*": ["backend/auth-service/*"]
     }
   },
   "include": [
