@@ -18,6 +18,8 @@ console.log('\n');
 
 // Directorios de los servicios
 const apiGatewayDir = path.join(__dirname, '../backend/api-gateway');
+const baseDatosDir = path.join(__dirname, '../backend/database');
+
 const webFrontendDir = path.join(__dirname, '../frontend/web');
 
 // Función para iniciar un servicio
@@ -43,6 +45,12 @@ const apiGateway = startService('API Gateway', apiGatewayDir, 'npm', ['run', 'de
 // Iniciar Frontend Web
 const webFrontend = startService('Frontend Web', webFrontendDir, 'npm', ['run', 'dev']);
 
+// Iniciar Base de Datos (usando npm run dev:db)
+const baseDatos = startService('Database', baseDatosDir, 'npm', ['run', 'dev:db']);
+
+
+
+
 console.log(chalk.green('\nTodos los servicios iniciados correctamente.'));
 console.log(chalk.blue('API Gateway disponible en: http://localhost:3000'));
 console.log(chalk.blue('Frontend Web disponible en: http://localhost:5173'));
@@ -55,6 +63,7 @@ process.on('SIGINT', () => {
   
   apiGateway.kill();
   webFrontend.kill();
+  baseDatos.kill()
   
   setTimeout(() => {
     console.log(chalk.green('Servicios detenidos correctamente.'));

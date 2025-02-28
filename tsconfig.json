@@ -19,7 +19,9 @@
       "@frontend/*": ["frontend/*"],
       "@backend/*": ["backend/*"],
       "@shared/*": ["shared/*"]
-    }
+    }, 
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "shared/**/*", 

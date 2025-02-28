@@ -4,41 +4,10 @@
  */
 
 import { publishEvent } from '@shared/libs/rabbitmq';
+import db from '@backend/database/db';
+import { District } from '@backend/map-service/src/models/district.model';
+import { AppDataSource } from '@backend/database/appDataSource';
 
-/**
- * Tipo para representar un distrito
- */
-export interface District {
-  id: string;
-  name: string;
-  description: string;
-  boundaries: {
-    type: 'Polygon';
-    coordinates: number[][][];
-  };
-  center: {
-    latitude: number;
-    longitude: number;
-  };
-  level: number;
-  unlockRequirements: {
-    points?: number;
-    previousDistricts?: string[];
-    tasks?: {
-      type: 'visit_poi' | 'take_photo' | 'complete_quiz';
-      target: string;
-      count: number;
-    }[];
-  };
-  rewards: {
-    points: number;
-    badges?: string[];
-    items?: string[];
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 /**
  * Crea un nuevo distrito
@@ -46,16 +15,56 @@ export interface District {
  * @param userId ID del usuario administrador que crea el distrito
  */
 export const createDistrict = async (
-  districtData: Omit<District, 'id' | 'createdAt' | 'updatedAt'>,
+  districtData: Omit<District, 'id'>,
   userId: string
 ): Promise<District> => {
-  // TODO: Implementar la creación de un distrito
-  // 1. Validar los datos del distrito
-  // 2. Verificar que el usuario tiene permisos de administrador
-  // 3. Validar que los límites geográficos no se solapan con otros distritos
-  // 4. Guardar el distrito en la base de datos
-  // 5. Publicar evento de distrito creado
-  
+
+  const districtRepository = AppDataSource.getRepository(District);
+
+  try {
+    // TODO: Implementar la creación de un distrito
+    // 1. Validar los datos del distrito
+    if (!districtData.name || !districtData.boundaries || !districtData.description) {
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+    }
+
+    // 2. Verificar que el usuario tiene permisos de administrador
+
+    // 3. Validar que los límites geográficos no se solapan con otros distritos
+    const existingDistrict = await db.oneOrNone(`
+        SELECT 1 
+        FROM district 
+        WHERE ST_Intersects(boundaries, ST_GeomFromText($1, 4326))
+      `, [districtData.boundaries]);
+
+    if (existingDistrict) {
+      throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
+    }
+
+    // 4. Guardar el distrito en la base de datos
+
+    const newDistrict = districtRepository.create({
+      ...districtData,
+    });
+
+    const createdDistrict = await districtRepository.save(newDistrict);
+
+
+    // 5. Publicar evento de distrito creado
+    await publishEvent('district.created', {
+      districtId: createdDistrict.id,
+      name: createdDistrict.name,
+      description: createdDistrict.description,
+      boundaries: createdDistrict.boundaries,
+      timestamp: new Date()
+    });
+
+  } catch (error) {
+    console.log(error)
+  }
+
+
+
   throw new Error('Método no implementado');
 };
 
@@ -67,7 +76,7 @@ export const getDistrictById = async (districtId: string): Promise<District | nu
   // TODO: Implementar la obtención de un distrito por ID
   // 1. Buscar el distrito en la base de datos
   // 2. Retornar null si no se encuentra
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -80,7 +89,7 @@ export const getAllDistricts = async (includeInactive: boolean = false): Promise
   // 1. Consultar todos los distritos en la base de datos
   // 2. Filtrar por estado activo/inactivo según el parámetro
   // 3. Ordenar por nivel o algún otro criterio relevante
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -102,7 +111,7 @@ export const updateDistrict = async (
   // 4. Si se modifican los límites, verificar que no hay solapamiento
   // 5. Actualizar el distrito en la base de datos
   // 6. Publicar evento de distrito actualizado
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -126,9 +135,11 @@ export const canUnlockDistrict = async (
   // 4. Comprobar si ha desbloqueado los distritos previos requeridos
   // 5. Comprobar si ha completado las tareas necesarias
   // 6. Retornar resultado detallado con requisitos cumplidos y faltantes
-  
+
   throw new Error('Método no implementado');
 };
+
+
 
 /**
  * Desbloquea un distrito para un usuario
@@ -140,7 +151,6 @@ export const unlockDistrict = async (
   userId: string
 ): Promise<{
   success: boolean;
-  rewards?: District['rewards'];
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
@@ -149,7 +159,7 @@ export const unlockDistrict = async (
   // 3. Registrar el desbloqueo en la base de datos
   // 4. Otorgar recompensas al usuario
   // 5. Publicar evento de distrito desbloqueado
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -162,7 +172,7 @@ export const getUserUnlockedDistricts = async (userId: string): Promise<District
   // 1. Consultar los registros de desbloqueo del usuario
   // 2. Obtener los datos completos de los distritos desbloqueados
   // 3. Ordenar por fecha de desbloqueo o nivel
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -179,6 +189,6 @@ export const findDistrictContainingLocation = async (
   // 1. Construir consulta geoespacial para la base de datos
   // 2. Buscar distritos cuyo polígono contiene el punto especificado
   // 3. Retornar el distrito encontrado o null
-  
+
   throw new Error('Método no implementado');
 }; 
