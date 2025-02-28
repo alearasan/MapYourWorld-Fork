@@ -5,6 +5,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { UserRole } from '@backend/api-gateway/src/types';
 
 // Interfaz para los datos del usuario
 export interface IUser extends Document {
@@ -17,6 +18,7 @@ export interface IUser extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  role: UserRole;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
