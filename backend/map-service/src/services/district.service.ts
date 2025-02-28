@@ -5,25 +5,9 @@
 
 import { publishEvent } from '@shared/libs/rabbitmq';
 import db from '@backend/database/db';
+import { District } from '@backend/map-service/src/models/district.model';
+import { AppDataSource } from '@backend/database/appDataSource';
 
-/**
- * Tipo para representar un distrito
- */
-export interface District {
-  id: string;
-  name: string;
-  description: string;
-  boundaries: {
-    type: 'Polygon';
-    coordinates: number[][][];
-  };
-  center: {
-    latitude: number;
-    longitude: number;
-  };
-  isBlocked: boolean;
-
-}
 
 /**
  * Crea un nuevo distrito
@@ -35,55 +19,52 @@ export const createDistrict = async (
   userId: string
 ): Promise<District> => {
 
+  const districtRepository = AppDataSource.getRepository(District);
+
   try {
-      // TODO: Implementar la creación de un distrito
-      // 1. Validar los datos del distrito
-      if (!districtData.name || !districtData.center || !districtData.boundaries || !districtData.description){
-        throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
-      }
+    // TODO: Implementar la creación de un distrito
+    // 1. Validar los datos del distrito
+    if (!districtData.name || !districtData.boundaries || !districtData.description) {
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+    }
 
-      // 2. Verificar que el usuario tiene permisos de administrador
+    // 2. Verificar que el usuario tiene permisos de administrador
 
-      // 3. Validar que los límites geográficos no se solapan con otros distritos
-      const existingDistrict = await db.oneOrNone(`
+    // 3. Validar que los límites geográficos no se solapan con otros distritos
+    const existingDistrict = await db.oneOrNone(`
         SELECT 1 
         FROM district 
         WHERE ST_Intersects(boundaries, ST_GeomFromText($1, 4326))
       `, [districtData.boundaries]);
 
-      if (existingDistrict){
-        throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
-      }
+    if (existingDistrict) {
+      throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
+    }
+
+    // 4. Guardar el distrito en la base de datos
+
+    const newDistrict = districtRepository.create({
+      ...districtData,
+    });
+
+    const createdDistrict = await districtRepository.save(newDistrict);
 
 
+    // 5. Publicar evento de distrito creado
+    await publishEvent('district.created', {
+      districtId: createdDistrict.id,
+      name: createdDistrict.name,
+      description: createdDistrict.description,
+      boundaries: createdDistrict.boundaries,
+      timestamp: new Date()
+    });
 
-      // 4. Guardar el distrito en la base de datos
-
-      const result = await db.none(`
-        INSERT INTO district (name, description, boundaries, center, isBlocked)
-        VALUES ($1, $2, ST_GeomFromText($3, 4326), ST_SetSRID(ST_MakePoint($4), 4326), $5)
-      `, [districtData.name, districtData.description, districtData.boundaries, districtData.center, districtData.isBlocked]);
-
-      const createdDistrict = await db.one(`
-        SELECT * FROM district WHERE name = $1 AND description = $2
-      `, [districtData.name, districtData.description]);
-
-      // 5. Publicar evento de distrito creado
-      await publishEvent('district.created', {
-        districtId: createdDistrict.id,
-        name: createdDistrict.name,
-        description: createdDistrict.description,
-        boundaries: createdDistrict.boundaries,
-        center: createdDistrict.center,
-        timestamp: new Date()
-      });
-    
   } catch (error) {
     console.log(error)
   }
 
 
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -95,7 +76,7 @@ export const getDistrictById = async (districtId: string): Promise<District | nu
   // TODO: Implementar la obtención de un distrito por ID
   // 1. Buscar el distrito en la base de datos
   // 2. Retornar null si no se encuentra
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -108,7 +89,7 @@ export const getAllDistricts = async (includeInactive: boolean = false): Promise
   // 1. Consultar todos los distritos en la base de datos
   // 2. Filtrar por estado activo/inactivo según el parámetro
   // 3. Ordenar por nivel o algún otro criterio relevante
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -130,7 +111,7 @@ export const updateDistrict = async (
   // 4. Si se modifican los límites, verificar que no hay solapamiento
   // 5. Actualizar el distrito en la base de datos
   // 6. Publicar evento de distrito actualizado
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -154,7 +135,7 @@ export const canUnlockDistrict = async (
   // 4. Comprobar si ha desbloqueado los distritos previos requeridos
   // 5. Comprobar si ha completado las tareas necesarias
   // 6. Retornar resultado detallado con requisitos cumplidos y faltantes
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -170,7 +151,6 @@ export const unlockDistrict = async (
   userId: string
 ): Promise<{
   success: boolean;
-  rewards?: District['rewards'];
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
@@ -179,7 +159,7 @@ export const unlockDistrict = async (
   // 3. Registrar el desbloqueo en la base de datos
   // 4. Otorgar recompensas al usuario
   // 5. Publicar evento de distrito desbloqueado
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -192,7 +172,7 @@ export const getUserUnlockedDistricts = async (userId: string): Promise<District
   // 1. Consultar los registros de desbloqueo del usuario
   // 2. Obtener los datos completos de los distritos desbloqueados
   // 3. Ordenar por fecha de desbloqueo o nivel
-  
+
   throw new Error('Método no implementado');
 };
 
@@ -209,6 +189,6 @@ export const findDistrictContainingLocation = async (
   // 1. Construir consulta geoespacial para la base de datos
   // 2. Buscar distritos cuyo polígono contiene el punto especificado
   // 3. Retornar el distrito encontrado o null
-  
+
   throw new Error('Método no implementado');
 }; 

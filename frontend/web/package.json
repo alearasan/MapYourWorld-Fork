@@ -21,11 +21,13 @@
     "@types/socket.io": "^3.0.1",
     "@types/socket.io-client": "^1.4.36",
     "chart.js": "4.4.2",
+    "class-validator": "0.14.1",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "jsonwebtoken": "9.0.2",
     "leaflet": "1.9.4",
     "nodemailer": "6.10.0",
+    "pg": "8.13.3",
     "react": "^19.0.0",
     "react-chartjs-2": "5.2.0",
     "react-dom": "^19.0.0",
@@ -33,7 +35,8 @@
     "react-leaflet": "4.2.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "styled-components": "6.1.8"
+    "styled-components": "6.1.8",
+    "typeorm": "0.3.20"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.6",
