@@ -3,17 +3,21 @@ import { DataSource } from 'typeorm';
 import { District } from '@backend/map-service/src/models/district.model'; // Importa tus entidades
 
 export const AppDataSource = new DataSource({
-    type: 'postgres', // O el tipo de base de datos que uses (mysql, sqlite, etc.)
-    host: 'localhost',
+    type: "postgres",
+    host: "localhost",
     port: 5432,
-    username: 'postgres',
-    password: 'mapyourworld13',
-    database: 'mapyourworldDB',
-    synchronize: true, // Solo para desarrollo, en producción usa migraciones
-    logging: true,
-    entities: [District], // Aquí van todas tus entidades
-    migrations: [],
+    username: "postgres",
+    password: "mapyourworld13",
+    database: "mapyourworldDB",
+    synchronize: true,
+    logging: false,
+    entities: [District],
+    migrations: [__dirname + "/../migrations/*.ts"],
     subscribers: [],
+    extra: {
+        connectionTimeoutMillis: 30000, // 30s de espera para conectar
+        query_timeout: 60000, // 60s de espera para consultas
+    }
 });
 
 // Inicializar la conexión antes de usarla
