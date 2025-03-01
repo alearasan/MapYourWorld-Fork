@@ -12,6 +12,7 @@
     "@types/jsonwebtoken": "9.0.9",
     "@types/nodemailer": "6.4.17",
     "amqplib": "0.10.3",
+    "auth-service": "file:",
     "bcrypt": "5.1.1",
     "class-validator": "0.14.1",
     "cors": "2.8.5",

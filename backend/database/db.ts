@@ -34,6 +34,17 @@ db.none(`
       isBlocked BOOLEAN DEFAULT FALSE  -- Booleano para marcar si está bloqueado
     );
 
+    CREATE TABLE IF NOT EXISTS user_locations (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(255) NOT NULL,
+      location GEOMETRY(Point, 4326) NOT NULL,
+      timestamp TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    -- Índice espacial para consultas geográficas rápidas
+    CREATE INDEX IF NOT EXISTS idx_user_locations_gist ON user_locations USING GIST(location);
+
   `)
   .then(() => {
     console.log('Tablas creadas satisfactoriamente');
