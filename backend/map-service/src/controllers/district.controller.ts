@@ -4,6 +4,8 @@ import * as DistrictService from '../services/district.service';
 /**
  * Crea un nuevo distrito
  */
+
+
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
     const { districtData, userId } = req.body;
@@ -20,6 +22,7 @@ export const createDistrict = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error al crear distrito' });
   }
 };
+
 
 /**
  * Obtiene un distrito por su ID
@@ -69,7 +72,7 @@ export const updateDistrict = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const updatedDistrict = await DistrictService.updateDistrict(id, updateData, userId);
+    const updatedDistrict = await DistrictService.updateDistrict(id, updateData);
     if (!updatedDistrict) {
       res.status(404).json({ success: false, message: 'Distrito no encontrado' });
       return;
@@ -82,20 +85,6 @@ export const updateDistrict = async (req: Request, res: Response): Promise<void>
   }
 };
 
-/**
- * Comprueba si un usuario puede desbloquear un distrito
- */
-export const canUnlockDistrict = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { districtId, userId } = req.params;
-    const result = await DistrictService.canUnlockDistrict(districtId, userId);
-
-    res.status(200).json({ success: true, ...result });
-  } catch (error) {
-    console.error('Error al verificar desbloqueo de distrito:', error);
-    res.status(500).json({ success: false, message: 'Error al verificar desbloqueo de distrito' });
-  }
-};
 
 /**
  * Desbloquea un distrito para un usuario

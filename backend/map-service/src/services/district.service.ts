@@ -12,11 +12,16 @@ import DistrictRepository from '../repositories/district.repository';
 const repo = new DistrictRepository();
 
 
+
+
 /**
  * Crea un nuevo distrito
  * @param districtData Datos del distrito a crear
  * @param userId ID del usuario administrador que crea el distrito
  */
+
+
+
 export const createDistrict = async (
   districtData: Omit<District, 'id'>,
   userId: string
@@ -62,6 +67,8 @@ export const createDistrict = async (
   }
 };
 
+
+ 
 
 /**
  * Obtiene un distrito por su ID
@@ -180,7 +187,7 @@ export const getUserUnlockedDistricts = async (userId: string): Promise<District
 export const findDistrictContainingLocation = async (
   latitude: number,
   longitude: number
-): Promise<Boolean | null> => {
+): Promise<District | null> => {
   const situation = await repo.findDistrictContainingLocation(latitude, longitude);
   return situation;
 }; 

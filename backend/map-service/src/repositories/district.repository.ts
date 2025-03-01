@@ -13,7 +13,7 @@ export default class DistrictRepository {
         const district = this.districtRepo.create(districtData);
         return await this.districtRepo.save(district);
     }
-
+ 
     async getDistrictById(districtId: string): Promise<District> {
         const district = await this.districtRepo.findOneBy({ id: districtId });
         if (!district) {
@@ -42,7 +42,7 @@ export default class DistrictRepository {
         return await this.districtRepo.find({ where: { isUnlocked: true } });
     }
 
-    async findDistrictContainingLocation(latitude: number, longitude: number): Promise<Boolean | null> {
+    async findDistrictContainingLocation(latitude: number, longitude: number): Promise<District | null> {
         const result = await this.districtRepo.query(`
             SELECT * 
             FROM district 
@@ -50,6 +50,6 @@ export default class DistrictRepository {
             LIMIT 1
         `, [longitude, latitude]);
     
-        return result.length > 0;
+        return result;
      }
 }
