@@ -34,8 +34,6 @@ db.none(`
       isBlocked BOOLEAN DEFAULT FALSE  -- Booleano para marcar si está bloqueado
     );
 
-    DROP TABLE IF EXISTS user_locations;
-
     CREATE TABLE IF NOT EXISTS user_locations (
       id SERIAL PRIMARY KEY,
       user_id VARCHAR(255) NOT NULL,
@@ -55,5 +53,29 @@ db.none(`
     console.error('Error al crear la tabla:', error);
   });
 
+// En backend/map-service/src/index.ts (o donde inicies tu servicio)
+// Verificar configuración de PostGIS
+db.any(`SELECT PostGIS_version();`)
+  .then(() => {
+    console.log('✅ PostGIS está instalado y funcionando');
+    
+    // Verificar tabla de ubicaciones
+    return db.any(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'user_locations'
+      );`
+    );
+  })
+  .then(result => {
+    if (result[0].exists) {
+      console.log('✅ Tabla user_locations existe');
+    } else {
+      console.error('❌ Tabla user_locations NO existe');
+    }
+  })
+  .catch(error => {
+    console.error('❌ Error verificando PostGIS:', error);
+  });
 
-  export default db
+export default db
