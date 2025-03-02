@@ -3,7 +3,7 @@
  * Implementa la lógica de negocio para manipular perfiles de usuario y suscripciones
  */
 
-import { User, UserProfile } from '@shared/types/user.types';
+import { UserProfile } from '../models/userProfile.model';
 
 /**
  * Obtiene un perfil de usuario por su ID

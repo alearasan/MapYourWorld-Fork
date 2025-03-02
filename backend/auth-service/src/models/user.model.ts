@@ -3,18 +3,15 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { UserRole } from '@backend/api-gateway/src/types';
+
+import { UserModel } from '../../../types/user/user.model.types';
+import { UserRole } from '../../../types/common/common.types';
 
 // Interfaz para los datos del usuario
-export interface IUser extends Document {
-  email: string;
+export interface IUser extends Document, Omit<UserModel.IUserBase, 'lastLogin' | 'createdAt' | 'updatedAt'> {
   password: string;
-  firstName: string;
-  lastName: string;
-  plan: 'free' | 'premium';
-  active: boolean;
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +22,11 @@ export interface IUser extends Document {
 // Esquema de mongoose para el usuario
 const UserSchema = new Schema<IUser>(
   {
+    userId: {
+      type: String,
+      required: true,
+      default: () => crypto.randomUUID()
+    },
     email: {
       type: String,
       required: [true, 'El email es obligatorio'],
@@ -62,6 +64,11 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+    role: {
+      type: String,
+      enum: Object.values(UserRole),
+      default: UserRole.USER,
+    }
   },
   {
     timestamps: true, // Añadir createdAt y updatedAt automáticamente

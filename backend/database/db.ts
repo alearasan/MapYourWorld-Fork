@@ -15,12 +15,21 @@ const db = pgPromise()({
 
 
 db.none(`
-
+    DROP TABLE IF EXISTS users;
+    
     CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      username VARCHAR(50) NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    plan VARCHAR(20) NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'premium')),
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
 
     DROP TABLE IF EXISTS district;
@@ -33,6 +42,25 @@ db.none(`
       center GEOMETRY(Point, 4326),  -- Usando tipo GEOMETRY para almacenar el punto central
       isBlocked BOOLEAN DEFAULT FALSE  -- Booleano para marcar si está bloqueado
     );
+
+    CREATE TABLE IF NOT EXISTS user_profiles (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    "firstName" VARCHAR(255),
+    "lastName" VARCHAR(255),
+    bio TEXT,
+    avatar VARCHAR(255),
+    phone VARCHAR(50),
+    location JSONB,
+    social JSONB,
+    preferences JSONB DEFAULT '{"language": "es", "theme": "light", "notificationsEnabled": true, "privacySettings": {"showLocation": true, "showActivity": true, "profileVisibility": "public"}}'::jsonb,
+    statistics JSONB DEFAULT '{"totalPoints": 0, "level": 1, "districtsUnlocked": 0, "poisVisited": 0, "photosUploaded": 0, "achievements": 0, "followers": 0, "following": 0}'::jsonb,
+    accountStatus VARCHAR(50) DEFAULT 'active' CHECK (accountStatus IN ('active','suspended','deactivated')),
+    lastActive TIMESTAMP,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
 
   `)
   .then(() => {

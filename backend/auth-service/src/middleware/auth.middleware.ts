@@ -6,6 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthenticatedRequest } from '@backend/auth-service/src/types';
 import { Auth } from '@types';
+import { User } from '../models/user.model';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -75,3 +76,62 @@ export const roleMiddleware = (roles: string[]) => {
     }
   };
 }; 
+
+/**
+ * Verifica si un usuario tiene rol de administrador
+ * @param userId ID del usuario a verificar
+ * @returns true si el usuario es administrador, false en caso contrario
+ */
+export const isAdmin = async (userId: string): Promise<boolean> => {
+  const user = await User.findById(userId);
+  return user?.role === 'admin';
+};
+
+/**
+ * Proteger tutas que requieren permisos de administrador
+ */
+export const requireAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.userId;
+    if(!userId){
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autorizado'
+      });
+    }
+    const isAdminUser = await isAdmin(userId);
+    if(!isAdminUser){
+      return res.status(403).json({
+        success: false,
+        message: 'Acceso denegado, not eres administrador'
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al verificar permisos',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+/**
+ * Verificar si el usuario está autenticado 
+ */
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if(!req.user){
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autorizado'
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al verificar permisos',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
