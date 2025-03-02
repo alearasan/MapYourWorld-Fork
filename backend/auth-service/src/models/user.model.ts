@@ -5,6 +5,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+
 import { UserModel } from '../../../types/user/user.model.types';
 import { UserRole } from '../../../types/common/common.types';
 
@@ -14,6 +15,7 @@ export interface IUser extends Document, Omit<UserModel.IUserBase, 'lastLogin' |
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  role: UserRole;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
