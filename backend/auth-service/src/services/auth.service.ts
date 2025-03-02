@@ -3,20 +3,59 @@
  * Implementa la lógica de negocio para registro, login y verificación de usuarios
  */
 
-import { IUser } from '@backend/auth-service/src/models/user.model';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { User, IUser } from '@backend/auth-service/src/models/user.model';
+import { sendVerificationEmail } from '@backend/auth-service/src/services/email.service';
+import { publishEvent } from '@shared/libs/rabbitmq';
+import { generateToken } from '@shared/config/jwt.config';
 
 /**
  * Registra un nuevo usuario en el sistema
  * @param userData Datos del usuario a registrar
  */
 export const registerUser = async (userData: any): Promise<IUser> => {
-  // TODO: Implementar la lógica de registro de usuario
   // 1. Validar datos de entrada
+  if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
+    throw new Error('Faltan campos requeridos');
+  }
+
   // 2. Verificar que el email no existe en la base de datos
+  const existingUser = await User.findOne({ email: userData.email });
+  if (existingUser) {
+    throw new Error('El usuario ya existe con este email');
+  }
+
   // 3. Crear el usuario en la base de datos
+  const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const newUser = new User({
+    email: userData.email,
+    password: hashedPassword,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    plan: 'free',
+    active: false, 
+    lastLogin: null,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  });
+  await newUser.save();
+
   // 4. Generar y enviar email de verificación
+  // Generamos un token aleatorio para la verificación
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  await sendVerificationEmail(newUser.email, newUser.firstName, verificationToken);
+
   // 5. Publicar evento de usuario registrado
-  throw new Error('Método no implementado');
+  await publishEvent('user.registered', {
+    userId: newUser._id.toString(),
+    email: newUser.email,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    timestamp: new Date().toISOString()
+  });
+
+  return newUser;
 };
 
 /**
@@ -31,7 +70,32 @@ export const loginUser = async (email: string, password: string): Promise<{user:
   // 3. Generar token JWT
   // 4. Actualizar lastLogin y guardar
   // 5. Publicar evento de inicio de sesión
-  throw new Error('Método no implementado');
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw new Error('Credenciales incorrectas');
+  }
+
+  const token = generateToken({
+    userId: user._id.toString(),
+    email: user.email,
+    plan: user.plan
+  });
+
+  user.lastLogin = new Date();
+  await user.save();
+
+  await publishEvent('user.loggedin', {
+    userId: user._id.toString(),
+    email: user.email,
+    timestamp: new Date().toISOString()
+  });
+
+  return { user, token };
 };
 
 /**

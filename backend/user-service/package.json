@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@types/jsonwebtoken": "9.0.9",
-    "@types/nodemailer": "6.4.17",
     "amqplib": "0.10.3",
     "class-validator": "0.14.1",
+    "bcryptjs": "3.0.2",
     "cors": "2.8.5",
     "dotenv": "16.4.5",
     "express": "4.19.2",
@@ -26,6 +26,8 @@
     "typeorm": "0.3.20"
   },
   "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/nodemailer": "6.4.17",
     "chalk": "5.4.1",
     "cross-env": "7.0.3",
     "jest": "29.7.0",
