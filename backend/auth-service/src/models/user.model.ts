@@ -3,11 +3,12 @@
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 // Interfaz para los datos del usuario
 export interface IUser extends Document {
+  userId: string;
   email: string;
   password: string;
   firstName: string;
@@ -17,12 +18,18 @@ export interface IUser extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  role: 'user' | 'admin';
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 // Esquema de mongoose para el usuario
 const UserSchema = new Schema<IUser>(
   {
+    userId: {
+      type: String,
+      required: true,
+      default: () => crypto.randomUUID()
+    },
     email: {
       type: String,
       required: [true, 'El email es obligatorio'],
@@ -60,6 +67,11 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    }
   },
   {
     timestamps: true, // Añadir createdAt y updatedAt automáticamente
