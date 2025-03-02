@@ -5,7 +5,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { UserModel } from '@types/user/user.model.types';
+import { UserModel } from '../../../types/user/user.model.types';
+import { UserRole } from '../../../types/common/common.types';
 
 // Interfaz para los datos del usuario
 export interface IUser extends Document, Omit<UserModel.IUserBase, 'lastLogin' | 'createdAt' | 'updatedAt'> {
@@ -63,8 +64,8 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: Object.values(UserRole),
+      default: UserRole.USER,
     }
   },
   {
