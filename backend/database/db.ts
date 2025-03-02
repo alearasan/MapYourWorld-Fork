@@ -34,6 +34,8 @@ db.none(`
       isBlocked BOOLEAN DEFAULT FALSE  -- Booleano para marcar si está bloqueado
     );
 
+    DROP TABLE IF EXISTS user_locations;
+
     CREATE TABLE IF NOT EXISTS user_locations (
       id SERIAL PRIMARY KEY,
       user_id VARCHAR(255) NOT NULL,

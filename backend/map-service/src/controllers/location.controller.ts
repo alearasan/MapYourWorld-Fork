@@ -2,14 +2,15 @@
 import { Request, Response } from 'express';
 import db from '@backend/database/db';
 import * as districtService from '../services/district.service';
+import {AuthenticatedRequest} from "@backend/api-gateway/src/types";
 
 /**
  * Guardar la ubicación del usuario en la base de datos
  */
-export const saveUserLocation = async (req: Request, res: Response) => {
+export const saveUserLocation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Modifica esta línea para manejar el caso donde req.user puede ser undefined
-    const userId = req.user?.userId || '1'; // TODO Usa un ID por defecto para pruebas
+    const userId = req.user?.userId ?? '1'; // TODO Usa un ID por defecto para pruebas
     const { latitude, longitude, timestamp } = req.body;
     
     if (!latitude || !longitude) {
@@ -24,14 +25,16 @@ export const saveUserLocation = async (req: Request, res: Response) => {
       INSERT INTO user_locations (user_id, location, timestamp) 
       VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326), $4)
     `, [userId, longitude, latitude, timestamp || new Date()]);
-    
+
+    console.log('Location registered in database')
+
     // Find district that contains this point
-    const district = await districtService.findDistrictContainingLocation(latitude, longitude);
+    //const district = await districtService.findDistrictContainingLocation(latitude, longitude);
     
     return res.status(200).json({
       success: true,
       message: 'Location saved successfully',
-      district: district || null
+      //district: district || null
     });
     
   } catch (error) {
