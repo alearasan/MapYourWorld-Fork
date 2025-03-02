@@ -3,7 +3,7 @@
  * Gestiona la creación, consulta y desbloqueo de distritos del mapa
  */
 
-import { publishEvent } from '@shared/libs/rabbitmq';
+//import { publishEvent } from '@shared/libs/rabbitmq';
 import db from '@backend/database/db';
 import { District } from '@backend/map-service/src/models/district.model';
 import { AppDataSource } from '@backend/database/appDataSource';
@@ -18,55 +18,54 @@ export const createDistrict = async (
   districtData: Omit<District, 'id'>,
   userId: string
 ): Promise<District> => {
-
   const districtRepository = AppDataSource.getRepository(District);
 
   try {
-    // TODO: Implementar la creación de un distrito
     // 1. Validar los datos del distrito
     if (!districtData.name || !districtData.boundaries || !districtData.description) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.");
     }
 
-    // 2. Verificar que el usuario tiene permisos de administrador
+    // 2. Validar que los límites geográficos no se solapan con otros distritos
+    const existingDistrict = await AppDataSource.query(`
+      SELECT 1 
+      FROM district 
+      WHERE ST_Intersects(boundaries, ST_GeomFromGeoJSON($1))
+    `, [JSON.stringify(districtData.boundaries)]);
 
-    // 3. Validar que los límites geográficos no se solapan con otros distritos
-    const existingDistrict = await db.oneOrNone(`
-        SELECT 1 
-        FROM district 
-        WHERE ST_Intersects(boundaries, ST_GeomFromText($1, 4326))
-      `, [districtData.boundaries]);
-
-    if (existingDistrict) {
-      throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
+    if (existingDistrict.length > 0) {
+      throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.");
     }
 
-    // 4. Guardar el distrito en la base de datos
-
+    // 3. Crear y guardar el distrito correctamente
     const newDistrict = districtRepository.create({
-      ...districtData,
+      name: districtData.name,
+      description: districtData.description,
+      isUnlocked: districtData.isUnlocked,
+      boundaries: districtData.boundaries
     });
 
-    const createdDistrict = await districtRepository.save(newDistrict);
+    const savedDistrict = await districtRepository.save(newDistrict);
+
+    // // 5. Publicar evento de distrito creado
+    // await publishEvent('district.created', {
+    //   districtId: createdDistrict.id,
+    //   name: createdDistrict.name,
+    //   description: createdDistrict.description,
+    //   boundaries: createdDistrict.boundaries,
+    //   timestamp: new Date()
+    // });
 
 
-    // 5. Publicar evento de distrito creado
-    await publishEvent('district.created', {
-      districtId: createdDistrict.id,
-      name: createdDistrict.name,
-      description: createdDistrict.description,
-      boundaries: createdDistrict.boundaries,
-      timestamp: new Date()
-    });
+    console.log("Distrito creado correctamente:", savedDistrict);
+    return savedDistrict;
 
   } catch (error) {
-    console.log(error)
+    console.error("Error al crear el distrito:", error);
+    throw error;
   }
-
-
-
-  throw new Error('Método no implementado');
 };
+
 
 /**
  * Obtiene un distrito por su ID
