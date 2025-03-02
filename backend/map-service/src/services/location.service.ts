@@ -26,15 +26,15 @@ export class LocationService {
             
             console.log('Ubicación guardada correctamente');
             
-            // Buscar el distrito que contiene esta ubicación
-            const district = await districtService.findDistrictContainingLocation(
-                latitude,
-                longitude
-            );
+            // Buscar el distrito que contiene esta ubicación TODO
+            // const district = await districtService.findDistrictContainingLocation(
+            //     latitude,
+            //     longitude
+            // );
 
             return {
-                success: true,
-                district
+                success: true
+                //,district
             };
         } catch (error) {
             console.error('Error en LocationService.saveUserLocation:', error);

@@ -38,15 +38,15 @@ export const saveUserLocation = async (req: AuthenticatedRequest, res: Response)
     
     return res.status(200).json({
       success: true,
-      message: 'Location saved successfully',
-      district: result.district || null
+      message: 'Location saved successfully'
+      //,district: result.district || null
     });
     
   } catch (error) {
     console.error('Error saving location:', error);
     return res.status(500).json({
       success: false,
-      message: `Error processing location data: ${error.message || 'Unknown error'}`
+      message: `Error processing location data: ${error}`
     });
   }
 };
