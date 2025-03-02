@@ -5,20 +5,14 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { UserModel } from '@types/user/user.model.types';
 
 // Interfaz para los datos del usuario
-export interface IUser extends Document {
-  userId: string;
-  email: string;
+export interface IUser extends Document, Omit<UserModel.IUserBase, 'lastLogin' | 'createdAt' | 'updatedAt'> {
   password: string;
-  firstName: string;
-  lastName: string;
-  plan: 'free' | 'premium';
-  active: boolean;
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
-  role: 'user' | 'admin';
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
