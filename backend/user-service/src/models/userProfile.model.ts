@@ -1,7 +1,7 @@
 // src/models/user.model.ts
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('users')
+@Entity('user_profiles')
 export class UserProfile {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
