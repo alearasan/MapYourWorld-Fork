@@ -9,6 +9,7 @@ import crypto from 'crypto';
 // Interfaz para los datos del usuario
 export interface IUser extends Document {
   userId: string;
+  username: string;
   email: string;
   password: string;
   firstName: string;
@@ -20,6 +21,10 @@ export interface IUser extends Document {
   updatedAt: Date;
   role: 'user' | 'admin';
   comparePassword(candidatePassword: string): Promise<boolean>;
+  tokenData : {
+    token: string;
+    expiration?: Date;
+  };
 }
 
 // Esquema de mongoose para el usuario

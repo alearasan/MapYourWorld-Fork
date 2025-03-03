@@ -6,9 +6,9 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { User, IUser } from '@backend/auth-service/src/models/user.model';
-import { sendVerificationEmail } from '@backend/auth-service/src/services/email.service';
+import { sendVerificationEmail,sendPasswordResetEmail } from '@backend/auth-service/src/services/email.service';
 import { publishEvent } from '@shared/libs/rabbitmq';
-import { generateToken } from '@shared/config/jwt.config';
+import { generateToken,verifyToken} from '@shared/config/jwt.config';
 
 /**
  * Registra un nuevo usuario en el sistema
@@ -39,12 +39,15 @@ export const registerUser = async (userData: any): Promise<IUser> => {
     createdAt: new Date(),
     updatedAt: new Date()
   });
-  await newUser.save();
 
   // 4. Generar y enviar email de verificación
   // Generamos un token aleatorio para la verificación
   const verificationToken = crypto.randomBytes(32).toString('hex');
-  await sendVerificationEmail(newUser.email, newUser.firstName, verificationToken);
+  const tokenData = {token: verificationToken};
+  newUser.tokenData =  tokenData;
+  await newUser.save();
+
+  await sendVerificationEmail(newUser.email, newUser.username, verificationToken);
 
   // 5. Publicar evento de usuario registrado
   await publishEvent('user.registered', {
@@ -105,8 +108,22 @@ export const loginUser = async (email: string, password: string): Promise<{user:
 export const verifyUserToken = async (token: string): Promise<any> => {
   // TODO: Implementar la verificación de token
   // 1. Verificar firma y expiración del token
+  const decoded = verifyToken(token);
+  if(!decoded) {
+    throw new Error('Token inválido o expirado');
+  } 
   // 2. Obtener información actualizada del usuario
-  throw new Error('Método no implementado');
+  const user = await User.findById(decoded.userId);
+  if (!user) {
+    throw new Error('Usuario no encontrado');
+  }
+  return {
+    userId: user._id.toString(),
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    plan: user.plan
+  };
 };
 
 /**
@@ -118,10 +135,26 @@ export const verifyUserToken = async (token: string): Promise<any> => {
 export const changePassword = async (userId: string, currentPassword: string, newPassword: string): Promise<boolean> => {
   // TODO: Implementar cambio de contraseña
   // 1. Buscar usuario por ID
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('Usuario no encontrado');
+  }
   // 2. Verificar contraseña actual
+  const correctPassword = await user.comparePassword(currentPassword);
+  if (!correctPassword) {
+    throw new Error('Credenciales incorrectas');
+  }
   // 3. Validar nueva contraseña
+  if (newPassword.length < 8) {
+    throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
+  }
+  if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
+  }
   // 4. Actualizar contraseña y guardar
-  throw new Error('Método no implementado');
+  user.password=newPassword;
+  await user.save();
+  return true;
 };
 
 /**
@@ -131,8 +164,22 @@ export const changePassword = async (userId: string, currentPassword: string, ne
 export const requestPasswordReset = async (email: string): Promise<boolean> => {
   // TODO: Implementar solicitud de restablecimiento de contraseña
   // 1. Buscar usuario por email
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error('Usuario no encontrado');
+  }
   // 2. Generar token único y temporal
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenExpiration = new Date();
+  tokenExpiration.setHours(tokenExpiration.getHours() + 1); // Válido por 1 hora
   // 3. Guardar token en el usuario
+  user.tokenData.token = token
+  user.tokenData.expiration = tokenExpiration
+
+  await user.save();
+
   // 4. Enviar email con instrucciones
-  throw new Error('Método no implementado');
+  await sendPasswordResetEmail(user.email, user.username, token);
+
+  return true;
 }; 
