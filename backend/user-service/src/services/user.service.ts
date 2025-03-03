@@ -4,6 +4,9 @@
  */
 
 import { UserProfile } from '../models/userProfile.model';
+import { UserProfileRepository }  from '../repositories/userProfile.repository';
+
+const repo = new UserProfileRepository();
 
 /**
  * Obtiene un perfil de usuario por su ID
