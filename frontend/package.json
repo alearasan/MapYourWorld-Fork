@@ -23,6 +23,7 @@
     "mapyourworld-frontend": "file:",
     "mapyourworld-root": "file:..",
     "nodemailer": "6.10.0",
+    "pg": "8.13.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.73.2",
@@ -31,7 +32,8 @@
     "react-native-vector-icons": "10.2.0",
     "react-native-web": "0.19.10",
     "react-router-dom": "6.22.3",
-    "socket.io-client": "4.7.4"
+    "socket.io-client": "4.7.4",
+    "typeorm": "0.3.20"
   },
   "devDependencies": {
     "@testing-library/react": "14.2.1",
