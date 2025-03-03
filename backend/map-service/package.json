@@ -11,10 +11,10 @@
   "dependencies": {
     "@turf/turf": "6.5.0",
     "@types/crypto-js": "^4.2.2",
-    "@types/nodemailer": "6.4.17",
     "@types/socket.io": "^3.0.1",
     "@types/socket.io-client": "^1.4.36",
     "class-validator": "0.14.1",
+    "bcryptjs": "3.0.2",
     "crypto-js": "^4.2.0",
     "dotenv": "16.4.5",
     "express": "4.19.2",
@@ -32,8 +32,10 @@
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.6",
+    "@types/bcryptjs": "2.4.6",
     "@types/jsonwebtoken": "9.0.9",
     "@types/node": "^22.13.5",
+    "@types/nodemailer": "6.4.17",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
