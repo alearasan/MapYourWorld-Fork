@@ -29,8 +29,8 @@ export const createDistrict = async (req: Request, res: Response): Promise<void>
  */
 export const getDistrictById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const district = await DistrictService.getDistrictById(id);
+    const districtId = req.params.districtId;
+    const district = await DistrictService.getDistrictById(districtId);
 
     if (!district) {
       res.status(404).json({ success: false, message: 'Distrito no encontrado' });
@@ -64,7 +64,7 @@ export const getAllDistricts = async (req: Request, res: Response): Promise<void
  */
 export const updateDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const districtId  = req.params.districtId;
     const { updateData, userId } = req.body;
 
     if (!updateData || !userId) {
@@ -72,7 +72,7 @@ export const updateDistrict = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const updatedDistrict = await DistrictService.updateDistrict(id, updateData);
+    const updatedDistrict = await DistrictService.updateDistrict(districtId, updateData);
     if (!updatedDistrict) {
       res.status(404).json({ success: false, message: 'Distrito no encontrado' });
       return;
@@ -91,8 +91,8 @@ export const updateDistrict = async (req: Request, res: Response): Promise<void>
  */
 export const unlockDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { districtId, userId } = req.body;
-
+    const districtId  = req.params.districtId;
+    const userId  = req.params.userId;
     if (!districtId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
       return;
@@ -116,7 +116,7 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
  */
 export const getUserUnlockedDistricts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;
+    const userId  = req.params.userId;
     const districts = await DistrictService.getUserUnlockedDistricts(userId);
 
     res.status(200).json({ success: true, districts });
@@ -131,7 +131,8 @@ export const getUserUnlockedDistricts = async (req: Request, res: Response): Pro
  */
 export const findDistrictContainingLocation = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { latitude, longitude } = req.query;
+    const latitude  = req.params.latitude;
+    const longitude  = req.params.longitude;
 
     if (!latitude || !longitude) {
       res.status(400).json({ success: false, message: 'Latitud y longitud son requeridos' });

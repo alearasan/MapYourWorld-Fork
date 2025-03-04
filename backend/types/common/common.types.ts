@@ -17,7 +17,8 @@ export interface GeoCoordinates {
 // Enumeración de roles de usuario
 export enum UserRole {
   USER = 'user',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
+  MODERATOR = 'moderator'
 }
 
 // Estado de una entidad

@@ -6,15 +6,15 @@ import { User } from '@backend/auth-service/src/models/user.model';
 
 
 export const AppDataSource = new DataSource({
-    type: "postgres",
-    host: "localhost",
+    type: 'postgres', // O el tipo de base de datos que uses (mysql, sqlite, etc.)
+    host: 'localhost',
     port: 5432,
     username: 'postgres',
     password: 'mapyourworld13',
     database: 'mapyourworldDB',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     logging: true,
-    entities: [District, User, UserProfile], // Aquí van todas tus entidades
+    entities: [District, UserProfile], // Aquí van todas tus entidades
     migrations: [],
     subscribers: [],
     extra: {

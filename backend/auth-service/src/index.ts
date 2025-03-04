@@ -8,6 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { authRouter } from './routes/auth.routes';
+//import  emailRouter  from './routes/email.routes';
 import { connectDB } from './config/db.config';
 import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas
 app.use('/api/auth', authRouter);
+//app.use('/api/email', emailRouter);
 
 // Ruta de salud para verificar que el servicio está funcionando
 app.get('/health', (_req: Request, res: Response) => {
