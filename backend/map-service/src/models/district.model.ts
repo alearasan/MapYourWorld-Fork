@@ -12,7 +12,7 @@ export class District {
     @Column({ type: 'text', nullable: true })
     description!: string;
 
-    @Column({ type: 'geometry', spatialFeatureType: 'Polygon', srid: 4326, nullable: false })
+    @Column({ type: 'geometry', spatialFeatureType: 'MultiPolygon', srid: 4326, nullable: false })
     boundaries!: Geometry;
 
     @Column({ type: 'boolean', default: false })
