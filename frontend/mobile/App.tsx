@@ -1,77 +1,83 @@
-/**
- * App principal de MapYourWorld Mobile
- */
-import React from 'react';
-import { SafeAreaView, StatusBar } from 'react-native';
+import React from "react";
+import { Image, Text, View } from 'react-native';
+import { createStackNavigator } from "@react-navigation/stack";
+import { NavigationContainer } from "@react-navigation/native";
+import MapScreen from "@/components/Map/MapScreen";
+import LoginScreen from "@/components/screens/LoginScreen";
+import RegisterScreen from "@/components/screens/RegisterScreen";
+import WelcomeScreen from "@/components/screens/WelcomeScreen";
 import { styled } from 'nativewind';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DropdownButton from "@/components/UI/DropDownMenu";
 
-// Importamos las pantallas
-import WelcomeScreen from './src/components/screens/WelcomeScreen';
-import LoginScreen from './src/components/screens/LoginScreen';
-import RegisterScreen from './src/components/screens/RegisterScreen';
 
-// Aplicamos styled a los componentes nativos para poder usar Tailwind
-const StyledSafeAreaView = styled(SafeAreaView);
+const Stack = createStackNavigator();
+const StyledText = styled(Text);
 
-// Definimos los tipos para el navegador
-type RootStackParamList = {
-  Welcome: undefined;
-  Login: undefined;
-  Register: undefined;
-  Map: undefined;
-  ForgotPassword: undefined;
-};
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const App = () => {
+const Navigation = () => {
   return (
     <NavigationContainer>
-      <StyledSafeAreaView className="flex-1 bg-white">
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-        <Stack.Navigator
-          initialRouteName="Welcome"
-          screenOptions={{
-            headerShown: false,
-            contentStyle: {
-              backgroundColor: '#FFFFFF',
-            },
-          }}
-        >
-          <Stack.Screen 
-            name="Welcome" 
-            component={WelcomeScreen} 
-          />
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen} 
-          />
-          <Stack.Screen 
-            name="Register" 
-            component={RegisterScreen} 
-          />
-          <Stack.Screen 
-            name="Map" 
-            component={() => (
-              <StyledSafeAreaView className="flex-1 justify-center items-center">
-                {/* Aquí iría el componente del mapa */}
-              </StyledSafeAreaView>
-            )} 
-          />
-          <Stack.Screen 
-            name="ForgotPassword" 
-            component={() => (
-              <StyledSafeAreaView className="flex-1 justify-center items-center">
-                {/* Aquí iría el componente de recuperación de contraseña */}
-              </StyledSafeAreaView>
-            )} 
-          />
-        </Stack.Navigator>
-      </StyledSafeAreaView>
+      <Stack.Navigator>
+        <Stack.Screen name="Welcome" 
+        component={WelcomeScreen} 
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Welcome</StyledText>
+          </View>
+          )
+          
+        }}/>
+        <Stack.Screen name="Register" 
+        component={RegisterScreen} 
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Register</StyledText>
+          </View>
+          )
+          
+        }}/>
+        <Stack.Screen name="Login" 
+        component={LoginScreen} 
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
+          </View>
+          )
+          
+        }}/>
+        <Stack.Screen name="Map" 
+        component={MapScreen}
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
+           
+          </View>
+          )
+          
+        }} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-export default App; 
+export default Navigation;

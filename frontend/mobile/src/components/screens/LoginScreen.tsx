@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, StyleSheet, Image } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
 import TextInput from '../UI/TextInput';
+import {styles} from '../../assets/styles/styles';
+
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -94,17 +96,19 @@ const LoginScreen = () => {
   };
 
   return (
-    <StyledView className="flex-1 bg-gray-100">
+    <ImageBackground
+      source={require("../../assets/images/login_background.webp")} 
+      style={styles.background_image}
+      resizeMode="cover"
+    >
+      <View style={styles.semi_transparent_overlay} />
       <StyledScrollView className="flex-1">
-        <StyledView className="flex-1 p-6 justify-center min-h-screen">
-          {/* Header */}
+        <StyledView className="flex-1 p-6 justify-start min-h-screen mt-20">
+          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
           <StyledView className="flex-row items-center justify-center mb-6">
-            <StyledView className="w-12 h-12 bg-teal-500 rounded-md"></StyledView>
+            <Image source={require('../../assets/images/logo.png')} style={{ width: 35, height: 35 }} />
             <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
           </StyledView>
-          
-          {/* Formulario */}
-          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
             <StyledText className="text-2xl font-bold text-center mb-2">
               Bienvenido de nuevo
             </StyledText>
@@ -161,8 +165,10 @@ const LoginScreen = () => {
           </StyledView>
         </StyledView>
       </StyledScrollView>
-    </StyledView>
+    </ImageBackground>
   );
 };
+
+
 
 export default LoginScreen; 
