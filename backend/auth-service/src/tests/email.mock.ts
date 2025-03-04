@@ -1,6 +1,8 @@
 import { EmailOptions, EmailResult, sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangeNotification } from '../services/email.service';
 
-// para probar el mock, desde cmd: npx ts-node -r tsconfig-paths/register src/tests/email.mock.ts
+// para probar el mock:
+// cd backend/auth-service
+// desde terminal: npx ts-node -r tsconfig-paths/register src/tests/email.mock.ts
 const nodemailer = require('nodemailer');
 nodemailer.createTransport = () => {
   console.log('nodemailer.createTransport overridden with mock transporter.');

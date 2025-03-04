@@ -2,7 +2,6 @@
  * Servicio para operaciones administrativas
  */
 import { User, IUser } from '../models/user.model';
-import { Request, Response } from 'express';
 
 /**
  * Obtener todos los usuarios del sistema
