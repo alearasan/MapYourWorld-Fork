@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, ImageBackground } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
+import {styles} from '../../assets/styles/styles';
+
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -32,32 +34,30 @@ const WelcomeScreen = () => {
   };
   
   return (
-    <StyledView className="flex-1 bg-gray-100 p-6">
-      {/* Header */}
-      <StyledView className="flex-row items-center mt-6">
-        <StyledView className="w-10 h-10 bg-teal-500 rounded-md"></StyledView>
-        <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
-      </StyledView>
-      
+  <ImageBackground
+            source={require("../../assets/images/login_background.webp")} 
+            style={styles.background_image}
+            resizeMode="cover"
+    >
+      <View style={styles.semi_transparent_overlay} />
       {/* Main content */}
-      <StyledView className="flex-1 justify-center items-start">
-        <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
-          <StyledText className="text-4xl font-bold text-gray-900 mb-2">
+      <StyledView className="flex-1 justify-center items-center mr-5 ml-5">
+          <StyledText className="text-6xl font-bold text-gray-900 mb-2 text-center">
             Transforma{'\n'}tus <StyledText className="text-teal-500">viajes</StyledText>
           </StyledText>
           
-          <StyledText className="text-gray-700 mb-8">
+          <StyledText className="text-gray-700 text-xl mb-8 text-center mt-4">
             Descubre una nueva forma de viajar con nuestra plataforma de 
             geolocalización gamificada. Registra tus aventuras, completa retos y 
             conecta con otros viajeros.
           </StyledText>
           
           <Button 
+            style={{ marginBottom: 16  }}
             title="Comenzar gratis" 
             onPress={handleRegisterPress} 
             variant="primary"
             fullWidth
-            className="mb-3"
           />
           
           <Button 
@@ -67,8 +67,7 @@ const WelcomeScreen = () => {
             fullWidth
           />
         </StyledView>
-      </StyledView>
-    </StyledView>
+  </ImageBackground>
   );
 };
 

@@ -3,7 +3,7 @@
  * Botón estilizado con Tailwind CSS que soporta diferentes variantes y tamaños
  */
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { styled } from 'nativewind';
 
 // Aplicamos styled a los componentes nativos
@@ -19,6 +19,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   className?: string;
   textClassName?: string;
+  style?: ViewStyle;
 }
 
 const Button = ({
@@ -30,6 +31,7 @@ const Button = ({
   fullWidth = false,
   className = '',
   textClassName = '',
+  style = {},
 }: ButtonProps) => {
   // Definimos las clases base según la variante
   let buttonClasses = 'py-3 px-6 rounded-md';
@@ -72,6 +74,7 @@ const Button = ({
       onPress={onPress}
       disabled={disabled || isLoading}
       activeOpacity={0.8}
+      style={style}
     >
       {isLoading ? (
         <ActivityIndicator color={variant === 'primary' ? 'white' : '#14b8a6'} />

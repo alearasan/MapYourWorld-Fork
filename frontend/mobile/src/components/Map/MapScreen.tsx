@@ -53,9 +53,11 @@ const MapScreen = () => {
             longitudeDelta: 0.01,
           }}
           showsUserLocation={true}
-          followsUserLocation={true} // Hace que el mapa siga al usuario
-        >
-        </MapView>
+          followsUserLocation={true} 
+          mapType="hybrid"
+          
+          
+        />
       ) : (
         <ActivityIndicator size="large" color="blue" />
       )}
