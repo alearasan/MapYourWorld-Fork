@@ -9,10 +9,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { registerRootComponent } from 'expo';
 
 // Importamos las pantallas
-import WelcomeScreen from '@components/screens/WelcomeScreen';
-import LoginScreen from '@components/screens/LoginScreen';
-import RegisterScreen from '@components/screens/RegisterScreen';
-import MapScreen from '@components/Map/MapScreen';
+import WelcomeScreen from './src/components/screens/WelcomeScreen';
+import LoginScreen from './src/components/screens/LoginScreen';
+import RegisterScreen from './src/components/screens/RegisterScreen';
+import MapScreen from './src/components/Map/MapScreen';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);

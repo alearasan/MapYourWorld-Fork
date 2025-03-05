@@ -33,5 +33,11 @@ module.exports = {
   },
   extra: {
     rootDir: __dirname
+  },
+  // Habilitar la nueva arquitectura explícitamente
+  newArchEnabled: true,
+  // Configuración del Metro bundler para mejorar la resolución de módulos
+  experimentalFeatures: {
+    enableImprovedModuleResolution: true
   }
 }; 
