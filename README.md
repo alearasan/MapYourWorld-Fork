@@ -114,6 +114,25 @@ cp frontend/web/.env.example frontend/web/.env
 cp frontend/mobile/.env.example frontend/mobile/.env
 ```
 
+### 5. Gestión de dependencias con script automatizado
+
+Para facilitar la gestión de dependencias del proyecto, puedes utilizar el script `actualizar-dependencias.js`:
+
+```bash
+node actualizar-dependencias.js
+```
+
+Este script ofrece las siguientes opciones:
+
+1. **Borrar todos los node_modules del proyecto**: Elimina de forma recursiva todos los directorios `node_modules` en el proyecto.
+2. **Instalar todas las dependencias del proyecto**: Reinstala todas las dependencias definidas en todos los archivos `package.json`.
+3. **Fijar versiones exactas desde node_modules instalados**: Actualiza los archivos `package.json` para utilizar las versiones exactas de las dependencias instaladas.
+
+Es especialmente útil cuando:
+- Necesitas realizar una instalación limpia del proyecto
+- Hay conflictos de dependencias o errores de compatibilidad
+- Quieres asegurarte de que todos los miembros del equipo utilizan las mismas versiones de dependencias
+
 ## 💻 Desarrollo
 
 ### Ejecutar la aplicación sin errores (Recomendado)
@@ -315,3 +334,37 @@ Si tienes problemas con la autenticación:
 ## 📜 Licencia
 
 Este proyecto está licenciado bajo la licencia ISC - ver el archivo LICENSE para más detalles.
+
+## Instrucciones de instalación actualizadas (Node.js 22.14.0 LTS)
+
+Se ha actualizado el proyecto para ser compatible con Node.js 22.14.0 LTS. Sigue estos pasos para configurar tu entorno:
+
+### Requisitos
+
+- Node.js 22.14.0 LTS o superior
+- npm 10.x o superior (viene con Node.js 22)
+
+### Instalación limpia
+
+1. Verifica tu entorno:
+   ```
+   npm run verificar:entorno
+   ```
+
+2. Instala todas las dependencias con un solo comando:
+   ```
+   npm run install:clean
+   ```
+
+### Desarrollo
+
+- Frontend web: `npm run dev:web`
+- Frontend móvil: `npm run dev:mobile`
+- Backend: `npm run dev:backend`
+- Todo junto: `npm run dev`
+
+### Notas importantes
+
+- Se ha actualizado Expo a la versión SDK 52, que es compatible con React Native 0.73.2
+- Se ha optimizado la configuración de npm para evitar conflictos de dependencias
+- Para el desarrollo móvil, usar los comandos `npx expo` en lugar de `expo`

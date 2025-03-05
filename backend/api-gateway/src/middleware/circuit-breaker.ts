@@ -4,8 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-// Importar opossum con una importación tipo require para solucionar error de tipos
-// @ts-ignore
+// Importar opossum con importación estándar ya que la versión 8.4.0 tiene mejor soporte de tipos
 import CircuitBreakerFactory from 'opossum';
 
 // Estados posibles del circuit breaker

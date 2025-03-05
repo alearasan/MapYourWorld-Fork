@@ -3,24 +3,22 @@ module.exports = {
   content: [
     "./App.{js,jsx,ts,tsx}",
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./index.{js,jsx,ts,tsx}",
+    "./index.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#3B82F6',
-          light: '#93C5FD',
-          dark: '#1D4ED8',
-        },
-        secondary: {
-          DEFAULT: '#10B981',
-          light: '#6EE7B7',
-          dark: '#047857',
-        },
+        primary: "#3498db",
+        secondary: "#2ecc71",
+        accent: "#e74c3c",
+        background: "#f5f5f5",
+        text: "#333333"
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
       },
     },
   },
   plugins: [],
-}
+};
 

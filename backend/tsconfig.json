@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "..",
     "composite": true,
     "sourceMap": true,
     "esModuleInterop": true,
@@ -15,17 +15,18 @@
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
-    "baseUrl": ".",
+    "baseUrl": "..",
     "paths": {
-      "@backend/*": ["./*"],
-      "@shared/*": ["../shared/*"],
-      "@types/*": ["./types/*"],
-      "@types": ["./types"]
+      "@backend/*": ["backend/*"],
+      "@shared/*": ["shared/*"],
+      "@types/*": ["backend/types/*"],
+      "@types": ["backend/types"]
     }
   },
   "include": [
     "**/*.ts",
-    "*.ts"
+    "*.ts",
+    "../shared/**/*.ts"
   ],
   "exclude": [
     "node_modules",
