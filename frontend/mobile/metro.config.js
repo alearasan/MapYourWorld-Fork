@@ -1,83 +1,86 @@
-const { getDefaultConfig } = require('@expo/metro-config');
+// Learn more https://docs.expo.io/guides/customizing-metro
+const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
-// Encuentra el directorio raíz del proyecto (workspace)
+// Encuentra el directorio del workspace
+const workspaceRoot = path.resolve(__dirname, '../../');
 const projectRoot = __dirname;
-const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// Configurar App.tsx como punto de entrada principal
-config.resolver.sourceExts = ['tsx', 'ts', 'jsx', 'js', 'json'];
-config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
+// Agregamos las rutas en workspaceRoot a las watchFolders
+config.watchFolders = [workspaceRoot];
 
-// 1. Configuración para el resolver de Metro optimizada
+// Incluimos el módulo de shared
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-// 2. Limitar los directorios vigilados para mejorar rendimiento
-config.watchFolders = [
-  path.resolve(projectRoot, 'src'),
-  path.resolve(projectRoot, 'assets'),
-  path.resolve(workspaceRoot, 'shared'),
-];
+// Configuramos resolver para el manejo de alias
+config.resolver.extraNodeModules = {
+  '@': path.resolve(projectRoot, 'src'),
+  '@components': path.resolve(projectRoot, 'src/components'),
+  '@screens': path.resolve(projectRoot, 'src/screens'),
+  '@assets': path.resolve(projectRoot, 'src/assets'),
+  '@utils': path.resolve(projectRoot, 'src/utils'),
+  '@hooks': path.resolve(projectRoot, 'src/hooks'),
+  '@services': path.resolve(projectRoot, 'src/services'),
+  // Agregamos aliases para los módulos compartidos
+  'shared': path.resolve(workspaceRoot, 'shared'),
+  'react': path.resolve(projectRoot, 'node_modules/react'),
+  'react-native': path.resolve(projectRoot, 'node_modules/react-native'),
+  'expo': path.resolve(projectRoot, 'node_modules/expo'),
+};
 
-// 3. Configuración de caché optimizada
-config.cacheStores = [
-  new (require('metro-cache').FileStore)({
-    root: path.join(projectRoot, 'node_modules', '.cache', 'metro')
-  })
-];
+// Aseguramos que Metro encuentre todos los módulos correctamente
+config.resolver.disableHierarchicalLookup = false;
+config.resolver.enableGlobalPackages = true;
 
-// 4. Mejorar el manejo de assets
-config.resolver.assetExts = [
-  ...config.resolver.assetExts.filter(ext => !['svg'].includes(ext)),
-  'pem', 'crt', 'db', 'json', 'md', 'sqlite'
-];
-config.resolver.sourceExts = ['js', 'jsx', 'ts', 'tsx', 'cjs', 'mjs', 'json', 'svg'];
+// Configuramos los assetExts y sourceExts
+config.resolver.assetExts = [...config.resolver.assetExts, 'db', 'sqlite', 'json', 'png', 'jpg', 'svg'];
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'jsx', 'json', 'js', 'ts', 'tsx', 'cjs', 'mjs'];
 
-// 5. Optimizaciones para el transformer
+// Configuración específica para la transformación
 config.transformer = {
   ...config.transformer,
   babelTransformerPath: require.resolve('react-native-svg-transformer'),
   minifierPath: require.resolve('metro-minify-terser'),
   minifierConfig: {
-    // Opciones de minificación para producción
-    compress: { 
-      drop_console: false, // Set true in production
-      drop_debugger: true
+    // Opciones del minimizador
+    ecma: 8, // Usar sintaxis ES2017
+    compress: {
+      // Opciones de compresión
+      unused: true,
+      dead_code: true,
+    },
+    mangle: {
+      safari10: true, // Para compatibilidad con Safari 10
+    },
+  },
+};
+
+// Configurar el Server
+config.server = {
+  ...config.server,
+  port: 8081, // Puerto por defecto
+  enhanceMiddleware: (middleware) => {
+    return (req, res, next) => {
+      // Manejo de errores en middleware
+      middleware(req, res, next);
+    };
+  },
+};
+
+// Configuración para el manejo de errores en Metro
+config.reporter = {
+  ...config.reporter,
+  update: (event) => {
+    // Podemos manejar eventos específicos aquí
+    if (event.type === 'bundle_build_failed') {
+      console.error('Error al construir el bundle:', event.error);
     }
   },
-  getTransformOptions: async () => ({
-    transform: {
-      experimentalImportSupport: true,
-      inlineRequires: true,
-    },
-  }),
 };
-
-// 6. Optimizaciones para el resolver
-config.resolver.disableHierarchicalLookup = true; // Evita búsquedas jerárquicas lentas
-config.resolver.useWatchman = true; // Usa watchman si está disponible para mejor rendimiento
-
-// 7. Configuración específica para react-native-reanimated y otros módulos críticos
-config.resolver.extraNodeModules = {
-  'react-native-reanimated': path.resolve(workspaceRoot, 'node_modules', 'react-native-reanimated'),
-  '@': path.resolve(projectRoot, 'src'),
-  '@components': path.resolve(projectRoot, 'src/components'),
-  '@assets': path.resolve(projectRoot, 'src/assets'),
-  '@screens': path.resolve(projectRoot, 'src/screens'),
-  '@hooks': path.resolve(projectRoot, 'src/hooks'),
-  '@services': path.resolve(projectRoot, 'src/services'),
-  '@shared': path.resolve(workspaceRoot, 'shared'),
-  '@frontend': path.resolve(workspaceRoot, 'frontend'),
-  '@backend': path.resolve(workspaceRoot, 'backend'),
-};
-
-// 8. Aumentar tamaño de caché de Metro
-config.maxWorkers = Math.max(2, require('os').cpus().length - 1);
-config.resetCache = false;
 
 module.exports = config; 
