@@ -3,9 +3,8 @@ import { View, Text, Image, ImageBackground } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Button from '../UI/Button';
-import {styles} from '../../assets/styles/styles';
-
+import Button from '@components/UI/Button';
+import {styles} from '@assets/styles/styles';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -34,40 +33,40 @@ const WelcomeScreen = () => {
   };
   
   return (
-  <ImageBackground
-            source={require("../../assets/images/login_background.webp")} 
-            style={styles.background_image}
-            resizeMode="cover"
+    <ImageBackground
+      source={require("../../assets/images/login_background.webp")} 
+      style={styles.background_image}
+      resizeMode="cover"
     >
       <View style={styles.semi_transparent_overlay} />
       {/* Main content */}
-      <StyledView className="flex-1 justify-center items-center mr-5 ml-5">
-          <StyledText className="text-6xl font-bold text-gray-900 mb-2 text-center">
-            Transforma{'\n'}tus <StyledText className="text-teal-500">viajes</StyledText>
-          </StyledText>
-          
-          <StyledText className="text-gray-700 text-xl mb-8 text-center mt-4">
-            Descubre una nueva forma de viajar con nuestra plataforma de 
-            geolocalización gamificada. Registra tus aventuras, completa retos y 
-            conecta con otros viajeros.
-          </StyledText>
-          
-          <Button 
-            style={{ marginBottom: 16  }}
-            title="Comenzar gratis" 
-            onPress={handleRegisterPress} 
-            variant="primary"
-            fullWidth
-          />
-          
-          <Button 
-            title="Iniciar sesión" 
-            onPress={handleLoginPress}
-            variant="secondary"
-            fullWidth
-          />
-        </StyledView>
-  </ImageBackground>
+      <StyledView className="flex-1 justify-center items-center mx-5">
+        <StyledText className="text-6xl font-bold text-gray-900 mb-2 text-center">
+          Transforma{'\n'}tus <StyledText className="text-teal-500">viajes</StyledText>
+        </StyledText>
+        
+        <StyledText className="text-gray-700 text-xl mb-8 text-center mt-4">
+          Descubre una nueva forma de viajar con nuestra plataforma de 
+          geolocalización gamificada. Registra tus aventuras, completa retos y 
+          conecta con otros viajeros.
+        </StyledText>
+        
+        <Button 
+          style={{ marginBottom: 16 }}
+          title="Comenzar gratis" 
+          onPress={handleRegisterPress} 
+          variant="primary"
+          fullWidth
+        />
+        
+        <Button 
+          title="Iniciar sesión" 
+          onPress={handleLoginPress}
+          variant="secondary"
+          fullWidth
+        />
+      </StyledView>
+    </ImageBackground>
   );
 };
 

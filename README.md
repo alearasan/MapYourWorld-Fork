@@ -315,3 +315,37 @@ Si tienes problemas con la autenticación:
 ## 📜 Licencia
 
 Este proyecto está licenciado bajo la licencia ISC - ver el archivo LICENSE para más detalles.
+
+## Instrucciones de instalación actualizadas (Node.js 22.14.0 LTS)
+
+Se ha actualizado el proyecto para ser compatible con Node.js 22.14.0 LTS. Sigue estos pasos para configurar tu entorno:
+
+### Requisitos
+
+- Node.js 22.14.0 LTS o superior
+- npm 10.x o superior (viene con Node.js 22)
+
+### Instalación limpia
+
+1. Verifica tu entorno:
+   ```
+   npm run verificar:entorno
+   ```
+
+2. Instala todas las dependencias con un solo comando:
+   ```
+   npm run install:clean
+   ```
+
+### Desarrollo
+
+- Frontend web: `npm run dev:web`
+- Frontend móvil: `npm run dev:mobile`
+- Backend: `npm run dev:backend`
+- Todo junto: `npm run dev`
+
+### Notas importantes
+
+- Se ha actualizado Expo a la versión SDK 52, que es compatible con React Native 0.73.2
+- Se ha optimizado la configuración de npm para evitar conflictos de dependencias
+- Para el desarrollo móvil, usar los comandos `npx expo` en lugar de `expo`

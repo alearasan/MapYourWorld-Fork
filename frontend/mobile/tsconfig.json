@@ -2,38 +2,46 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react-native",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "moduleResolution": "node",
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "strict": true,
-    "baseUrl": "../../",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./frontend/mobile/src/*"],
-      "@components/*": ["./frontend/mobile/src/components/*"],
-      "@screens/*": ["./frontend/mobile/src/screens/*"],
-      "@hooks/*": ["./frontend/mobile/src/hooks/*"],
-      "@services/*": ["./frontend/mobile/src/services/*"],
-      "@utils/*": ["./frontend/mobile/src/utils/*"],
-      "@assets/*": ["./frontend/mobile/src/assets/*"],
-      "@navigation/*": ["./frontend/mobile/src/navigation/*"],
-      "@constants/*": ["./frontend/mobile/src/constants/*"],
-      "@contexts/*": ["./frontend/mobile/src/contexts/*"],
-      "@types/*": ["./frontend/mobile/src/types/*"],
-      "@store/*": ["./frontend/mobile/src/store/*"],
-      "@shared/*": ["./shared/*"],
-      "@frontend/*": ["./frontend/*"],
-      "@backend/*": ["./backend/*"]
-    }
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@navigation/*": ["./src/navigation/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@types/*": ["./src/types/*"],
+      "@store/*": ["./src/store/*"],
+      "@shared/*": ["../../shared/*"],
+      "@frontend/*": ["../../frontend/*"],
+      "@backend/*": ["../../backend/*"]
+    },
+    "typeRoots": [
+      "../../node_modules/@types",
+      "./node_modules/@types"
+    ],
+    "types": ["node"]
   },
   "include": [
-    "src",
+    "src/**/*",
     "App.tsx",
     "index.js",
+    "babel.config.js",
     "metro.config.js",
-    ".eslintrc.js",
-    "babel.config.js"
+    "app.config.js"
   ],
   "exclude": [
     "node_modules",

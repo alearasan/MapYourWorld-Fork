@@ -3,9 +3,9 @@ import { View, Text, ScrollView, ImageBackground, Image } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Button from '../UI/Button';
-import TextInput from '../UI/TextInput';
-import {styles} from '../../assets/styles/styles';
+import Button from '@components/UI/Button';
+import TextInput from '@components/UI/TextInput';
+import {styles} from '@assets/styles/styles';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
