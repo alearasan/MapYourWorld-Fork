@@ -5,15 +5,13 @@
 
 const { spawn } = require('child_process');
 const path = require('path');
-// Importando chalk de manera compatible con ESM y CJS
-const chalk = require('chalk');
 
-// Creando una versión de respaldo si chalk no funciona correctamente
+// Implementación simple de colores sin dependencias externas
 const colorize = {
-  green: (text) => chalk.green ? chalk.green(text) : `\x1b[32m${text}\x1b[0m`,
-  blue: (text) => chalk.blue ? chalk.blue(text) : `\x1b[34m${text}\x1b[0m`,
-  yellow: (text) => chalk.yellow ? chalk.yellow(text) : `\x1b[33m${text}\x1b[0m`,
-  red: (text) => chalk.red ? chalk.red(text) : `\x1b[31m${text}\x1b[0m`
+  green: (text) => `\x1b[32m${text}\x1b[0m`,
+  blue: (text) => `\x1b[34m${text}\x1b[0m`,
+  yellow: (text) => `\x1b[33m${text}\x1b[0m`,
+  red: (text) => `\x1b[31m${text}\x1b[0m`
 };
 
 console.log('\n');

@@ -89,7 +89,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.web.js', '.js', '.tsx', '.ts', '.web.tsx', '.web.ts', '.jsx'],
+    extensions: ['.web.js', '.web.jsx', '.web.ts', '.web.tsx', '.js', '.jsx', '.ts', '.tsx'],
     alias: {
       'react-native$': 'react-native-web',
       'react': path.resolve(appDirectory, 'node_modules/react'),
@@ -101,6 +101,10 @@ module.exports = {
       '@utils': path.resolve(appDirectory, 'src/utils'),
       '@hooks': path.resolve(appDirectory, 'src/hooks'),
       '@services': path.resolve(appDirectory, 'src/services')
+    },
+    fallback: {
+      'react-native-maps': false,
+      'react-native/Libraries/Utilities/codegenNativeCommands': false,
     },
     symlinks: false,
     cacheWithContext: false,
@@ -126,7 +130,12 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
       __DEV__: process.env.NODE_ENV !== 'production',
+      'registerRootComponent': '(() => {})',
     }),
+    new webpack.NormalModuleReplacementPlugin(
+      /react-native-maps/,
+      path.resolve(appDirectory, 'src/components/Map/MapScreen.web.tsx')
+    ),
     new webpack.ids.HashedModuleIdsPlugin(),
   ],
   devServer: {

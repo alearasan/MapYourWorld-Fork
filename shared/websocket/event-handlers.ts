@@ -3,8 +3,8 @@
  * Define tipos de eventos y manejadores para comunicación con WebSockets
  */
 
-import { WebSocket } from 'ws';
-import { connectionManager, WebSocketClient } from './connection-manager';
+
+import { WebSocketClient } from './connection-manager';
 
 /**
  * Tipos de eventos WebSocket

@@ -229,7 +229,6 @@ function sincronizarDependencias() {
       '@babel/plugin-transform-runtime': '7.26.9',
       '@testing-library/react': '16.2.0',
       '@testing-library/react-native': '^13.1.0',
-      '@types/node': '22.13.9',
       '@typescript-eslint/eslint-plugin': '^8.26.0',
       '@typescript-eslint/parser': '^8.26.0',
       'autoprefixer': '^10.4.20',
@@ -266,6 +265,7 @@ function sincronizarDependencias() {
       'bcryptjs': '3.0.2',
       'jsonwebtoken': '9.0.2',
       'pg': '8.13.3',
+      'pg-hstore': '2.3.4',
       'pg-promise': '11.10.2',
       'typeorm': '0.3.21',
       'nodemailer': '6.10.0',
@@ -273,11 +273,56 @@ function sincronizarDependencias() {
       'socket.io': '3.0.0',
       'axios': '1.8.1',
       'class-validator': '0.14.1',
+      'multer': '1.4.5-lts.1',
+      'express': '4.21.2',
+      'express-validator': '7.2.1',
+      'express-rate-limit': '7.5.0',
+      'express-winston': '4.2.0',
+      'winston': '3.17.0',
+      'cors': '2.8.5',
+      'dotenv': '16.4.7',
+      'helmet': '8.0.0',
+      'mongoose': '8.12.1',
+      'sharp': '0.33.5',
+      'compression': '1.8.0',
+      'http-proxy-middleware': '3.0.3',
+      'amqplib': '0.10.5',
+      'redis': '4.7.0',
+      'aws-sdk': '2.1692.0',
+      'jwt-decode': '4.0.0',
+      'geojson': '0.5.0',
+      'crypto-js': '4.2.0',
+      '@turf/turf': '7.2.0',
+      'sequelize': '6.37.6',
+      'ws': '8.18.1',
       
       // Tipos
       '@types/bcryptjs': '2.4.6',
       '@types/jsonwebtoken': '9.0.9',
-      '@types/nodemailer': '6.4.17'
+      '@types/nodemailer': '6.4.17',
+      '@types/express': '5.0.0',
+      '@types/cors': '2.8.17',
+      '@types/amqplib': '0.10.7',
+      '@types/crypto-js': '4.2.2',
+      '@types/ws': '8.18.0',
+      '@types/multer': '1.4.12',
+      '@types/compression': '1.7.5'
+    };
+    
+    // Dependencias de desarrollo específicas para el backend
+    const backendDevDependenciesMap = {
+      'typescript': '5.8.2',
+      'ts-node': '10.9.2',
+      'ts-node-dev': '2.0.0',
+      'eslint': '9.21.0',
+      '@typescript-eslint/eslint-plugin': '8.26.0',
+      '@typescript-eslint/parser': '8.26.0',
+      'jest': '29.7.0',
+      'ts-jest': '29.2.6',
+      'nodemon': '3.1.9',
+      'chalk': '5.4.1',
+      'cross-env': '7.0.3',
+      'babel-plugin-module-resolver': '5.0.2'
     };
     
     // Actualizar cada package.json encontrado
@@ -299,6 +344,7 @@ function sincronizarDependencias() {
           console.log(`${colors.blue}Usando mapa de dependencias para frontend/mobile${colors.reset}`);
         } else if (packagePath.includes('backend')) {
           dependenciesMap = backendDependenciesMap;
+          devDependenciesMap = backendDevDependenciesMap;
           console.log(`${colors.blue}Usando mapa de dependencias para backend${colors.reset}`);
         } else {
           // Para otros package.json, usar un conjunto común de dependencias
@@ -355,10 +401,11 @@ function sincronizarDependencias() {
         }
         
         if (packageJson.devDependencies) {
-          // Usar el mapa de devDependencies si está disponible, o usar dependenciesMap como fallback
-          const mapToUse = packagePath.includes('mobile') ? devDependenciesMap : {};
+          // Usar el mapa de devDependencies si está disponible
+          const devMapToUse = packagePath.includes('mobile') ? mobileDevDependenciesMap : 
+                            packagePath.includes('backend') ? backendDevDependenciesMap : {};
           
-          for (const [dep, version] of Object.entries(mapToUse)) {
+          for (const [dep, version] of Object.entries(devMapToUse)) {
             if (packageJson.devDependencies[dep] && packageJson.devDependencies[dep] !== version) {
               console.log(`${colors.yellow}→ Actualizando devDependencies/${dep} de ${packageJson.devDependencies[dep]} a ${version}${colors.reset}`);
               packageJson.devDependencies[dep] = version;
@@ -411,39 +458,33 @@ function startScript() {
     
     // Mostrar opciones al usuario
     console.log(`Seleccione una opción:`);
-    console.log(`1. Actualizar dependencias e instalar automáticamente`);
-    console.log(`2. Limpiar caché y eliminar node_modules (para instalación manual)`);
-    console.log(`3. Solo regenerar package-lock.json (mantener node_modules)`);
-    console.log(`4. Sincronizar versiones de dependencias entre todos los package.json`);
-    console.log(`\n`);
+    console.log(`1. Borrar todos los node_modules del proyecto`);
+    console.log(`2. Instalar todas las dependencias del proyecto`);
+    console.log(`3. Fijar versiones exactas desde node_modules instalados`);
     
     const readline = require('readline').createInterface({
       input: process.stdin,
       output: process.stdout
     });
     
-    readline.question(`Opción (1/2/3/4): `, (option) => {
+    readline.question(`\nOpción (1/2/3): `, (option) => {
       readline.close();
       
       switch (option.trim()) {
         case '1':
-          // Ejecutar actualización e instalación
-          ejecutarActualizacion();
+          // Borrar todos los node_modules del proyecto
+          borrarNodeModules();
           break;
         case '2':
-          // Limpiar caché y node_modules
-          cleanNodeCache();
+          // Instalar todas las dependencias del proyecto
+          instalarDependencias();
           break;
         case '3':
-          // Solo regenerar package-lock.json
-          regenerarLockFile();
-          break;
-        case '4':
-          // Sincronizar dependencias entre package.json
-          sincronizarDependencias();
+          // Fijar versiones desde node_modules existentes
+          fijarVersionesDesdeNodeModules();
           break;
         default:
-          console.log(`${colors.red}Opción no válida. Por favor seleccione 1, 2, 3 o 4.${colors.reset}`);
+          console.log(`${colors.red}Opción no válida. Por favor seleccione una opción del 1 al 3.${colors.reset}`);
           break;
       }
     });
@@ -452,289 +493,616 @@ function startScript() {
   }
 }
 
-// Función para limpiar la caché y los directorios node_modules
-function cleanNodeCache() {
-  console.log(`\n${colors.bright}${colors.magenta}LIMPIANDO CACHÉ DE NPM${colors.reset}\n`);
-  
-  // Definir directorios para limpiar
-  const rootDir = __dirname;
-  const directoriesToClean = [
-    rootDir,
-    path.join(rootDir, 'frontend'),
-    path.join(rootDir, 'frontend/web'),
-    path.join(rootDir, 'frontend/mobile'),
-    path.join(rootDir, 'backend'),
-    path.join(rootDir, 'backend/api-gateway'),
-    path.join(rootDir, 'backend/auth-service'),
-    path.join(rootDir, 'backend/map-service'),
-    path.join(rootDir, 'backend/notification-service'),
-    path.join(rootDir, 'backend/social-service'),
-    path.join(rootDir, 'backend/user-service'),
-    path.join(rootDir, 'shared')
-  ];
-  
-  // Limpiar la caché de npm - desactivando temporalmente workspaces
-  console.log(`${colors.yellow}Limpiando caché de npm...${colors.reset}`);
-  
-  // Crear un .npmrc temporal que deshabilite los workspaces
-  const tempNpmrcPath = path.join(rootDir, '.npmrc.temp');
-  const originalNpmrcPath = path.join(rootDir, '.npmrc');
-  let originalNpmrcContent = '';
+/**
+ * Función para borrar todos los node_modules del proyecto de forma recursiva
+ */
+function borrarNodeModules() {
+  console.log(`\n${colors.bright}${colors.magenta}BORRANDO TODOS LOS NODE_MODULES DEL PROYECTO${colors.reset}\n`);
   
   try {
-    // Guardar contenido original de .npmrc
-    if (fs.existsSync(originalNpmrcPath)) {
-      originalNpmrcContent = fs.readFileSync(originalNpmrcPath, 'utf8');
-    }
+    // Definir directorio raíz
+    const rootDir = __dirname;
+    let nodeModulesEncontrados = [];
+    let packageJsonEncontrados = [];
     
-    // Crear .npmrc temporal sin workspaces
-    fs.writeFileSync(tempNpmrcPath, 'workspaces=false\n');
+    console.log(`${colors.cyan}Buscando archivos package.json y directorios node_modules...${colors.reset}`);
     
-    // Mover el .npmrc temporal
-    if (fs.existsSync(originalNpmrcPath)) {
-      fs.renameSync(originalNpmrcPath, `${originalNpmrcPath}.bak`);
-    }
-    fs.renameSync(tempNpmrcPath, originalNpmrcPath);
-    
-    // Ejecutar la limpieza de caché
-    execSync('npm cache clean --force', { stdio: 'inherit' });
-    console.log(`${colors.green}✓ Caché de npm limpiada correctamente${colors.reset}`);
-    
-    // Restaurar el .npmrc original
-    fs.unlinkSync(originalNpmrcPath);
-    if (fs.existsSync(`${originalNpmrcPath}.bak`)) {
-      fs.renameSync(`${originalNpmrcPath}.bak`, originalNpmrcPath);
-    } else if (originalNpmrcContent) {
-      fs.writeFileSync(originalNpmrcPath, originalNpmrcContent);
-    }
-  } catch (error) {
-    // Asegurarse de restaurar el .npmrc original en caso de error
-    if (fs.existsSync(`${originalNpmrcPath}.bak`)) {
-      if (fs.existsSync(originalNpmrcPath)) {
-        fs.unlinkSync(originalNpmrcPath);
-      }
-      fs.renameSync(`${originalNpmrcPath}.bak`, originalNpmrcPath);
-    }
-    console.error(`${colors.red}Error al limpiar la caché de npm:${colors.reset} ${error.message}`);
-  }
-  
-  // Limpiar solo node_modules si el usuario lo desea
-  console.log(`\n${colors.yellow}¿Deseas eliminar también los directorios node_modules?${colors.reset}`);
-  console.log(`${colors.yellow}Esto puede ser útil para una instalación totalmente limpia.${colors.reset}`);
-  
-  const readlineModules = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  
-  readlineModules.question(`\n${colors.bright}¿Eliminar node_modules? (s/N): ${colors.reset}`, (answer) => {
-    readlineModules.close();
-    
-    if (answer.toLowerCase() === 's') {
-      console.log(`${colors.yellow}Eliminando directorios node_modules...${colors.reset}`);
+    // Función recursiva para buscar package.json y node_modules
+    function buscarArchivos(directorio, profundidadMaxima = 5, profundidadActual = 0) {
+      if (profundidadActual > profundidadMaxima) return;
       
-      for (const dir of directoriesToClean) {
-        const nodeModulesPath = path.join(dir, 'node_modules');
+      try {
+        const archivos = fs.readdirSync(directorio);
         
-        // Eliminar node_modules
-        if (fs.existsSync(nodeModulesPath)) {
-          try {
-            if (process.platform === 'win32') {
-              // En Windows, usar el comando rd para eliminar directorios
-              execSync(`rd /s /q "${nodeModulesPath}"`, { stdio: 'ignore' });
-            } else {
-              // En Unix/Linux, usar rm -rf
-              execSync(`rm -rf "${nodeModulesPath}"`, { stdio: 'ignore' });
+        // Comprobar si hay package.json en este directorio
+        if (archivos.includes('package.json')) {
+          packageJsonEncontrados.push(directorio);
+          
+          // Si hay package.json, comprobar si también hay node_modules
+          if (archivos.includes('node_modules')) {
+            const nodeModulesPath = path.join(directorio, 'node_modules');
+            if (fs.statSync(nodeModulesPath).isDirectory()) {
+              nodeModulesEncontrados.push(nodeModulesPath);
             }
-            console.log(`${colors.green}✓ Eliminado:${colors.reset} ${nodeModulesPath}`);
-          } catch (error) {
-            console.error(`${colors.red}Error al eliminar ${nodeModulesPath}:${colors.reset} ${error.message}`);
           }
+        }
+        
+        // Continuar buscando en subdirectorios
+        for (const archivo of archivos) {
+          const rutaCompleta = path.join(directorio, archivo);
+          
+          try {
+            const stat = fs.statSync(rutaCompleta);
+            
+            if (stat.isDirectory()) {
+              // No buscar en node_modules, .git, dist, build
+              if (archivo !== 'node_modules' && archivo !== '.git' && archivo !== 'dist' && archivo !== 'build') {
+                buscarArchivos(rutaCompleta, profundidadMaxima, profundidadActual + 1);
+              }
+            }
+          } catch (err) {
+            // Ignorar errores al acceder a archivos individuales
+          }
+        }
+      } catch (err) {
+        console.log(`${colors.yellow}No se pudo acceder al directorio ${directorio}: ${err.message}${colors.reset}`);
+      }
+    }
+    
+    // Iniciar búsqueda
+    buscarArchivos(rootDir);
+    
+    if (packageJsonEncontrados.length === 0) {
+      console.log(`${colors.yellow}No se encontraron archivos package.json en el proyecto.${colors.reset}`);
+      return;
+    }
+    
+    console.log(`${colors.green}Se encontraron ${packageJsonEncontrados.length} directorios con package.json:${colors.reset}`);
+    packageJsonEncontrados.forEach((dir, index) => {
+      console.log(`${colors.cyan}${index + 1}. ${path.relative(rootDir, dir)}${colors.reset}`);
+    });
+    
+    if (nodeModulesEncontrados.length === 0) {
+      console.log(`${colors.yellow}No se encontraron directorios node_modules en el proyecto.${colors.reset}`);
+      return;
+    }
+    
+    console.log(`\n${colors.green}Se encontraron ${nodeModulesEncontrados.length} directorios node_modules:${colors.reset}`);
+    nodeModulesEncontrados.forEach((dir, index) => {
+      console.log(`${colors.cyan}${index + 1}. ${path.relative(rootDir, dir)}${colors.reset}`);
+    });
+    
+    console.log(`\n${colors.yellow}Se procederá a eliminar todos los directorios node_modules encontrados.${colors.reset}`);
+    
+    const readlineConfirm = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    
+    readlineConfirm.question(`\n${colors.bright}¿Desea continuar? (s/N): ${colors.reset}`, (answer) => {
+      readlineConfirm.close();
+      
+      if (answer.toLowerCase() !== 's') {
+        console.log(`${colors.yellow}Operación cancelada por el usuario.${colors.reset}`);
+        return;
+      }
+      
+      console.log(`\n${colors.magenta}Eliminando directorios node_modules...${colors.reset}`);
+      
+      let directoriosEliminados = 0;
+      let errores = 0;
+      
+      for (const directorio of nodeModulesEncontrados) {
+        try {
+          console.log(`${colors.yellow}Eliminando: ${path.relative(rootDir, directorio)}${colors.reset}`);
+          
+          if (process.platform === 'win32') {
+            // En Windows, usar el comando rd para eliminar directorios
+            execSync(`rd /s /q "${directorio}"`, { stdio: 'ignore' });
+          } else {
+            // En Unix/Linux, usar rm -rf
+            execSync(`rm -rf "${directorio}"`, { stdio: 'ignore' });
+          }
+          
+          // Verificar si se eliminó correctamente
+          if (!fs.existsSync(directorio)) {
+            console.log(`${colors.green}✓ Eliminado correctamente${colors.reset}`);
+            directoriosEliminados++;
+          } else {
+            console.log(`${colors.red}⚠ No se pudo eliminar completamente${colors.reset}`);
+            errores++;
+          }
+        } catch (error) {
+          console.error(`${colors.red}Error al eliminar ${directorio}: ${error.message}${colors.reset}`);
+          errores++;
         }
       }
       
-      finalizarLimpieza();
-    } else {
-      finalizarLimpieza();
-    }
-  });
-}
-
-// Función auxiliar para finalizar el proceso de limpieza
-function finalizarLimpieza() {
-  console.log(`\n${colors.green}✓ Limpieza completada${colors.reset}`);
-  console.log(`\n${colors.bright}Para instalar los paquetes:${colors.reset}`);
-  console.log(`1. ${colors.cyan}node actualizar-dependencias.js${colors.reset} - Selecciona la opción 3 para regenerar el package-lock.json`);
-  console.log(`2. ${colors.cyan}npm install${colors.reset} - Para instalar todas las dependencias\n`);
-  console.log(`${colors.yellow}Si encuentras errores con npm install, intenta:${colors.reset}`);
-  console.log(`${colors.cyan}npm install --legacy-peer-deps${colors.reset}\n`);
-  console.log(`${colors.bright}${colors.blue}====================================================${colors.reset}\n`);
-}
-
-// Función para regenerar el package-lock.json y corregir los conflictos de dependencias
-function regenerarLockFile() {
-  console.log(`${colors.blue}Iniciando regeneración del package-lock.json...${colors.reset}`);
-  
-  // 1. Corregir conflictos en package.json
-  const mobilePackagePath = path.join(__dirname, 'frontend', 'mobile', 'package.json');
-  
-  if (!fs.existsSync(mobilePackagePath)) {
-    console.log(`${colors.red}Error: No se encontró el archivo package.json del proyecto móvil${colors.reset}`);
-    return;
-  }
-  
-  // Leer package.json del proyecto móvil
-  const mobilePackageJson = JSON.parse(fs.readFileSync(mobilePackagePath, 'utf8'));
-  
-  // Verificar y ajustar la versión de @expo/webpack-config
-  if (mobilePackageJson.dependencies && mobilePackageJson.dependencies.expo) {
-    const expoVersion = mobilePackageJson.dependencies.expo;
-    console.log(`${colors.yellow}Detectada versión de Expo: ${expoVersion}${colors.reset}`);
-    
-    // Para Expo SDK 52, necesitamos una versión específica de @expo/webpack-config
-    if (expoVersion.includes('52')) {
-      if (mobilePackageJson.dependencies['@expo/webpack-config'] !== '^0.17.4') {
-        console.log(`${colors.yellow}Actualizando @expo/webpack-config a ^0.17.4 para compatibilidad con Expo SDK 52${colors.reset}`);
-        mobilePackageJson.dependencies['@expo/webpack-config'] = '^0.17.4';
+      // Eliminar package-lock.json si existe
+      const packageLockPath = path.join(rootDir, 'package-lock.json');
+      if (fs.existsSync(packageLockPath)) {
+        try {
+          fs.unlinkSync(packageLockPath);
+          console.log(`${colors.green}✓ Archivo package-lock.json eliminado${colors.reset}`);
+        } catch (error) {
+          console.error(`${colors.red}Error al eliminar package-lock.json: ${error.message}${colors.reset}`);
+        }
       }
       
-      // Guardar cambios en el proyecto móvil
-      fs.writeFileSync(mobilePackagePath, JSON.stringify(mobilePackageJson, null, 2) + '\n');
-      console.log(`${colors.green}✓ package.json del proyecto móvil actualizado${colors.reset}`);
-      
-      // Crear webpack.config.js personalizado si no existe
-      const webpackConfigPath = path.join(__dirname, 'frontend', 'mobile', 'webpack.config.js');
-      if (!fs.existsSync(webpackConfigPath)) {
-        console.log(`${colors.yellow}Creando webpack.config.js personalizado para Expo SDK 52${colors.reset}`);
-        const webpackConfig = `const createExpoWebpackConfigAsync = require('@expo/webpack-config');
-
-module.exports = async function (env, argv) {
-  const config = await createExpoWebpackConfigAsync(
-    {
-      ...env,
-      // Deshabilitar la validación de peer dependencies para evitar errores
-      disablePeerDependencyValidation: true,
-    },
-    argv
-  );
-
-  // Configuraciones adicionales para Expo SDK 52
-  config.resolve = {
-    ...config.resolve,
-    alias: {
-      ...config.resolve.alias,
-      'react-native': 'react-native-web',
-      'react-native/Libraries/Components/View/ViewStylePropTypes': 'react-native-web/dist/exports/View/ViewStylePropTypes',
-      'react-native/Libraries/EventEmitter/RCTDeviceEventEmitter': 'react-native-web/dist/vendor/react-native/NativeEventEmitter/RCTDeviceEventEmitter',
-    },
-    extensions: ['.web.js', '.js', '.ts', '.tsx', '.web.tsx', '.web.ts', '.mjs', '.json'],
-  };
-
-  return config;
-};`;
-        fs.writeFileSync(webpackConfigPath, webpackConfig);
-        console.log(`${colors.green}✓ webpack.config.js creado${colors.reset}`);
+      console.log(`\n${colors.bright}${colors.green}RESUMEN DE LA OPERACIÓN:${colors.reset}`);
+      console.log(`${colors.green}- Directorios node_modules eliminados: ${directoriosEliminados}/${nodeModulesEncontrados.length}${colors.reset}`);
+      if (errores > 0) {
+        console.log(`${colors.red}- Errores encontrados: ${errores}${colors.reset}`);
       }
-    }
+      
+      console.log(`\n${colors.bright}${colors.green}OPERACIÓN COMPLETADA${colors.reset}`);
+      console.log(`${colors.yellow}Para reinstalar las dependencias, ejecute la opción 2 de este script.${colors.reset}`);
+    });
+  } catch (error) {
+    console.error(`${colors.red}Error al borrar node_modules: ${error.message}${colors.reset}`);
   }
-  
-  // Actualizar el package.json de la raíz
-  const rootPackagePath = path.join(__dirname, 'package.json');
-  if (fs.existsSync(rootPackagePath)) {
-    const rootPackageJson = JSON.parse(fs.readFileSync(rootPackagePath, 'utf8'));
-    
-    // Obtener la versión de Expo del proyecto móvil
-    const expoVersion = mobilePackageJson.dependencies.expo;
-    
-    // Agregar resoluciones para mantener consistencia
-    rootPackageJson.resolutions = {
-      ...rootPackageJson.resolutions,
-      'react': '18.3.1',
-      'react-dom': '18.3.1',
-      'react-native': '0.76.7',
-      'expo': expoVersion,
-      'react-native-svg': '15.8.0',
-      'react-test-renderer': '18.3.1',
-      '@types/react': '~18.3.12',
-      '@types/react-dom': '~18.3.1',
-      'lottie-react-native': '7.1.0'
-    };
-    
-    // Agregar overrides para npm (equivalente a resolutions en Yarn)
-    rootPackageJson.overrides = {
-      ...rootPackageJson.overrides,
-      'react': '18.3.1',
-      'react-dom': '18.3.1',
-      'react-native': '0.76.7',
-      'expo': expoVersion,
-      'react-native-svg': '15.8.0',
-      'react-test-renderer': '18.3.1',
-      '@types/react': '~18.3.12',
-      '@types/react-dom': '~18.3.1',
-      'lottie-react-native': '7.1.0'
-    };
-    
-    // Guardar cambios en raíz
-    fs.writeFileSync(rootPackagePath, JSON.stringify(rootPackageJson, null, 2) + '\n');
-    console.log(`${colors.green}✓ package.json raíz actualizado${colors.reset}`);
-  }
-  
-  // 2. Verificar si existe package-lock.json y eliminarlo para regenerar
-  const lockFilePath = path.join(__dirname, 'package-lock.json');
-  if (fs.existsSync(lockFilePath)) {
-    fs.unlinkSync(lockFilePath);
-    console.log(`${colors.yellow}Eliminado package-lock.json existente para regenerarlo${colors.reset}`);
-  }
-  
-  // 3. Crear archivo .npmrc temporal para esta operación
-  const npmrcPath = path.join(__dirname, '.npmrc');
-  let originalNpmrcContent = '';
-  
-  if (fs.existsSync(npmrcPath)) {
-    originalNpmrcContent = fs.readFileSync(npmrcPath, 'utf8');
-  }
-  
-  // Crear .npmrc temporal optimizado para generar package-lock sin workspaces
-  const tempNpmrcContent = `
-# Configuración temporal para generar package-lock.json
-workspaces=false
-engine-strict=false
-save-exact=true
-fund=false
-audit=false
-loglevel=error
-package-lock=true
-legacy-peer-deps=true
-`;
-  
-  fs.writeFileSync(npmrcPath, tempNpmrcContent);
-  console.log(`${colors.yellow}Configuración temporal de .npmrc creada${colors.reset}`);
+}
+
+/**
+ * Función para instalar todas las dependencias del proyecto
+ */
+function instalarDependencias() {
+  console.log(`\n${colors.bright}${colors.blue}INSTALANDO DEPENDENCIAS DEL PROYECTO${colors.reset}\n`);
   
   try {
-    // 4. Ejecutar npm install con opciones específicas para generar package-lock.json
-    console.log(`${colors.blue}Ejecutando npm install --package-lock-only...${colors.reset}`);
-    const result = runCommand('npm install --package-lock-only');
+    // Definir directorios donde se instalarán las dependencias
+    const rootDir = __dirname;
+    const directorios = [
+      {
+        ruta: rootDir,
+        nombre: 'Raíz del proyecto'
+      },
+      {
+        ruta: path.join(rootDir, 'frontend', 'mobile'),
+        nombre: 'Frontend/Mobile'
+      },
+      {
+        ruta: path.join(rootDir, 'backend'),
+        nombre: 'Backend'
+      },
+      {
+        ruta: path.join(rootDir, 'shared'),
+        nombre: 'Shared'
+      },
+      {
+        ruta: path.join(rootDir, 'backend', 'api-gateway'),
+        nombre: 'API Gateway'
+      }
+    ];
     
-    if (result.error) {
-      console.log(`${colors.red}Error al regenerar package-lock.json: ${result.stderr}${colors.reset}`);
-    } else {
-      console.log(`${colors.green}✓ package-lock.json regenerado correctamente${colors.reset}`);
-    }
+    // Filtrar solo directorios que existen y tienen package.json
+    const directoriosValidos = directorios.filter(dir => {
+      const existeDirectorio = fs.existsSync(dir.ruta);
+      const existePackageJson = fs.existsSync(path.join(dir.ruta, 'package.json'));
+      return existeDirectorio && existePackageJson;
+    });
+    
+    console.log(`${colors.cyan}Se instalarán dependencias en ${directoriosValidos.length} directorios:${colors.reset}`);
+    directoriosValidos.forEach((dir, index) => {
+      console.log(`${colors.cyan}${index + 1}. ${dir.nombre} (${path.relative(rootDir, dir.ruta)})${colors.reset}`);
+    });
+    
+    console.log(`\n${colors.yellow}Este proceso puede tardar varios minutos. Se ejecutarán dos comandos de instalación en cada directorio:${colors.reset}`);
+    console.log(`${colors.cyan}- npm install --force${colors.reset}`);
+    console.log(`${colors.cyan}- npm install --legacy-peer-deps${colors.reset}`);
+    
+    const readlineConfirm = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    
+    readlineConfirm.question(`\n${colors.bright}¿Desea continuar? (s/N): ${colors.reset}`, (answer) => {
+      readlineConfirm.close();
+      
+      if (answer.toLowerCase() !== 's') {
+        console.log(`${colors.yellow}Operación cancelada por el usuario.${colors.reset}`);
+        return;
+      }
+      
+      // Instalar dependencias en cada directorio
+      console.log(`\n${colors.magenta}Iniciando instalación de dependencias...${colors.reset}`);
+      
+      let directoriosCompletados = 0;
+      let errores = 0;
+      
+      for (const directorio of directoriosValidos) {
+        console.log(`\n${colors.bright}${colors.blue}=== Instalando en: ${directorio.nombre} ===${colors.reset}`);
+        
+        try {
+          // Ejecutar npm install --force
+          console.log(`${colors.yellow}Ejecutando: npm install --force${colors.reset}`);
+          execSync('npm install --force', { 
+            cwd: directorio.ruta, 
+            stdio: 'inherit'
+          });
+          
+          // Ejecutar npm install --legacy-peer-deps
+          console.log(`${colors.yellow}Ejecutando: npm install --legacy-peer-deps${colors.reset}`);
+          execSync('npm install --legacy-peer-deps', { 
+            cwd: directorio.ruta, 
+            stdio: 'inherit'
+          });
+          
+          console.log(`${colors.green}✓ Instalación completada en ${directorio.nombre}${colors.reset}`);
+          directoriosCompletados++;
+        } catch (error) {
+          console.error(`${colors.red}Error al instalar dependencias en ${directorio.nombre}: ${error.message}${colors.reset}`);
+          errores++;
+        }
+      }
+      
+      // Verificación de dependencias de expo
+      const dirMobile = path.join(rootDir, 'frontend', 'mobile');
+      if (fs.existsSync(dirMobile)) {
+        console.log(`\n${colors.bright}${colors.blue}=== Verificando dependencias de Expo ===${colors.reset}`);
+        
+        try {
+          console.log(`${colors.yellow}Ejecutando: npx expo-doctor --verbose${colors.reset}`);
+          // Usar stdio: 'inherit' para mostrar la salida directamente en la consola
+          execSync('npx expo-doctor --verbose', { 
+            cwd: dirMobile, 
+            stdio: 'inherit'
+          });
+          
+          console.log(`${colors.green}✓ Verificación de Expo completada${colors.reset}`);
+        } catch (error) {
+          console.error(`${colors.red}Error al verificar dependencias de Expo: ${error.message}${colors.reset}`);
+        }
+      }
+      
+      // Verificación de versiones con npm outdated
+      console.log(`\n${colors.bright}${colors.blue}=== Verificando versiones de paquetes ===${colors.reset}`);
+      
+      try {
+        console.log(`${colors.yellow}Ejecutando: npm outdated${colors.reset}`);
+        
+        // Primero mostrar la salida original de npm outdated para visualizar todos los paquetes
+        try {
+          const outdatedTable = execSync('npm outdated', { 
+            cwd: rootDir, 
+            stdio: 'pipe',
+            encoding: 'utf8'
+          });
+          
+          if (outdatedTable.trim() !== '') {
+            console.log(`\n${colors.cyan}Lista de paquetes y sus versiones:${colors.reset}`);
+            console.log(outdatedTable);
+          } else {
+            console.log(`${colors.green}No hay paquetes desactualizados.${colors.reset}`);
+          }
+        } catch (outputError) {
+          if (outputError.stdout && outputError.stdout.trim() !== '') {
+            console.log(`\n${colors.cyan}Lista de paquetes y sus versiones:${colors.reset}`);
+            console.log(outputError.stdout);
+          }
+        }
+        
+        // Ahora obtener los datos en formato JSON para analizar
+        const outdated = execSync('npm outdated --json', { 
+          cwd: rootDir, 
+          stdio: 'pipe',
+          encoding: 'utf8'
+        });
+        
+        if (outdated.trim() === '') {
+          console.log(`\n${colors.green}✓ Todas las dependencias están actualizadas a las versiones requeridas${colors.reset}`);
+        } else {
+          try {
+            // Parsear la salida JSON para comparar Current vs Wanted
+            const outdatedJson = JSON.parse(outdated);
+            let todasCoinciden = true;
+            let paquetesDesactualizados = [];
+            
+            for (const [pkg, info] of Object.entries(outdatedJson)) {
+              if (info.current !== info.wanted) {
+                todasCoinciden = false;
+                paquetesDesactualizados.push(`${pkg}: current=${info.current}, wanted=${info.wanted}`);
+              }
+            }
+            
+            console.log(`\n${colors.bright}${colors.blue}=== Resultado del análisis de versiones ===${colors.reset}`);
+            
+            if (todasCoinciden) {
+              console.log(`${colors.green}✓ Todas las versiones actuales coinciden con las requeridas${colors.reset}`);
+            } else {
+              console.log(`${colors.yellow}⚠ Algunas dependencias tienen versiones diferentes a las requeridas:${colors.reset}`);
+              paquetesDesactualizados.forEach(pkg => console.log(`  ${colors.yellow}${pkg}${colors.reset}`));
+            }
+          } catch (jsonError) {
+            // Si el JSON no se puede parsear, mostrar un mensaje genérico
+            console.log(`\n${colors.yellow}⚠ No se pudo realizar el análisis detallado de las versiones${colors.reset}`);
+          }
+        }
+      } catch (error) {
+        // npm outdated retorna código de error si encuentra paquetes desactualizados
+        if (error.stdout) {
+          try {
+            // Intentar parsear la salida como JSON
+            const outdatedJson = JSON.parse(error.stdout);
+            let todasCoinciden = true;
+            let paquetesDesactualizados = [];
+            
+            for (const [pkg, info] of Object.entries(outdatedJson)) {
+              if (info.current !== info.wanted) {
+                todasCoinciden = false;
+                paquetesDesactualizados.push(`${pkg}: current=${info.current}, wanted=${info.wanted}`);
+              }
+            }
+            
+            console.log(`\n${colors.bright}${colors.blue}=== Resultado del análisis de versiones ===${colors.reset}`);
+            
+            if (todasCoinciden) {
+              console.log(`${colors.green}✓ Todas las versiones actuales coinciden con las requeridas${colors.reset}`);
+            } else {
+              console.log(`${colors.yellow}⚠ Algunas dependencias tienen versiones diferentes a las requeridas:${colors.reset}`);
+              paquetesDesactualizados.forEach(pkg => console.log(`  ${colors.yellow}${pkg}${colors.reset}`));
+            }
+          } catch (jsonError) {
+            // Si el JSON no se puede parsear, mostrar un mensaje genérico
+            console.log(`\n${colors.yellow}⚠ No se pudo realizar el análisis detallado de las versiones${colors.reset}`);
+          }
+        } else {
+          console.error(`${colors.red}Error al verificar versiones de paquetes: ${error.message}${colors.reset}`);
+        }
+      }
+      
+      console.log(`\n${colors.bright}${colors.green}RESUMEN DE LA OPERACIÓN:${colors.reset}`);
+      console.log(`${colors.green}- Directorios donde se instalaron dependencias: ${directoriosCompletados}/${directoriosValidos.length}${colors.reset}`);
+      if (errores > 0) {
+        console.log(`${colors.red}- Errores encontrados: ${errores}${colors.reset}`);
+      }
+      
+      console.log(`\n${colors.bright}${colors.green}INSTALACIÓN COMPLETADA${colors.reset}`);
+    });
   } catch (error) {
-    console.log(`${colors.red}Error al regenerar package-lock.json: ${error.message}${colors.reset}`);
-  } finally {
-    // 5. Restaurar .npmrc original
-    if (originalNpmrcContent) {
-      fs.writeFileSync(npmrcPath, originalNpmrcContent);
-    } else {
-      fs.unlinkSync(npmrcPath);
-    }
-    console.log(`${colors.green}✓ Configuración original de .npmrc restaurada${colors.reset}`);
+    console.error(`${colors.red}Error al instalar dependencias: ${error.message}${colors.reset}`);
   }
+}
+
+/**
+ * Función para fijar versiones exactas desde los node_modules instalados
+ * Esta función busca todos los directorios node_modules y actualiza los package.json
+ * con las versiones exactas de las dependencias actualmente instaladas.
+ */
+function fijarVersionesDesdeNodeModules() {
+  console.log(`\n${colors.bright}${colors.blue}FIJANDO VERSIONES EXACTAS DESDE NODE_MODULES INSTALADOS${colors.reset}\n`);
   
-  console.log(`\n${colors.green}=== Proceso de regeneración completado ====${colors.reset}`);
-  console.log(`${colors.yellow}Ahora puedes ejecutar: npm install${colors.reset}`);
-  console.log(`${colors.yellow}Si sigues teniendo problemas, prueba: npm install --legacy-peer-deps${colors.reset}`);
+  try {
+    // Definir directorio raíz
+    const rootDir = __dirname;
+    let packageJsonEncontrados = [];
+    
+    console.log(`${colors.cyan}Buscando archivos package.json en el proyecto...${colors.reset}`);
+    
+    // Función recursiva para buscar package.json
+    function buscarArchivos(directorio, profundidadMaxima = 5, profundidadActual = 0) {
+      if (profundidadActual > profundidadMaxima) return;
+      
+      try {
+        const archivos = fs.readdirSync(directorio);
+        
+        // Comprobar si hay package.json en este directorio
+        if (archivos.includes('package.json') && archivos.includes('node_modules')) {
+          packageJsonEncontrados.push({
+            directorio: directorio,
+            nodeModulesPath: path.join(directorio, 'node_modules'),
+            packageJsonPath: path.join(directorio, 'package.json'),
+            relativePath: path.relative(rootDir, directorio) || '.' // Si es directorio raíz, mostrar .
+          });
+        }
+        
+        // Continuar buscando en subdirectorios
+        for (const archivo of archivos) {
+          const rutaCompleta = path.join(directorio, archivo);
+          
+          try {
+            const stat = fs.statSync(rutaCompleta);
+            
+            if (stat.isDirectory()) {
+              // No buscar en node_modules, .git, dist, build
+              if (archivo !== 'node_modules' && archivo !== '.git' && archivo !== 'dist' && archivo !== 'build') {
+                buscarArchivos(rutaCompleta, profundidadMaxima, profundidadActual + 1);
+              }
+            }
+          } catch (err) {
+            // Ignorar errores al acceder a archivos individuales
+          }
+        }
+      } catch (err) {
+        console.log(`${colors.yellow}No se pudo acceder al directorio ${directorio}: ${err.message}${colors.reset}`);
+      }
+    }
+    
+    // Iniciar búsqueda
+    buscarArchivos(rootDir);
+    
+    if (packageJsonEncontrados.length === 0) {
+      console.log(`${colors.yellow}No se encontraron directorios con package.json y node_modules.${colors.reset}`);
+      console.log(`${colors.yellow}Primero debe instalar las dependencias con la opción 2.${colors.reset}`);
+      return;
+    }
+    
+    console.log(`${colors.green}Se encontraron ${packageJsonEncontrados.length} directorios con package.json y node_modules:${colors.reset}`);
+    packageJsonEncontrados.forEach((info, index) => {
+      console.log(`${colors.cyan}${index + 1}. ${info.relativePath}${colors.reset}`);
+    });
+    
+    // Procesar cada directorio con node_modules
+    for (const info of packageJsonEncontrados) {
+      console.log(`\n${colors.yellow}Procesando: ${info.relativePath}${colors.reset}`);
+      
+      // Leer el package.json del proyecto
+      const packageJson = JSON.parse(fs.readFileSync(info.packageJsonPath, 'utf8'));
+      
+      try {
+        // Almacenar el directorio actual para volver después
+        const cwd = process.cwd();
+        
+        // Cambiar al directorio del proyecto
+        process.chdir(info.directorio);
+        
+        console.log(`${colors.cyan}Escaneando dependencias instaladas en ${info.relativePath}...${colors.reset}`);
+        
+        // Actualizar package.json con versiones exactas 
+        let actualizado = false;
+        
+        // Obtener dependencias instaladas directamente de los archivos package.json en node_modules
+        const obtenerVersionesInstaladas = (dependenciesObj) => {
+          const versiones = {};
+          
+          if (!dependenciesObj) return versiones;
+          
+          for (const depName of Object.keys(dependenciesObj)) {
+            const moduloPath = path.join(info.nodeModulesPath, depName, 'package.json');
+            
+            try {
+              if (fs.existsSync(moduloPath)) {
+                const modulePackage = JSON.parse(fs.readFileSync(moduloPath, 'utf8'));
+                versiones[depName] = modulePackage.version;
+                console.log(`${colors.cyan}→ Módulo encontrado: ${depName}@${modulePackage.version}${colors.reset}`);
+              }
+            } catch (err) {
+              console.log(`${colors.yellow}No se pudo leer la versión para ${depName}: ${err.message}${colors.reset}`);
+            }
+          }
+          
+          return versiones;
+        };
+        
+        // Actualizar las dependencias regulares
+        if (packageJson.dependencies) {
+          const versionesInstaladas = obtenerVersionesInstaladas(packageJson.dependencies);
+          
+          Object.entries(versionesInstaladas).forEach(([dep, version]) => {
+            if (packageJson.dependencies[dep] && packageJson.dependencies[dep] !== version) {
+              console.log(`${colors.yellow}→ Actualizando ${dep} a versión exacta: ${version}${colors.reset}`);
+              packageJson.dependencies[dep] = version;
+              actualizado = true;
+            }
+          });
+        }
+        
+        // Actualizar las devDependencies
+        if (packageJson.devDependencies) {
+          const versionesInstaladas = obtenerVersionesInstaladas(packageJson.devDependencies);
+          
+          Object.entries(versionesInstaladas).forEach(([dep, version]) => {
+            if (packageJson.devDependencies[dep] && packageJson.devDependencies[dep] !== version) {
+              console.log(`${colors.yellow}→ Actualizando devDependency ${dep} a versión exacta: ${version}${colors.reset}`);
+              packageJson.devDependencies[dep] = version;
+              actualizado = true;
+            }
+          });
+        }
+        
+        // Arreglar los overrides para que coincidan con las dependencias reales
+        if (packageJson.overrides) {
+          const todasLasDependencias = {...(packageJson.dependencies || {}), ...(packageJson.devDependencies || {})};
+          let overridesActualizados = false;
+          
+          for (const [dep, version] of Object.entries(packageJson.overrides)) {
+            if (todasLasDependencias[dep]) {
+              const versionInstalada = todasLasDependencias[dep];
+              if (versionInstalada !== version) {
+                console.log(`${colors.yellow}→ Corrigiendo conflicto en override ${dep}: ${version} → ${versionInstalada}${colors.reset}`);
+                packageJson.overrides[dep] = versionInstalada;
+                overridesActualizados = true;
+              }
+            }
+          }
+          
+          if (overridesActualizados) {
+            actualizado = true;
+            console.log(`${colors.green}✓ Overrides actualizados para evitar conflictos${colors.reset}`);
+          }
+        }
+        
+        // Guardar el package.json actualizado
+        if (actualizado) {
+          fs.writeFileSync(info.packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+          console.log(`${colors.green}✓ package.json actualizado con versiones exactas${colors.reset}`);
+        } else {
+          console.log(`${colors.blue}→ No se encontraron cambios para package.json${colors.reset}`);
+        }
+        
+        // Generar el package-lock.json
+        console.log(`${colors.cyan}Regenerando package-lock.json...${colors.reset}`);
+        
+        try {
+          const lockFilePath = path.join(info.directorio, 'package-lock.json');
+          const packageJsonPath = info.packageJsonPath;
+          
+          // Eliminar package-lock.json si existe
+          if (fs.existsSync(lockFilePath)) {
+            fs.unlinkSync(lockFilePath);
+            console.log(`${colors.yellow}Eliminado package-lock.json existente para regenerarlo${colors.reset}`);
+          }
+          
+          // Intentar generar con npm primero
+          console.log(`${colors.blue}Ejecutando npm install --package-lock-only...${colors.reset}`);
+          
+          let packageLockGenerado = false;
+          
+          try {
+            execSync('npm install --package-lock-only', { 
+              cwd: info.directorio,
+              stdio: 'pipe' 
+            });
+            
+            if (fs.existsSync(lockFilePath)) {
+              const fileSize = fs.statSync(lockFilePath).size;
+              console.log(`${colors.green}✓ package-lock.json regenerado (${fileSize} bytes)${colors.reset}`);
+              packageLockGenerado = true;
+            }
+          } catch (cmdError) {
+            console.log(`${colors.yellow}No se pudo generar con npm: ${cmdError.message}${colors.reset}`);
+          }
+          
+          // Si no se pudo generar, simplemente copiar el archivo package.json completo
+          if (!packageLockGenerado) {
+            console.log(`${colors.yellow}Copiando package.json como package-lock.json...${colors.reset}`);
+            
+            try {
+              // Copiar el archivo directamente
+              fs.copyFileSync(packageJsonPath, lockFilePath);
+              
+              if (fs.existsSync(lockFilePath)) {
+                const fileSize = fs.statSync(lockFilePath).size;
+                console.log(`${colors.green}✓ package.json copiado como package-lock.json (${fileSize} bytes)${colors.reset}`);
+                console.log(`${colors.yellow}Nota: Es una copia exacta del package.json${colors.reset}`);
+              }
+            } catch (copyError) {
+              console.log(`${colors.red}Error al copiar el archivo: ${copyError.message}${colors.reset}`);
+            }
+          }
+        } catch (lockError) {
+          console.error(`${colors.red}Error al manejar package-lock.json: ${lockError.message}${colors.reset}`);
+        }
+        
+        // Volver al directorio original
+        process.chdir(cwd);
+        
+      } catch (error) {
+        console.error(`${colors.red}Error al procesar ${info.relativePath}:${colors.reset} ${error.message}`);
+        // Asegurarse de volver al directorio original
+        if (process.cwd() !== rootDir) {
+          process.chdir(rootDir);
+        }
+      }
+    }
+    
+    console.log(`\n${colors.bright}${colors.green}PROCESO COMPLETADO${colors.reset}`);
+    console.log(`${colors.yellow}Se han fijado las versiones exactas en los package.json.${colors.reset}`);
+    console.log(`${colors.yellow}Se han regenerado los archivos package-lock.json.${colors.reset}`);
+    
+  } catch (error) {
+    console.error(`${colors.red}Error al fijar versiones desde node_modules:${colors.reset} ${error.message}`);
+  }
 }
 
 // Inicio del script

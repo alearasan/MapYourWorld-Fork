@@ -38,7 +38,6 @@
   "include": [
     "src/**/*",
     "App.tsx",
-    "index.js",
     "babel.config.js",
     "metro.config.js",
     "app.config.js"

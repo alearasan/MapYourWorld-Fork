@@ -6,6 +6,7 @@ import { SafeAreaView, StatusBar, View, Text } from 'react-native';
 import { styled } from 'nativewind';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { registerRootComponent } from 'expo';
 
 // Importamos las pantallas
 import WelcomeScreen from '@components/screens/WelcomeScreen';
@@ -84,5 +85,8 @@ const App = () => {
     </NavigationContainer>
   );
 };
+
+// Registramos directamente el componente App como componente raíz de la aplicación
+registerRootComponent(App);
 
 export default App; 

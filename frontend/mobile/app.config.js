@@ -27,11 +27,6 @@ module.exports = {
     // favicon: "./assets/favicon.png",
     bundler: "metro"
   },
-  doctor: {
-    reactNativeDirectoryCheck: false
-  },
-  // Aquí especificamos la ruta del proyecto explícitamente
-  projectRoot: __dirname,
   // Desactivamos el auto-update check para evitar problemas
   updates: {
     enabled: false

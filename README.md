@@ -114,6 +114,25 @@ cp frontend/web/.env.example frontend/web/.env
 cp frontend/mobile/.env.example frontend/mobile/.env
 ```
 
+### 5. Gestión de dependencias con script automatizado
+
+Para facilitar la gestión de dependencias del proyecto, puedes utilizar el script `actualizar-dependencias.js`:
+
+```bash
+node actualizar-dependencias.js
+```
+
+Este script ofrece las siguientes opciones:
+
+1. **Borrar todos los node_modules del proyecto**: Elimina de forma recursiva todos los directorios `node_modules` en el proyecto.
+2. **Instalar todas las dependencias del proyecto**: Reinstala todas las dependencias definidas en todos los archivos `package.json`.
+3. **Fijar versiones exactas desde node_modules instalados**: Actualiza los archivos `package.json` para utilizar las versiones exactas de las dependencias instaladas.
+
+Es especialmente útil cuando:
+- Necesitas realizar una instalación limpia del proyecto
+- Hay conflictos de dependencias o errores de compatibilidad
+- Quieres asegurarte de que todos los miembros del equipo utilizan las mismas versiones de dependencias
+
 ## 💻 Desarrollo
 
 ### Ejecutar la aplicación sin errores (Recomendado)
