@@ -133,7 +133,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.80:5999/districts');
+      const response = await fetch('http://192.168.1.145:5999/districts');
       const data = await response.json();
       
       if (data.success && data.districts) {
@@ -241,7 +241,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
               setTimeout(() => {
                 setMostrarLogro(false);
               }, 6000);
-            }, 2000);
+            }, 4000);
           }
           
           break;
