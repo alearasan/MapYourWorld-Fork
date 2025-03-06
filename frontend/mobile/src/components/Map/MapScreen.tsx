@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated } from "react-native";
 import MapView, { Polygon } from "react-native-maps";
 import * as Location from "expo-location";
 
@@ -22,10 +22,51 @@ interface MapScreenProps {
   distritos?: Distrito[]; // Lista de distritos opcional
 }
 
+// Componente para mostrar el logro
+const LogroComponent = ({ visible, distrito }: { visible: boolean, distrito: string }) => {
+  const [opacityAnim] = useState(new Animated.Value(0));
+  
+  useEffect(() => {
+    if (visible) {
+      // Animar la entrada
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+      
+      // Configurar la salida después de 4 segundos
+      const timer = setTimeout(() => {
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [visible]);
+  
+  if (!visible) return null;
+  
+  return (
+    <Animated.View style={[styles.logroContainer, { opacity: opacityAnim }]}>
+      <Text style={styles.logroEmoji}>🏆</Text>
+      <Text style={styles.logroTitle}>¡Logro Conseguido!</Text>
+      <Text style={styles.logroSubtitle}>Primer distrito desbloqueado</Text>
+      <Text style={styles.logroDistrito}>{distrito}</Text>
+    </Animated.View>
+  );
+};
+
 const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [distritosBackend, setDistritosBackend] = useState<Distrito[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [distritoActual, setDistritoActual] = useState<string | null>(null);
+  const [mostrarLogro, setMostrarLogro] = useState<boolean>(false);
+  const [distritosVisitados, setDistritosVisitados] = useState<Set<string>>(new Set());
 
   // Función para verificar si el punto está dentro del polígono
   const isPointInPolygon = (point: { latitude: number; longitude: number }, polygon: { latitude: number; longitude: number }[]) => {
@@ -170,6 +211,50 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     };
   }, []);
 
+  // Actualizar la verificación de si el usuario está dentro de algún distrito
+  useEffect(() => {
+    if (location && distritosBackend.length > 0) {
+      // Verificar todos los distritos
+      let dentroDeAlguno = false;
+      let nombreDistrito = "";
+      
+      for (const distrito of distritosBackend) {
+        if (isPointInPolygon(location, distrito.coordenadas)) {
+          dentroDeAlguno = true;
+          nombreDistrito = distrito.nombre;
+          
+          // Verificar si es la primera vez que se visita este distrito
+          if (!distritosVisitados.has(nombreDistrito)) {
+            // Marcar el distrito como visitado
+            const nuevosVisitados = new Set(distritosVisitados);
+            nuevosVisitados.add(nombreDistrito);
+            setDistritosVisitados(nuevosVisitados);
+            
+            // Actualizar el distrito actual
+            setDistritoActual(nombreDistrito);
+            
+            // Mostrar el logro después de 2 segundos
+            setTimeout(() => {
+              setMostrarLogro(true);
+              
+              // Ocultar el logro después de 6 segundos (4 segundos de visualización + 2 de animación)
+              setTimeout(() => {
+                setMostrarLogro(false);
+              }, 6000);
+            }, 2000);
+          }
+          
+          break;
+        }
+      }
+      
+      // Si no está dentro de ningún distrito, resetear el distrito actual
+      if (!dentroDeAlguno) {
+        setDistritoActual(null);
+      }
+    }
+  }, [location, distritosBackend]);
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -177,31 +262,36 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
           <ActivityIndicator size="large" color="#0000ff" />
         </View>
       ) : (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 37.3754,  // Coordenadas aproximadas de Sevilla
-            longitude: -5.9903,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-          showsUserLocation={true}
-        >
-          {/* Renderizar los polígonos de los distritos */}
-          {distritosBackend.map((distrito, index) => {
-            const isInside = location ? isPointInPolygon(location, distrito.coordenadas) : false;
-            
-            return (
-              <Polygon
-                key={index}
-                coordinates={distrito.coordenadas}
-                strokeColor={isInside ? "#00FF00" : "#808080"}
-                fillColor={isInside ? "rgba(10, 255, 10, 0.81)" : "rgba(128, 128, 128, 0.3)"}
-                strokeWidth={2}
-              />
-            );
-          })}
-        </MapView>
+        <>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: 37.3754,  // Coordenadas aproximadas de Sevilla
+              longitude: -5.9903,
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,
+            }}
+            showsUserLocation={true}
+          >
+            {/* Renderizar los polígonos de los distritos */}
+            {distritosBackend.map((distrito, index) => {
+              const isInside = location ? isPointInPolygon(location, distrito.coordenadas) : false;
+              
+              return (
+                <Polygon
+                  key={index}
+                  coordinates={distrito.coordenadas}
+                  strokeColor={isInside ? "#00FF00" : "#808080"}
+                  fillColor={isInside ? "rgba(0, 255, 0, 0.2)" : "rgba(128, 128, 128, 0.2)"}
+                  strokeWidth={2}
+                />
+              );
+            })}
+          </MapView>
+          
+          {/* Componente de logro */}
+          {distritoActual && <LogroComponent visible={mostrarLogro} distrito={distritoActual} />}
+        </>
       )}
     </View>
   );
@@ -219,6 +309,37 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logroContainer: {
+    position: 'absolute',
+    top: '40%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  logroEmoji: {
+    fontSize: 50,
+    marginBottom: 10,
+  },
+  logroTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 5,
+  },
+  logroSubtitle: {
+    fontSize: 18,
+    color: 'white',
+    marginBottom: 5,
+  },
+  logroDistrito: {
+    fontSize: 16,
+    color: 'yellow',
+    fontWeight: 'bold',
   },
 });
 
