@@ -414,12 +414,11 @@ async function startDatabase() {
   // En lugar de iniciar el servidor, vamos a cargar los scripts de inicialización
   try {
     // Importar el script de inicialización de la base de datos
-    const dbPath = path.join(__dirname, '../backend/database');
+    const dbPath = path.join(__dirname, './backend/database');
     
     // Ejecutar script de inicialización en un proceso separado
-    const initProcess = spawn('npx', ['ts-node', 'db.ts'], {
+    const initProcess = spawn('npx', ['-r', 'ts-node/register', 'db.ts'], {
       cwd: dbPath,
-      shell: true,
       stdio: 'pipe'
     });
     

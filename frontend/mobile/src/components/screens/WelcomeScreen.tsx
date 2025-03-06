@@ -31,7 +31,25 @@ const WelcomeScreen = () => {
   const handleLoginPress = () => {
     navigation.navigate('Login');
   };
-  
+
+  fetch('http://localhost:5999/districts')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Error en la respuesta del servidor');
+    }
+    return response.text();  // Cambiar a `text()` para ver el contenido raw
+  })
+  .then(data => {
+    console.log('Respuesta del servidor:', data);  // Ver el contenido de la respuesta
+    try {
+      const jsonData = JSON.parse(data);  // Intentar parsear JSON manualmente
+      console.log('Datos JSON:', jsonData);
+    } catch (e) {
+      console.error('No es un JSON válido:', e);
+    }
+  })
+  .catch(error => console.error('Error al obtener los distritos:', error));
+
   return (
     <ImageBackground
       source={require("../../assets/images/login_background.webp")} 
