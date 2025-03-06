@@ -7,7 +7,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { authRouter } from './routes/auth.routes';
+import authRouter from './routes/auth.routes';
 //import  emailRouter  from './routes/email.routes';
 import { connectDB } from './config/db.config';
 import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';

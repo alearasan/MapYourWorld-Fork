@@ -6,7 +6,9 @@
   "scripts": {
     "start:web": "cd web && npm start",
     "start:mobile": "cd mobile && npm start",
-    "test": "jest"
+    "test": "jest",
+    "run:frontend": "ts-node runFrontend.ts",
+    "run:frontend:prod": "ts-node runFrontend.ts --prod"
   },
   "dependencies": {
     "@expo/metro-runtime": "4.0.1",
