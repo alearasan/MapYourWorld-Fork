@@ -137,29 +137,56 @@ app.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
 // Crear WebSocket Server para notificaciones en tiempo real
 const wss = new WebSocketServer({ server });
 
-// Inicializar RabbitMQ y gestión de eventos
+// Inicializar RabbitMQ y suscribirse a eventos
 async function initializeRabbitMQ() {
   try {
-    const rabbitMQHost = process.env.RABBITMQ_HOST || 'localhost';
-    const rabbitMQPort = process.env.RABBITMQ_PORT || '5672';
+    logger.info('Iniciando conexión a RabbitMQ en localhost:5672...');
+    console.log(chalk.yellow('Iniciando conexión a RabbitMQ en localhost:5672...'));
     
-    // Configurar reintentos en base a variables de entorno
-    const maxRetries = parseInt(process.env.RABBITMQ_RETRY_ATTEMPTS || '5', 10);
-    const retryDelay = parseInt(process.env.RABBITMQ_RETRY_DELAY || '2000', 10);
+    // Desactivado: Nunca purgar colas automáticamente
+    const purgarColasExistentes = false; // Siempre false para evitar borrar colas
     
-    logger.info(`Iniciando conexión a RabbitMQ en ${rabbitMQHost}:${rabbitMQPort}...`);
-    console.log(chalk.yellow(`Iniciando conexión a RabbitMQ en ${rabbitMQHost}:${rabbitMQPort}...`));
+    // Inicializar conexión RabbitMQ
+    const rabbitMQConnector = await inicializarRabbitMQ(NOMBRE_SERVICIO);
     
-    // Inicializar RabbitMQ con la configuración de variables de entorno
-    await inicializarRabbitMQ(NOMBRE_SERVICIO);
+    // Purgar colas existentes si está habilitado (ahora nunca se ejecutará)
+    if (purgarColasExistentes) {
+      try {
+        logger.info('Eliminando colas RabbitMQ existentes para evitar conflictos...');
+        console.log(chalk.yellow('Eliminando colas RabbitMQ existentes para evitar conflictos...'));
+        await rabbitMQConnector.purgarColas();
+      } catch (error) {
+        logger.warn(`Error al purgar colas: ${error instanceof Error ? error.message : String(error)}`);
+        console.warn(chalk.yellow(`Error al purgar colas: ${error instanceof Error ? error.message : String(error)}`));
+      }
+    }
     
     // Inicializar servicio de eventos
-    await eventHandlerService.iniciar();
+    try {
+      logger.info('Iniciando servicio de gestión de eventos...');
+      console.log(chalk.blue('[INFO]'), 'Iniciando servicio de gestión de eventos...');
+      await eventHandlerService.iniciar();
+    } catch (error) {
+      logger.error(`Error al iniciar el servicio de eventos: ${JSON.stringify({
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      }, null, 2)}`);
+      console.error(chalk.red('[ERROR]'), `Error al iniciar el servicio de eventos: ${JSON.stringify({
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })}`);
+      
+      // En modo desarrollo, continuamos aunque haya error en el servicio de eventos
+      if (process.env.NODE_ENV === 'development') {
+        logger.warn('Continuando sin RabbitMQ en modo desarrollo. La funcionalidad de eventos no estará disponible.');
+        console.warn(chalk.yellow('⚠️ Continuando sin RabbitMQ en modo desarrollo. La funcionalidad de eventtos no estará disponible.'));
+        throw error;
+      } else {
+        throw new Error(`Error al iniciar RabbitMQ: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
     
-    logger.info('RabbitMQ inicializado correctamente');
-    console.log(chalk.green('RabbitMQ inicializado correctamente ✅'));
-    
-    return { rabbitMQConnector: true, eventHandlerService };
+    return { rabbitMQConnector, eventHandlerService };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     logger.error(`Error al iniciar RabbitMQ: ${errorMsg}`);

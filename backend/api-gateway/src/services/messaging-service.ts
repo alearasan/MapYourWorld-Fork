@@ -4,7 +4,7 @@
  * pub/sub, command pattern y message queuing
  */
 
-import { TipoEvento, MensajeEvento, publicarEvento, suscribirseAEventos } from '../models/rabbit-mq';
+import { TipoEvento, MensajeEvento, publicarEvento, suscribirseEventos } from '../models/rabbit-mq';
 import ConectorRabbitMQ from '../models/rabbit-mq/rabbit-mq';
 import { getMetricsStore } from '../middleware/metrics';
 
@@ -96,43 +96,43 @@ class MessagingService {
    */
   private async setupSubscriptions(): Promise<void> {
     // Suscripción a eventos de usuario
-    await suscribirseAEventos(
-      'api-gateway',
+    await suscribirseEventos(
       'api-gateway-user-events',
-      ['user.*'],
-      this.handleUserEvents.bind(this)
+      ['user.*'],  // Array de patrones de enrutamiento
+      this.handleUserEvent.bind(this),
+      'api-gateway'
     );
     
     // Suscripción a eventos de mapas
-    await suscribirseAEventos(
-      'api-gateway',
+    await suscribirseEventos(
       'api-gateway-map-events',
-      ['map.*'],
-      this.handleMapEvents.bind(this)
+      ['map.*'],  // Array de patrones de enrutamiento
+      this.handleMapEvent.bind(this),
+      'api-gateway'
     );
     
     // Suscripción a eventos de notificaciones
-    await suscribirseAEventos(
-      'api-gateway',
+    await suscribirseEventos(
       'api-gateway-notification-events',
-      ['notification.*'],
-      this.handleNotificationEvents.bind(this)
+      ['notification.*'],  // Array de patrones de enrutamiento
+      this.handleNotificationEvent.bind(this),
+      'api-gateway'
     );
     
     // Suscripción a eventos sociales
-    await suscribirseAEventos(
-      'api-gateway',
+    await suscribirseEventos(
       'api-gateway-social-events',
-      ['social.*'],
-      this.handleSocialEvents.bind(this)
+      ['social.*'],  // Array de patrones de enrutamiento
+      this.handleSocialEvent.bind(this),
+      'api-gateway'
     );
     
     // Suscripción a eventos del sistema
-    await suscribirseAEventos(
-      'api-gateway',
+    await suscribirseEventos(
       'api-gateway-system-events',
-      ['system.*'],
-      this.handleSystemEvents.bind(this)
+      ['system.*'],  // Array de patrones de enrutamiento
+      this.handleSystemEvent.bind(this),
+      'api-gateway'
     );
   }
   
@@ -159,11 +159,12 @@ class MessagingService {
     
     try {
       await publicarEvento(
-        'api-gateway', 
-        eventType, 
-        payload, 
-        metadata.userId, 
-        metadata.correlationId
+        eventType,             // tipo de evento
+        payload,               // datos del evento
+        'api-gateway',         // nombre del servicio
+        {                      // opciones opcionales
+          idCorrelacion: metadata.correlationId
+        }
       );
       
       console.log(`[MessagingService] Evento publicado: ${eventType}`);
@@ -190,7 +191,7 @@ class MessagingService {
   /**
    * Manejador de eventos de usuario
    */
-  private async handleUserEvents(event: MensajeEvento, routingKey: string): Promise<void> {
+  private async handleUserEvent(event: MensajeEvento, routingKey: string): Promise<void> {
     console.log(`[MessagingService] Evento de usuario recibido: ${routingKey}`, event);
     
     // Aquí se implementa la lógica específica para cada tipo de evento de usuario
@@ -207,7 +208,7 @@ class MessagingService {
   /**
    * Manejador de eventos de mapa
    */
-  private async handleMapEvents(event: MensajeEvento, routingKey: string): Promise<void> {
+  private async handleMapEvent(event: MensajeEvento, routingKey: string): Promise<void> {
     console.log(`[MessagingService] Evento de mapa recibido: ${routingKey}`, event);
     
     // Lógica específica para eventos de mapas
@@ -216,7 +217,7 @@ class MessagingService {
   /**
    * Manejador de eventos de notificación
    */
-  private async handleNotificationEvents(event: MensajeEvento, routingKey: string): Promise<void> {
+  private async handleNotificationEvent(event: MensajeEvento, routingKey: string): Promise<void> {
     console.log(`[MessagingService] Evento de notificación recibido: ${routingKey}`, event);
     
     // Lógica específica para eventos de notificaciones
@@ -225,7 +226,7 @@ class MessagingService {
   /**
    * Manejador de eventos sociales
    */
-  private async handleSocialEvents(event: MensajeEvento, routingKey: string): Promise<void> {
+  private async handleSocialEvent(event: MensajeEvento, routingKey: string): Promise<void> {
     console.log(`[MessagingService] Evento social recibido: ${routingKey}`, event);
     
     // Lógica específica para eventos sociales
@@ -234,7 +235,7 @@ class MessagingService {
   /**
    * Manejador de eventos del sistema
    */
-  private async handleSystemEvents(event: MensajeEvento, routingKey: string): Promise<void> {
+  private async handleSystemEvent(event: MensajeEvento, routingKey: string): Promise<void> {
     console.log(`[MessagingService] Evento del sistema recibido: ${routingKey}`, event);
     
     // Lógica específica para eventos del sistema

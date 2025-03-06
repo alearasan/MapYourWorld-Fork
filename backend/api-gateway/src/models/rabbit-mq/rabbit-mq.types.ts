@@ -70,7 +70,13 @@ export enum TipoEvento {
   SISTEMA_INFO = 'sistema.info',
   SISTEMA_METRICAS = 'sistema.metricas',
   SISTEMA_SALUD = 'sistema.salud',
-  SISTEMA_AUDITORIA = 'sistema.auditoria'
+  SISTEMA_AUDITORIA = 'sistema.auditoria',
+
+  // Eventos de error
+  ERROR_MENSAJE = 'error.mensaje',
+  ERROR_PROCESAMIENTO = 'error.procesamiento',
+  ERROR_CONEXION = 'error.conexion',
+  ERROR_TIMEOUT = 'error.timeout'
 }
 
 /**
@@ -172,6 +178,25 @@ export interface DatosEventoSistema extends DatosEvento {
 }
 
 /**
+ * Datos de eventos relacionados con errores en la mensajería
+ * 
+ * @interface DatosEventoError
+ * @extends {DatosEvento}
+ */
+export interface DatosEventoError extends DatosEvento {
+  tipoError: string;
+  mensaje: string;
+  codigoError?: string | number;
+  fechaError: string | Date;
+  eventoOriginal?: {
+    tipo: string;
+    datos: any;
+  };
+  intentos?: number;
+  stack?: string;
+}
+
+/**
  * Estructura de un mensaje de evento
  * 
  * @interface MensajeEvento
@@ -189,14 +214,57 @@ export interface MensajeEvento {
 }
 
 /**
- * Tipo de función callback para procesar mensajes
+ * Opciones para la publicación de mensajes
+ * 
+ * @interface OpcionesPublicacion
+ */
+export interface OpcionesPublicacion {
+  persistente?: boolean;
+  expiracion?: number;
+  prioridad?: number;
+  idCorrelacion?: string;
+  headers?: Record<string, any>;
+}
+
+/**
+ * Opciones para la suscripción a colas
+ * 
+ * @interface OpcionesSuscripcion
+ */
+export interface OpcionesSuscripcion {
+  /** Define si la cola es durable (sobrevive reinicios) */
+  durable?: boolean;
+  /** Número de mensajes a prefetch */
+  prefetch?: number;
+  /** Si los mensajes se confirman automáticamente */
+  autoAck?: boolean;
+  /** Si se reencolan mensajes fallidos */
+  requeue?: boolean;
+  /** Máximo de reintentos antes de ir a DLQ */
+  maxReintentos?: number;
+  /** Tiempo de espera entre reintentos */
+  tiempoEspera?: number;
+}
+
+/**
+ * Función de callback para procesar mensajes
  * 
  * @callback CallbackMensaje
- * @param {MensajeEvento} mensaje - El mensaje recibido
- * @param {string} claveEnrutamiento - La clave de enrutamiento del mensaje
+ * @param {any} mensaje - Contenido del mensaje
+ * @param {any} metadatos - Metadatos del mensaje (puede ser el objeto de mensaje completo o solo la clave de enrutamiento)
+ * @returns {Promise<void>|void} - Puede ser asíncrono o síncrono
+ */
+export type CallbackMensaje = (mensaje: any, metadatos: any) => Promise<void> | void;
+
+/**
+ * Tipo de función callback para procesar mensajes de error
+ * 
+ * @callback CallbackError
+ * @param {MensajeEvento} mensaje - El mensaje de error
+ * @param {Error} error - El error ocurrido
  * @returns {Promise<void> | void}
  */
-export type CallbackMensaje = (mensaje: MensajeEvento, claveEnrutamiento: string) => Promise<void> | void;
+export type CallbackError = (mensaje: MensajeEvento, error: Error) => Promise<void> | void;
 
 /**
  * Interfaz de eventos emitidos por el conector RabbitMQ
@@ -211,9 +279,9 @@ export interface EventosConectorRabbitMQ {
   reconectando: (intentos: number, retraso: number) => void;
   reconexionFallida: () => void;
   suscripcionRestaurada: (nombreCola: string) => void;
-  eventoPublicado: (tipo: string, mensaje: MensajeEvento) => void;
-  bufferLleno: (tipo: string) => void;
-  errorPublicacion: (tipo: string, error: Error) => void;
+  eventoPublicado: (tipo: string | TipoEvento, mensaje: MensajeEvento) => void;
+  bufferLleno: (tipo: string | TipoEvento) => void;
+  errorPublicacion: (tipo: string | TipoEvento, error: Error) => void;
   mensajeRecibido: (claveEnrutamiento: string, contenido: MensajeEvento) => void;
   errorProcesamiento: (error: Error) => void;
   mensajeDescartado: (mensaje: amqplib.ConsumeMessage) => void;
@@ -222,6 +290,39 @@ export interface EventosConectorRabbitMQ {
   errorNoCapturado: (error: Error) => void;
   detenido: () => void;
   errorAlDetener: (error: Error) => void;
+  // Nuevos eventos para DLQ
+  mensajeEnviadoADLQ: (mensaje: MensajeEvento, razon: string, intentos: number) => void;
+  mensajeProcesadoDeDLQ: (mensaje: MensajeEvento, intentos: number) => void;
+  procesandoDLQ: (nombreCola: string, cantidadMensajes: number) => void;
+}
+
+/**
+ * Estado del conector RabbitMQ
+ * 
+ * @enum {string}
+ */
+export enum EstadoConector {
+  DESCONECTADO = 'desconectado',
+  CONECTANDO = 'conectando',
+  CONECTADO = 'conectado',
+  RECONECTANDO = 'reconectando',
+  ERROR = 'error',
+  DETENIDO = 'detenido'
+}
+
+/**
+ * Métricas del conector RabbitMQ
+ * 
+ * @interface MetricasRabbitMQ
+ */
+export interface MetricasRabbitMQ {
+  enviados: Record<string, number>;
+  recibidos: Record<string, number>;
+  errores: Record<string, number>;
+  intentosReconexion: number;
+  tiempoUltimaReconexion?: number;
+  mensajesEnDLQ?: Record<string, number>;
+  estadoActual: EstadoConector;
 }
 
 /**
@@ -249,8 +350,11 @@ declare module 'amqplib' {
     consume(queue: string, onMessage: (msg: amqplib.ConsumeMessage | null) => void, options?: any): Promise<any>;
     ack(message: amqplib.ConsumeMessage): void;
     nack(message: amqplib.ConsumeMessage, allUpTo?: boolean, requeue?: boolean): void;
-    prefetch(count: number): Promise<void>;
-    checkQueue(queue: string): Promise<any>;
+    prefetch(count: number, global?: boolean): Promise<void>;
     close(): Promise<void>;
+    checkQueue(queue: string): Promise<amqplib.Replies.AssertQueue>;
+    deleteQueue(queue: string, options?: amqplib.Options.DeleteQueue): Promise<amqplib.Replies.DeleteQueue>;
+    purgeQueue(queue: string): Promise<amqplib.Replies.PurgeQueue>;
+    unbindQueue(queue: string, exchange: string, routingKey: string): Promise<void>;
   }
 } 

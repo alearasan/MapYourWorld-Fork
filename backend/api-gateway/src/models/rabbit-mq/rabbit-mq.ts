@@ -14,8 +14,8 @@ import * as dotenv from 'dotenv';
 import {
   TipoEvento,
   MensajeEvento,
-  CallbackMensaje,
-  EventosConectorRabbitMQ
+  EventosConectorRabbitMQ,
+  CallbackMensaje
 } from './rabbit-mq.types';
 
 // Cargar variables de entorno
@@ -31,9 +31,33 @@ const RABBITMQ_EXCHANGE = process.env.RABBITMQ_EXCHANGE || 'mapyourworld';
 const RABBITMQ_QUEUE_PREFIX = process.env.RABBITMQ_QUEUE_PREFIX || 'mapyourworld_';
 const RABBITMQ_RETRY_ATTEMPTS = parseInt(process.env.RABBITMQ_RETRY_ATTEMPTS || '5', 10);
 const RABBITMQ_RETRY_DELAY = parseInt(process.env.RABBITMQ_RETRY_DELAY || '5000', 10);
+const RABBITMQ_MAX_RECONNECT = parseInt(process.env.RABBITMQ_MAX_RECONNECT || '10', 10);
+
+// Nuevas constantes para Dead Letter Queues
+const RABBITMQ_DLX_EXCHANGE = `${RABBITMQ_EXCHANGE}.mensaje-fallido`;
+const RABBITMQ_DLQ_PREFIX = `${RABBITMQ_QUEUE_PREFIX}fallidos_`;
+const RABBITMQ_MAX_RETRIES = parseInt(process.env.RABBITMQ_MAX_RETRIES || '3', 10);
+const RABBITMQ_MESSAGE_TTL = parseInt(process.env.RABBITMQ_MESSAGE_TTL || '30000', 10); // TTL en ms (30 segundos)
 
 // URL de conexión para RabbitMQ
 const RABBITMQ_URL = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@${RABBITMQ_HOST}:${RABBITMQ_PORT}${RABBITMQ_VHOST}`;
+
+// Añadimos la definición de la interfaz InfoMensaje
+interface InfoMensaje {
+  id: string;
+  exchange: string;
+  claveEnrutamiento: string;
+  cola: string;
+  timestamp: number;
+  headers: Record<string, any>;
+  propiedades: amqplib.MessageProperties;
+}
+
+// Constante para intentos máximos (en lugar de RABBITMQ_MAX_RETRIES)
+const RABBITMQ_MAX_INTENTOS = 3;
+
+// Actualizar los tipos de contadores para incluir 'procesados' y 'fallidos'
+type TipoContador = 'enviados' | 'recibidos' | 'errores' | 'procesados' | 'fallidos';
 
 /**
  * Clase para gestionar la conexión y comunicación con RabbitMQ
@@ -67,6 +91,23 @@ class ConectorRabbitMQ extends EventEmitter {
   /** @private Indicador de inicialización */
   private iniciado: boolean = false;
 
+  /** @private Contadores de mensajes recibidos y enviados para métricas */
+  private contadorMensajesEnviados: Map<string, number> = new Map();
+  private contadorMensajesRecibidos: Map<string, number> = new Map();
+  
+  /** @private Contador de errores en el procesamiento de mensajes */
+  private contadorErrores: Map<string, number> = new Map();
+
+  /** @private Suscripciones pendientes */
+  private suscripcionesPendientes: Array<{
+    nombreCola: string;
+    clavesEnrutamiento: string[];
+    callback: CallbackMensaje;
+    opciones?: any;
+    resolve: (value: string) => void;
+    reject: (error: Error) => void;
+  }> = [];
+
   /**
    * Crea una instancia del conector RabbitMQ
    * @param {string} nombreServicio - Nombre del servicio que utilizará la conexión
@@ -77,6 +118,10 @@ class ConectorRabbitMQ extends EventEmitter {
     
     // Configurar manejo de errores no capturados
     this.on('error', this.manejarErrorNoCapturado.bind(this));
+    
+    // Configurar listeners para el manejo de salida del proceso
+    process.once('SIGINT', this.detenerGracefully.bind(this));
+    process.once('SIGTERM', this.detenerGracefully.bind(this));
   }
 
   /**
@@ -94,199 +139,283 @@ class ConectorRabbitMQ extends EventEmitter {
     try {
       await this.conectar();
       
-      // Crear la cola de ping durante la inicialización
-      if (this.canal) {
-        const nombreCola = `${RABBITMQ_QUEUE_PREFIX}${this.nombreServicio}_ping`;
-        await this.canal.assertQueue(nombreCola, {
-          durable: true,
-          exclusive: false,
-          autoDelete: false
-        });
-        console.log(`[RabbitMQ:${this.nombreServicio}] Cola de ping creada: ${nombreCola}`);
-      }
+      // Configurar intervalo de ping para verificar estado
+      this.configurarPing();
       
-      this.iniciarPing();
       this.iniciado = true;
-      this.emit('iniciado');
       console.log(`[RabbitMQ:${this.nombreServicio}] Iniciado correctamente`);
+      this.emit('iniciado');
     } catch (error) {
       console.error(`[RabbitMQ:${this.nombreServicio}] Error al iniciar:`, error);
-      this.emit('error', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
 
   /**
+   * Configura una cola de mensajes fallidos para gestionar 
+   * mensajes que no pudieron ser procesados correctamente
+   * 
+   * @param {string} nombreColaOriginal - Nombre de la cola original
+   * @returns {Promise<void>}
+   * @throws {Error} Si hay un error al configurar la cola
+   * @private
+   */
+  private async configurarColaMensajesFallidos(nombreColaOriginal: string): Promise<void> {
+    if (!this.canal) {
+      throw new Error('No hay canal disponible para configurar la cola de mensajes fallidos');
+    }
+    
+    // Crear exchange para mensajes fallidos si no existe
+    await this.canal.assertExchange(RABBITMQ_DLX_EXCHANGE, 'topic', {
+      durable: true
+    });
+    
+    // Nombre de la cola de mensajes fallidos
+    const baseQueueName = nombreColaOriginal.startsWith(RABBITMQ_QUEUE_PREFIX) ? nombreColaOriginal.substring(RABBITMQ_QUEUE_PREFIX.length) : nombreColaOriginal;
+    // Nos aseguramos de que para colas de eventos se incluya el prefijo "api-gateway_eventos_"
+    const nombreBase = baseQueueName.includes('eventos') ? baseQueueName : `api-gateway_eventos_${baseQueueName}`;
+    const nombreColaFallidos = `${RABBITMQ_QUEUE_PREFIX}${nombreBase.replace('_eventos_', '_fallidos_eventos_')}`;
+    
+    // Crear cola de mensajes fallidos
+    await this.canal.assertQueue(nombreColaFallidos, {
+      durable: true,
+      arguments: { 'x-message-ttl': 7200000 }
+    });
+    
+    // Vincular la cola de mensajes fallidos al exchange
+    await this.canal.bindQueue(nombreColaFallidos, RABBITMQ_DLX_EXCHANGE, `${nombreColaOriginal}.fallido`);
+    
+    console.log(`[RabbitMQ:${this.nombreServicio}] Cola DLQ verificada: ${nombreColaFallidos}`);
+  }
+
+  /**
    * Establece la conexión con el servidor RabbitMQ
    * 
-   * @private
    * @returns {Promise<void>}
+   * @throws {Error} Si ocurre un error durante la conexión
+   * @private
    */
   private async conectar(): Promise<void> {
+    if (this.conexion && this.canal) {
+      return;
+    }
+
     try {
       console.log(`[RabbitMQ:${this.nombreServicio}] Conectando a ${RABBITMQ_URL}...`);
       
-      // Establecer conexión con el servidor
+      // Conectar a RabbitMQ
       this.conexion = await amqplib.connect(RABBITMQ_URL) as unknown as amqplib.Connection;
       
-      // Crear canal de comunicación
-      if (this.conexion) {
-        this.canal = await this.conexion.createChannel();
-        
-        // Configurar exchange
-        if (this.canal) {
-          await this.canal.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
-            durable: true,
-            autoDelete: false
-          });
-          
-          // Configurar prefetch para control de carga
-          await this.canal.prefetch(1);
-          
-          // Configurar eventos de conexión
-          this.configurarEventosConexion();
-          
-          this.intentosReconexion = 0;
-          this.reconectando = false;
-          
-          console.log(`[RabbitMQ:${this.nombreServicio}] Conectado correctamente`);
-          this.emit('conectado');
-        }
-      }
+      // Configurar manejadores de eventos para la conexión
+      this.conexion.on('close', this.manejarCierreConexion.bind(this));
+      this.conexion.on('error', this.manejarErrorConexion.bind(this));
+      
+      // Crear canal
+      this.canal = await this.conexion.createChannel();
+      
+      // Configurar prefetch (control de QoS)
+      await this.canal.prefetch(1);
+      
+      // Declarar el exchange principal
+      await this.canal.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
+        durable: true,
+        autoDelete: false
+      });
+      
+      // Declarar el exchange de mensajes fallidos
+      await this.canal.assertExchange(RABBITMQ_DLX_EXCHANGE, 'topic', {
+        durable: true,
+        autoDelete: false
+      });
+      
+      // Manejar la conexión establecida
+      await this.manejarConexionEstablecida();
+      
+      console.log(`[RabbitMQ:${this.nombreServicio}] Conexión establecida correctamente`);
     } catch (error) {
       console.error(`[RabbitMQ:${this.nombreServicio}] Error al conectar:`, error);
-      this.emit('error', error instanceof Error ? error : new Error(String(error)));
+      this.conexion = null;
+      this.canal = null;
       
-      // Intentar reconexión
-      await this.manejarReconexion();
+      throw error;
     }
   }
 
   /**
-   * Configura los listeners para eventos de la conexión
-   * 
+   * Maneja conexión establecida y restaura suscripciones
    * @private
    */
-  private configurarEventosConexion(): void {
-    if (!this.conexion) return;
+  private async manejarConexionEstablecida(): Promise<void> {
+    console.log(`[RabbitMQ:${this.nombreServicio}] Conexión establecida`);
+    this.emit('conectado');
+    this.intentosReconexion = 0;
+    this.reconectando = false;
     
-    // Evento cuando la conexión se cierra
-    this.conexion.on('close', async () => {
-      console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión cerrada`);
-      this.emit('desconectado');
-      
-      this.conexion = null;
-      this.canal = null;
-      
-      // Intentar reconexión si no estamos en proceso de reconexión
-      if (!this.reconectando) {
-        await this.manejarReconexion();
-      }
-    });
+    // Restaurar suscripciones
+    await this.restaurarSuscripciones();
     
-    // Evento cuando ocurre un error en la conexión
-    this.conexion.on('error', async (error) => {
-      console.error(`[RabbitMQ:${this.nombreServicio}] Error en conexión:`, error);
-      this.emit('error', error);
-      
-      // Intentar reconexión si no estamos en proceso de reconexión
-      if (!this.reconectando) {
-        await this.manejarReconexion();
-      }
-    });
+    // Configurar monitoreo de conexión
+    this.configurarPing();
+    
+    // Marcar como iniciado
+    this.iniciado = true;
   }
 
   /**
-   * Maneja el proceso de reconexión con estrategia de backoff exponencial
+   * Maneja el evento de cierre de conexión
+   * 
+   * @param {Error} error - Error que causó el cierre (si aplica)
+   * @private
+   */
+  private manejarCierreConexion(error?: Error): void {
+    // Si ya estamos reconectando, no hacemos nada
+    if (this.reconectando) {
+      return;
+    }
+    
+    // Verificar si el error es un 404 relacionado con colas que no existen
+    const errorObj = error as any;
+    if (errorObj?.code === 404 && errorObj?.message?.includes('no queue')) {
+      console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión cerrada por error 404 (cola no existe): ${errorObj.message}`);
+      console.log(`[RabbitMQ:${this.nombreServicio}] Este error es esperado y será manejado automáticamente`);
+    } else {
+      console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión cerrada${error ? `: ${error.message}` : ''}`);
+    }
+    
+    // Limpiar referencias a conexión y canal
+    this.conexion = null;
+    this.canal = null;
+    
+    this.emit('desconectado');
+    
+    // Programar reconexión con un retraso para evitar intentos demasiado frecuentes
+    setTimeout(() => {
+      this.programarReconexion();
+    }, 1000);
+  }
+
+  /**
+   * Maneja errores en la conexión
+   * 
+   * @param {Error} error - Error ocurrido
+   * @private
+   */
+  private manejarErrorConexion(error: Error): void {
+    console.error(`[RabbitMQ:${this.nombreServicio}] Error en conexión:`, error);
+    this.emit('error', error);
+    
+    // No cerramos la conexión aquí porque el evento 'close' se encargará
+  }
+
+  /**
+   * Detiene gracefully la conexión cuando se recibe una señal de terminación
    * 
    * @private
-   * @returns {Promise<void>}
    */
-  private async manejarReconexion(): Promise<void> {
-    if (this.reconectando) return;
+  private async detenerGracefully(): Promise<void> {
+    console.log(`[RabbitMQ:${this.nombreServicio}] Recibida señal de terminación, cerrando conexión...`);
+    await this.detener();
+    process.exit(0);
+  }
+
+  /**
+   * Programa un intento de reconexión con retraso exponencial
+   * 
+   * @private
+   */
+  private programarReconexion(): void {
+    if (this.reconectando) {
+      return;
+    }
     
     this.reconectando = true;
     this.intentosReconexion++;
     
-    // Calcular tiempo de espera con backoff exponencial
-    const retraso = Math.min(
-      RABBITMQ_RETRY_DELAY * Math.pow(1.5, this.intentosReconexion - 1),
-      60000 // Máximo 1 minuto
+    // Retraso exponencial con jitter (variación aleatoria)
+    const retrasoBase = Math.min(
+      30000, // Máximo 30 segundos
+      RABBITMQ_RETRY_DELAY * Math.pow(1.5, this.intentosReconexion - 1)
     );
     
-    console.log(`[RabbitMQ:${this.nombreServicio}] Intentando reconexión ${this.intentosReconexion}/${RABBITMQ_RETRY_ATTEMPTS} en ${retraso}ms...`);
+    // Añadir jitter (±20%)
+    const jitter = 0.2;
+    const retraso = Math.floor(retrasoBase * (1 + jitter * (Math.random() * 2 - 1)));
+    
+    console.log(`[RabbitMQ:${this.nombreServicio}] Intentando reconexión ${this.intentosReconexion}/${RABBITMQ_MAX_RECONNECT} en ${retraso}ms...`);
     this.emit('reconectando', this.intentosReconexion, retraso);
     
-    // Esperar antes de reconectar
-    await new Promise(resolve => setTimeout(resolve, retraso));
-    
-    try {
-      await this.conectar();
-      
-      // Si la reconexión tuvo éxito, restaurar suscripciones
-      if (this.conexion && this.canal) {
-        await this.restaurarSuscripciones();
-      }
-    } catch (error) {
-      console.error(`[RabbitMQ:${this.nombreServicio}] Error en reconexión:`, error);
-      
-      // Si agotamos los intentos, emitir evento de fallo
-      if (this.intentosReconexion >= RABBITMQ_RETRY_ATTEMPTS) {
-        console.error(`[RabbitMQ:${this.nombreServicio}] Agotados los intentos de reconexión`);
-        this.emit('reconexionFallida');
+    setTimeout(async () => {
+      try {
+        await this.conectar();
+      } catch (error) {
+        // Error en la reconexión
+        console.error(`[RabbitMQ:${this.nombreServicio}] Error en reconexión:`, error);
+        
+        // Si alcanzamos el límite de intentos, notificar y detener
+        if (this.intentosReconexion >= RABBITMQ_MAX_RECONNECT) {
+          console.error(`[RabbitMQ:${this.nombreServicio}] Agotados los intentos de reconexión`);
+          this.emit('reconexionFallida');
+          return;
+        }
+        
+        // Programar siguiente intento
         this.reconectando = false;
-        return;
+        this.programarReconexion();
       }
-      
-      // Intentar nuevamente
-      this.reconectando = false;
-      await this.manejarReconexion();
-    }
+    }, retraso);
   }
 
   /**
-   * Restaura las suscripciones activas después de una reconexión
-   * 
+   * Restaura suscripciones después de una reconexión
    * @private
-   * @returns {Promise<void>}
    */
   private async restaurarSuscripciones(): Promise<void> {
-    if (!this.canal || this.suscripciones.size === 0) return;
+    console.log(`[RabbitMQ:${this.nombreServicio}] Restaurando ${this.suscripciones.size} suscripciones activas...`);
     
-    console.log(`[RabbitMQ:${this.nombreServicio}] Restaurando ${this.suscripciones.size} suscripciones...`);
-    
-    let suscripcionesRestauradas = 0;
-    
-    for (const [id, datos] of this.suscripciones.entries()) {
+    // Primero restauramos las suscripciones ya existentes
+    for (const [id, { cola, clavesEnrutamiento }] of this.suscripciones) {
       try {
-        const { cola, clavesEnrutamiento } = datos;
-        
-        // Recrear la cola
-        await this.canal.assertQueue(cola, {
-          durable: true,
-          exclusive: false,
-          autoDelete: false
-        });
-        
-        // Vincular con las claves de enrutamiento
-        for (const clave of clavesEnrutamiento) {
-          await this.canal.bindQueue(cola, RABBITMQ_EXCHANGE, clave);
+        if (this.canal) {
+          // Configurar cola de mensajes fallidos
+          await this.configurarColaMensajesFallidos(cola);
+          
+          // Restaurar cola
+          await this.canal.assertQueue(cola, {
+            durable: true,
+            deadLetterExchange: RABBITMQ_DLX_EXCHANGE,
+            deadLetterRoutingKey: 'fallidos'
+          });
+          
+          // Restaurar bindings
+          for (const claveEnrutamiento of clavesEnrutamiento) {
+            await this.canal.bindQueue(cola, RABBITMQ_EXCHANGE, claveEnrutamiento);
+          }
+          
+          console.log(`[RabbitMQ:${this.nombreServicio}] Cola ${cola} restaurada con éxito`);
         }
-        
-        console.log(`[RabbitMQ:${this.nombreServicio}] Suscripción restaurada: ${cola}`);
-        this.emit('suscripcionRestaurada', cola);
-        suscripcionesRestauradas++;
       } catch (error) {
-        console.error(`[RabbitMQ:${this.nombreServicio}] Error al restaurar suscripción ${id}:`, error);
-        this.emit('error', error instanceof Error ? error : new Error(String(error)));
-        // Continuamos con la siguiente suscripción
+        console.error(`[RabbitMQ:${this.nombreServicio}] Error al restaurar cola ${cola}:`, error);
       }
     }
     
-    if (suscripcionesRestauradas === this.suscripciones.size) {
-      console.log(`[RabbitMQ:${this.nombreServicio}] Todas las suscripciones restauradas`);
-    } else {
-      console.warn(`[RabbitMQ:${this.nombreServicio}] Restauradas ${suscripcionesRestauradas}/${this.suscripciones.size} suscripciones`);
+    // Luego procesamos suscripciones pendientes
+    console.log(`[RabbitMQ:${this.nombreServicio}] Procesando ${this.suscripcionesPendientes.length} suscripciones pendientes...`);
+    
+    const pendientes = [...this.suscripcionesPendientes];
+    this.suscripcionesPendientes = [];
+    
+    for (const suscripcion of pendientes) {
+      try {
+        const id = await this.suscribirse(
+          suscripcion.nombreCola,
+          suscripcion.clavesEnrutamiento,
+          suscripcion.callback,
+          suscripcion.opciones
+        );
+        suscripcion.resolve(id);
+      } catch (error) {
+        suscripcion.reject(error as Error);
+      }
     }
   }
 
@@ -295,232 +424,465 @@ class ConectorRabbitMQ extends EventEmitter {
    * 
    * @private
    */
-  private iniciarPing(): void {
+  private configurarPing(): void {
     if (this.intervaloPing) {
       clearInterval(this.intervaloPing);
     }
     
     this.intervaloPing = setInterval(async () => {
-      if (!this.conexion || !this.canal) {
-        console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión perdida durante ping, intentando reconectar...`);
-        
-        if (!this.reconectando) {
-          await this.manejarReconexion();
-        }
-        return;
-      }
-      
       try {
-        // Declarar la cola antes de verificarla para asegurar que existe
-        const nombreCola = `${RABBITMQ_QUEUE_PREFIX}${this.nombreServicio}_ping`;
-        await this.canal.assertQueue(nombreCola, {
-          durable: true,
-          exclusive: false,
-          autoDelete: false
-        });
-        
-        // Verificar que el canal está activo
-        await this.canal.checkQueue(nombreCola);
-        // console.log(`[RabbitMQ:${this.nombreServicio}] Ping exitoso`);
+        // Verificar la conexión y publicar ping
+        const resultado = await this.verificarConexion();
+        if (!resultado) {
+          console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión perdida durante ping, intentando reconectar...`);
+        }
       } catch (error) {
         console.warn(`[RabbitMQ:${this.nombreServicio}] Error en ping:`, error);
-        
-        if (!this.reconectando) {
-          await this.manejarReconexion();
-        }
       }
-    }, 30000); // Cada 30 segundos
+    }, 30000); // Ping cada 30 segundos
   }
 
   /**
-   * Publica un evento en el exchange
+   * Verifica la conexión y publica un mensaje de ping
    * 
-   * @param {string | TipoEvento} tipo - Tipo de evento a publicar
+   * @private
+   * @returns {Promise<boolean>} - Indica si la conexión es exitosa
+   */
+  private async verificarConexion(): Promise<boolean> {
+    if (!this.conexion || !this.canal) {
+      console.warn(`[RabbitMQ:${this.nombreServicio}] Conexión perdida durante ping, intentando reconectar...`);
+      await this.programarReconexion();
+      return false;
+    }
+    
+    try {
+      // Simplemente verificamos que el canal esté abierto usando una operación segura
+      // En lugar de crear/eliminar colas, usamos un método que no puede fallar
+      
+      // Verificamos que el canal esté abierto
+      if (!this.canal || !this.canal.connection) {
+        console.warn(`[RabbitMQ:${this.nombreServicio}] Canal cerrado o conexión cerrada durante ping`);
+        await this.programarReconexion();
+        return false;
+      }
+      
+      // Usamos una operación segura que no puede fallar: publicar en el exchange por defecto
+      // Esto verifica que el canal está funcionando sin riesgo de errores 404
+      const mensaje = { tipo: 'ping', timestamp: Date.now() };
+      const buffer = Buffer.from(JSON.stringify(mensaje));
+      
+      // Publicamos en el exchange por defecto (vacío) con una routing key que no existe
+      // Esto es seguro porque si no hay consumidores, el mensaje simplemente se descarta
+      const pingRoutingKey = `ping.${this.nombreServicio}.${Date.now()}`;
+      this.canal.publish('', pingRoutingKey, buffer, { expiration: '1000' });
+      
+      return true;
+    } catch (error) {
+      console.warn(`[RabbitMQ:${this.nombreServicio}] Error en ping:`, error);
+      
+      // Intentar reconectar si no estamos en proceso
+      if (!this.reconectando) {
+        await this.programarReconexion();
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Publica un evento en el exchange de RabbitMQ
+   * 
+   * @param {string} tipo - Tipo de evento a publicar
    * @param {any} datos - Datos del evento
-   * @param {Partial<MensajeEvento['metadatos']>} metadatos - Metadatos adicionales
-   * @returns {Promise<boolean>} - True si se publicó correctamente
+   * @param {Object} [opciones] - Opciones adicionales para la publicación
+   * @returns {Promise<boolean>} - Indica si la publicación fue exitosa
+   * @throws {Error} Si no hay conexión activa o error al publicar
    */
   public async publicarEvento(
     tipo: string | TipoEvento,
     datos: any,
-    metadatos: Partial<MensajeEvento['metadatos']> = {}
+    opciones?: {
+      persistente?: boolean;
+      expiracion?: number;
+      prioridad?: number;
+      idCorrelacion?: string;
+      headers?: Record<string, any>;
+    }
   ): Promise<boolean> {
-    if (!this.canal || !this.conexion) {
+    // Verificar si tenemos conexión
+    if (!this.conexion || !this.canal) {
       console.warn(`[RabbitMQ:${this.nombreServicio}] Intento de publicar sin conexión activa`);
       
-      // Intentar reconectar si no estamos en proceso
+      // Intentar reconectar
       if (!this.reconectando) {
-        await this.manejarReconexion();
+        await this.programarReconexion();
       }
       
-      // Si sigue sin conexión, falla
-      if (!this.canal || !this.conexion) {
-        throw new Error(`No hay conexión a RabbitMQ para publicar evento ${tipo}`);
-      }
+      throw new Error(`No hay conexión a RabbitMQ para publicar evento ${tipo}`);
     }
     
     try {
-      // Crear mensaje de evento
+      // Crear el mensaje con metadatos
       const mensaje: MensajeEvento = {
         tipo,
         datos,
         metadatos: {
           timestamp: Date.now(),
           servicioOrigen: this.nombreServicio,
-          idCorrelacion: metadatos.idCorrelacion || crearIdCorrelacion(),
-          ...metadatos
+          idCorrelacion: opciones?.idCorrelacion || this.generarIdUnico()
         }
       };
       
-      // Convertir a buffer
+      // Convertir a formato JSON y luego a Buffer
       const contenido = Buffer.from(JSON.stringify(mensaje));
       
-      // Crear clave de enrutamiento a partir del tipo
-      const claveEnrutamiento = aClaveEnrutamiento(tipo.toString());
+      // Determinar clave de enrutamiento basada en el tipo de evento
+      const claveEnrutamiento = typeof tipo === 'string' ? tipo : String(tipo);
       
-      // Publicar en el exchange
-      const resultado = this.canal.publish(RABBITMQ_EXCHANGE, claveEnrutamiento, contenido, {
-        persistent: true,
-        contentType: 'application/json',
-        contentEncoding: 'utf-8',
-        messageId: mensaje.metadatos.idCorrelacion,
-        timestamp: mensaje.metadatos.timestamp,
+      // Opciones de publicación
+      const opcionesPublicacion: amqplib.Options.Publish = {
+        persistent: opciones?.persistente !== false, // Por defecto true
+        expiration: opciones?.expiracion?.toString(),
+        priority: opciones?.prioridad,
+        correlationId: opciones?.idCorrelacion || mensaje.metadatos.idCorrelacion,
         headers: {
-          'x-servicio-origen': this.nombreServicio,
-          'x-usuario-id': mensaje.metadatos.idUsuario || '',
-          'x-dispositivo-id': mensaje.metadatos.idDispositivo || ''
+          'x-retries': 0,
+          ...(opciones?.headers || {})
         }
-      });
+      };
+      
+      // Publicar el mensaje en el exchange
+      const resultado = this.canal.publish(RABBITMQ_EXCHANGE, claveEnrutamiento, contenido, opcionesPublicacion);
+      
+      // Incrementar contador de mensajes para métricas
+      this.incrementarContadorMensajes('enviados', claveEnrutamiento);
       
       if (resultado) {
-        // console.log(`[RabbitMQ:${this.nombreServicio}] Evento publicado: ${tipo}`);
-        this.emit('eventoPublicado', tipo.toString(), mensaje);
+        // Evento publicado correctamente
+        this.emit('eventoPublicado', tipo, mensaje);
+        return true;
       } else {
+        // Buffer lleno, no se pudo publicar inmediatamente
         console.warn(`[RabbitMQ:${this.nombreServicio}] Buffer lleno al publicar: ${tipo}`);
-        this.emit('bufferLleno', tipo.toString());
+        this.emit('bufferLleno', tipo);
+        return false;
       }
-      
-      return resultado;
     } catch (error) {
       console.error(`[RabbitMQ:${this.nombreServicio}] Error al publicar evento ${tipo}:`, error);
-      this.emit('errorPublicacion', tipo.toString(), error instanceof Error ? error : new Error(String(error)));
+      this.emit('errorPublicacion', tipo, error instanceof Error ? error : new Error(String(error)));
+      
+      // Incrementar contador de errores
+      this.incrementarContadorMensajes('errores', typeof tipo === 'string' ? tipo : String(tipo));
+      
       throw error;
     }
   }
 
   /**
-   * Suscribe a eventos específicos mediante claves de enrutamiento
+   * Elimina una cola para recrearla con diferentes propiedades
    * 
-   * @param {string} nombreCola - Nombre de la cola para la suscripción
-   * @param {string[]} clavesEnrutamiento - Claves de enrutamiento (pueden usar wildcards)
-   * @param {CallbackMensaje} callback - Función a ejecutar cuando llega un mensaje
-   * @returns {Promise<string>} - ID único de la suscripción
+   * @param {string} nombreCola - Nombre de la cola a eliminar
+   * @returns {Promise<boolean>} - Si se eliminó correctamente
+   * @private
    */
-  public async suscribirseAEventos(
-    nombreCola: string,
-    clavesEnrutamiento: string[],
-    callback: CallbackMensaje
-  ): Promise<string> {
-    if (!this.canal || !this.conexion) {
-      console.warn(`[RabbitMQ:${this.nombreServicio}] Intento de suscribirse sin conexión activa`);
-      
-      // Intentar reconectar si no estamos en proceso
-      if (!this.reconectando) {
-        await this.manejarReconexion();
+  private async eliminarColaExistente(nombreCola: string): Promise<boolean> {
+    if (!this.canal) {
+      console.log(`[RabbitMQ:${this.nombreServicio}] No hay canal disponible para eliminar cola ${nombreCola}`);
+      return false;
+    }
+
+    console.log(`[RabbitMQ:${this.nombreServicio}] Intentando eliminar cola: ${nombreCola}`);
+    try {
+      await this.canal.deleteQueue(nombreCola);
+      console.log(`[RabbitMQ:${this.nombreServicio}] Cola eliminada correctamente: ${nombreCola}`);
+    } catch (error: any) {
+      if (error.code === 406 || (typeof error.message === 'string' && error.message.includes('PRECONDITION_FAILED'))) {
+        console.warn(`[RabbitMQ:${this.nombreServicio}] Error 406 al eliminar cola ${nombreCola}, ignorando precondición fallida.`);
+        return true;
+      } else if (error.code === 404 || (typeof error.message === 'string' && error.message.includes('NOT_FOUND'))) {
+        console.log(`[RabbitMQ:${this.nombreServicio}] La cola ${nombreCola} no existe, no es necesario eliminarla`);
+      } else {
+        console.warn(`[RabbitMQ:${this.nombreServicio}] Error al eliminar cola ${nombreCola}:`, error);
       }
-      
-      // Si sigue sin conexión, falla
-      if (!this.canal || !this.conexion) {
-        throw new Error(`No hay conexión a RabbitMQ para suscribirse a ${nombreCola}`);
-      }
+    }
+    return true;
+  }
+
+  /**
+   * Purga todas las colas temporales del sistema
+   * @returns {Promise<boolean>} true si se purgaron las colas, false en caso contrario
+   */
+  public async purgarColas(): Promise<boolean> {
+    console.log(`[RabbitMQ:${this.nombreServicio}] La función purgarColas ha sido deshabilitada`);
+    console.log(`[RabbitMQ:${this.nombreServicio}] Utilice los scripts en colasConfig para gestionar las colas`);
+    
+    // No realizamos ninguna acción de borrado
+    // Las colas deben gestionarse mediante los scripts dedicados
+    return true;
+    
+    /*
+    if (!this.canal) {
+      console.error(`[RabbitMQ:${this.nombreServicio}] No hay canal disponible para purgar colas`);
+      return false;
     }
     
     try {
-      // Asegurar que las claves sean válidas
-      const claves = clavesEnrutamiento.map(clave => aClaveEnrutamiento(clave));
+      // Lista de colas a eliminar (colas de monitoreo, ping, etc)
+      const colasEliminar = [
+        // Colas de monitoreo y ping (siempre se pueden recrear)
+        `${RABBITMQ_QUEUE_PREFIX}monitor`,
+        `${RABBITMQ_QUEUE_PREFIX}ping`,
+        
+        // Colas de eventos (se recrearán al suscribirse)
+        `${RABBITMQ_QUEUE_PREFIX}eventos_mapas`,
+        `${RABBITMQ_QUEUE_PREFIX}eventos_notificaciones`,
+        `${RABBITMQ_QUEUE_PREFIX}eventos_sociales`,
+        `${RABBITMQ_QUEUE_PREFIX}eventos_usuarios`,
+        `${RABBITMQ_QUEUE_PREFIX}eventos_autenticacion`,
+        `${RABBITMQ_QUEUE_PREFIX}eventos_todos`
+      ];
       
-      // Crear cola con prefijo del servicio
-      const nombreColaCompleto = `${RABBITMQ_QUEUE_PREFIX}${this.nombreServicio}_${nombreCola}`;
+      let contadorEliminadas = 0;
       
-      // Declarar la cola
-      await this.canal.assertQueue(nombreColaCompleto, {
-        durable: true,
-        exclusive: false,
-        autoDelete: false
-      });
-      
-      // Vincular la cola al exchange con cada clave de enrutamiento
-      for (const clave of claves) {
-        await this.canal.bindQueue(nombreColaCompleto, RABBITMQ_EXCHANGE, clave);
+      for (const cola of colasEliminar) {
+        console.log(`[RabbitMQ:${this.nombreServicio}] Intentando eliminar cola: ${cola}`);
+        try {
+          await this.eliminarColaPublica(cola);
+          contadorEliminadas++;
+          
+          // También eliminar la DLQ correspondiente
+          const colaDLQ = `${RABBITMQ_DLQ_PREFIX}${cola}`;
+          console.log(`[RabbitMQ:${this.nombreServicio}] Intentando eliminar cola: ${colaDLQ}`);
+          await this.eliminarColaPublica(colaDLQ);
+          contadorEliminadas++;
+        } catch (error) {
+          console.warn(`[RabbitMQ:${this.nombreServicio}] Error al eliminar cola ${cola}: ${(error as Error).message}`);
+        }
       }
       
-      // Generar ID único para esta suscripción
-      const idSuscripcion = `${this.nombreServicio}_${nombreCola}_${Date.now()}`;
-      
-      // Guardar datos de suscripción para reconexiones
-      this.suscripciones.set(idSuscripcion, {
-        cola: nombreColaCompleto,
-        clavesEnrutamiento: claves
+      console.log(`[RabbitMQ:${this.nombreServicio}] Se eliminaron ${contadorEliminadas} colas`);
+      return true;
+    } catch (error) {
+      console.error(`[RabbitMQ:${this.nombreServicio}] Error al purgar colas: ${(error as Error).message}`);
+      return false;
+    }
+    */
+  }
+
+  /**
+   * Suscribe a eventos de una cola específica
+   * 
+   * @param nombreCola Nombre de la cola a suscribirse
+   * @param clavesEnrutamiento Claves de enrutamiento para los eventos
+   * @param callback Función que procesa los mensajes recibidos
+   * @param opciones Opciones de suscripción
+   * @returns ID único de la suscripción
+   */
+  public async suscribirse(
+    nombreCola: string,
+    clavesEnrutamiento: string[],
+    callback: CallbackMensaje,
+    opciones?: {
+      durable?: boolean;
+      prefetch?: number;
+      autoAck?: boolean;
+      requeue?: boolean;
+      maxReintentos?: number;
+      tiempoEspera?: number;
+    }
+  ): Promise<string> {
+    // Generar ID único para esta suscripción
+    const idSuscripcion = this.generarIdUnico();
+    
+    // Si no hay conexión, encolar la suscripción para cuando se conecte
+    if (!this.canal) {
+      return new Promise((resolve, reject) => {
+        this.suscripcionesPendientes.push({
+          nombreCola,
+          clavesEnrutamiento,
+          callback,
+          opciones,
+          resolve: (id: string) => resolve(id),
+          reject
+        });
       });
+    }
+    
+    try {
+      // Verificar que la cola existe sin intentar crearla
+      try {
+        await this.canal.checkQueue(nombreCola);
+        console.log(`[RabbitMQ:${this.nombreServicio}] Cola verificada: ${nombreCola}`);
+      } catch (error) {
+        console.log(`[RabbitMQ:${this.nombreServicio}] Error al verificar cola ${nombreCola}:`, error);
+        throw new Error(`La cola ${nombreCola} no existe. Debe crearla primero con los scripts de configuración`);
+      }
       
-      // Consumir mensajes de la cola
-      await this.canal.consume(
-        nombreColaCompleto,
+      // Asumimos que las colas ya están enlazadas al exchange con las claves de enrutamiento correctas
+      // No intentamos enlazar de nuevo, ya que eso debe haberse hecho en los scripts de configuración
+      
+      // Configurar prefetch si se especifica
+      if (opciones?.prefetch) {
+        await this.canal.prefetch(opciones.prefetch);
+      }
+      
+      // Configurar el consumidor
+      const { consumerTag } = await this.canal.consume(
+        nombreCola,
         async (msg) => {
-          if (!msg) return; // Mensaje nulo, ignorar
+          if (!msg) return; // Null cuando el consumidor es cancelado
           
           try {
-            // Obtener contenido y clave de enrutamiento
+            // Incrementar contador de mensajes recibidos
+            this.incrementarContadorMensajes('recibidos', nombreCola);
+            
+            // Extraer datos del mensaje
             const contenido = msg.content.toString();
-            const claveEnrutamiento = msg.fields.routingKey;
+            let datos;
             
-            // Parsear mensaje
-            const mensaje = JSON.parse(contenido) as MensajeEvento;
-            
-            // Emitir evento
-            this.emit('mensajeRecibido', claveEnrutamiento, mensaje);
-            
-            // Ejecutar callback
-            await Promise.resolve(callback(mensaje, claveEnrutamiento));
-            
-            // Confirmar procesamiento
-            this.canal?.ack(msg);
-          } catch (error) {
-            console.error(`[RabbitMQ:${this.nombreServicio}] Error al procesar mensaje:`, error);
-            this.emit('errorProcesamiento', error instanceof Error ? error : new Error(String(error)));
-            
-            // Rechazar mensaje (requeue=false para no volver a procesarlo)
-            if (this.canal) {
-              this.canal.nack(msg, false, false);
-              this.emit('mensajeDescartado', msg);
+            try {
+              datos = JSON.parse(contenido);
+            } catch (error) {
+              console.error(`[RabbitMQ:${this.nombreServicio}] Error al parsear mensaje:`, error);
+              // Rechazar mensaje mal formateado para que vaya a DLQ
+              this.canal?.reject(msg, false);
+              return;
             }
+            
+            // Información del mensaje
+            const infoMensaje: InfoMensaje = {
+              id: msg.properties.messageId || this.generarIdUnico(),
+              exchange: msg.fields.exchange,
+              claveEnrutamiento: msg.fields.routingKey,
+              cola: nombreCola,
+              timestamp: msg.properties.timestamp || Date.now(),
+              headers: msg.properties.headers || {},
+              propiedades: msg.properties
+            };
+            
+            try {
+              // Llamar callback de usuario con los datos y la información del mensaje
+              await callback(datos, infoMensaje);
+              
+              // Confirmar procesamiento exitoso
+              this.canal?.ack(msg);
+              
+              // Incrementar contador de mensajes procesados
+              this.incrementarContadorMensajes('procesados', nombreCola);
+            } catch (error) {
+              console.error(`[RabbitMQ:${this.nombreServicio}] Error al procesar mensaje:`, error);
+              
+              // Incrementar intentos
+              const intentos = (msg.properties.headers?.['x-delivery-count'] || 0) + 1;
+              
+              // Rechazar mensaje con reintento o enviarlo a DLQ
+              if (intentos < RABBITMQ_MAX_INTENTOS) {
+                // Rechazar y volver a encolar con información de reintento
+                this.canal?.reject(msg, true);
+                console.log(`[RabbitMQ:${this.nombreServicio}] Mensaje reencolado para reintento ${intentos}/${RABBITMQ_MAX_INTENTOS}`);
+              } else {
+                // Enviar a DLQ cuando se superan los reintentos
+                this.canal?.reject(msg, false);
+                console.log(`[RabbitMQ:${this.nombreServicio}] Mensaje enviado a DLQ después de ${intentos} intentos`);
+                
+                // Incrementar contador de mensajes fallidos
+                this.incrementarContadorMensajes('fallidos', nombreCola);
+              }
+            }
+          } catch (error) {
+            console.error(`[RabbitMQ:${this.nombreServicio}] Error crítico al procesar mensaje:`, error);
+            // En caso de error crítico, rechazar sin reintento
+            this.canal?.reject(msg, false);
           }
         },
-        {
-          noAck: false, // Requiere confirmación explícita
-        }
+        // Opciones de consumidor (noAck: false significa que se requiere confirmación explícita)
+        { noAck: false }
       );
       
-      console.log(`[RabbitMQ:${this.nombreServicio}] Suscripción establecida: ${nombreColaCompleto} -> ${claves.join(', ')}`);
-      this.emit('suscripcionEstablecida', nombreColaCompleto, claves);
+      // Guardar información de suscripción
+      this.suscripciones.set(idSuscripcion, {
+        cola: nombreCola,
+        clavesEnrutamiento
+      });
+      
+      console.log(`[RabbitMQ:${this.nombreServicio}] Suscripción activada: ${nombreCola}`);
+      
+      // Activar evento de suscripción
+      this.emit('suscripcion', {
+        idSuscripcion,
+        nombreCola,
+        clavesEnrutamiento
+      });
       
       return idSuscripcion;
     } catch (error) {
-      console.error(`[RabbitMQ:${this.nombreServicio}] Error al suscribirse:`, error);
-      this.emit('errorSuscripcion', error instanceof Error ? error : new Error(String(error)));
+      console.error(`[RabbitMQ:${this.nombreServicio}] Error al suscribirse a ${nombreCola}:`, error);
       throw error;
     }
   }
 
   /**
-   * Maneja errores no capturados en el emisor de eventos
-   * 
+   * Incrementa contadores de mensajes por tipo y clave
+   * @param tipo Tipo de contador a incrementar
+   * @param clave Clave específica del contador
    * @private
+   */
+  private incrementarContadorMensajes(
+    tipo: 'enviados' | 'recibidos' | 'errores' | 'procesados' | 'fallidos',
+    clave: string
+  ): void {
+    const contador = tipo === 'enviados' 
+      ? this.contadorMensajesEnviados 
+      : tipo === 'recibidos' 
+        ? this.contadorMensajesRecibidos 
+        : tipo === 'errores' 
+          ? this.contadorErrores 
+          : tipo === 'procesados' 
+            ? this.contadorMensajesRecibidos 
+            : this.contadorErrores;
+    
+    contador.set(clave, (contador.get(clave) || 0) + 1);
+  }
+
+  /**
+   * Obtiene las métricas de mensajes enviados, recibidos y errores
+   * @returns {Object} Objeto con métricas de mensajes
+   */
+  public obtenerMetricas(): { enviados: Record<string, number>, recibidos: Record<string, number>, errores: Record<string, number> } {
+    return {
+      enviados: Object.fromEntries(this.contadorMensajesEnviados.entries()),
+      recibidos: Object.fromEntries(this.contadorMensajesRecibidos.entries()),
+      errores: Object.fromEntries(this.contadorErrores.entries())
+    };
+  }
+
+  /**
+   * Maneja errores no capturados en el conector
+   * 
    * @param {Error} error - Error ocurrido
+   * @private
    */
   private manejarErrorNoCapturado(error: Error): void {
+    // Verificar si el error es relacionado con una cola que no existe (404)
+    const errorObj = error as any;
+    if (errorObj?.code === 404 && errorObj?.message?.includes('no queue')) {
+      console.warn(`[RabbitMQ:${this.nombreServicio}] Error 404 controlado (cola no existe):`, errorObj.message);
+      
+      // Para estos errores, no cerramos la conexión ni hacemos reconexión
+      // ya que son esperados cuando las colas son eliminadas automáticamente
+      return;
+    }
+    
+    // Para otros errores no esperados, los registramos y consideramos reconectar
     console.error(`[RabbitMQ:${this.nombreServicio}] Error no capturado:`, error);
-    this.emit('errorNoCapturado', error);
+    
+    // Si es un error crítico de conexión, programamos reconexión
+    if (errorObj?.code === 'ECONNREFUSED' || 
+        errorObj?.code === 'ECONNRESET' || 
+        errorObj?.code === 320 || // Conexión forzada a cerrarse
+        errorObj?.code === 501    // Error en el canal
+    ) {
+      this.programarReconexion();
+    }
   }
 
   /**
@@ -529,39 +891,99 @@ class ConectorRabbitMQ extends EventEmitter {
    * @returns {Promise<void>}
    */
   public async detener(): Promise<void> {
+    // Detener intervalo de ping
+    if (this.intervaloPing) {
+      clearInterval(this.intervaloPing);
+      this.intervaloPing = null;
+    }
+    
+    // Limpiar mapa de suscripciones
+    this.suscripciones.clear();
+    
+    // Cerrar canal y conexión
     try {
-      // Detener ping
-      if (this.intervaloPing) {
-        clearInterval(this.intervaloPing);
-        this.intervaloPing = null;
-      }
-      
-      // Cerrar canal
       if (this.canal) {
         await this.canal.close();
         this.canal = null;
       }
       
-      // Cerrar conexión
       if (this.conexion) {
         await this.conexion.close();
         this.conexion = null;
       }
       
       this.iniciado = false;
-      this.suscripciones.clear();
-      
       console.log(`[RabbitMQ:${this.nombreServicio}] Conexión cerrada correctamente`);
       this.emit('detenido');
     } catch (error) {
-      console.error(`[RabbitMQ:${this.nombreServicio}] Error al detener conexión:`, error);
+      console.error(`[RabbitMQ:${this.nombreServicio}] (X) Error al detener conexión:`, error);
       this.emit('errorAlDetener', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
+
+  /**
+   * Genera un identificador único
+   * @returns {string} Identificador único
+   * @private
+   */
+  private generarIdUnico(): string {
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15) + 
+           Date.now().toString(36);
+  }
+
+  /**
+   * Método público que envuelve el método privado eliminarColaExistente
+   * para permitir su uso fuera de la clase.
+   * @param {string} cola - Nombre de la cola a eliminar
+   * @returns {Promise<boolean>} Indica si se eliminó la cola
+   */
+  public async eliminarColaPublica(cola: string): Promise<boolean> {
+    return this.eliminarColaExistente(cola);
+  }
+
+  /**
+   * Verifica que todas las colas DLQ existan y estén correctamente configuradas
+   */
+  public async verificarColasDLQ(colasEventos: string[] = []): Promise<void> {
+    if (!this.canal) {
+      throw new Error('Canal no inicializado');
+    }
+
+    // Si no se proporcionan colas, usar las colas de eventos estándar
+    const colasVerificar = colasEventos.length > 0 ? colasEventos : [
+      'api-gateway_eventos_auth',
+      'api-gateway_eventos_mapas',
+      'api-gateway_eventos_notificaciones',
+      'api-gateway_eventos_sociales',
+      'api-gateway_eventos_usuarios'
+    ];
+
+    for (const cola of colasVerificar) {
+      try {
+        // Construir el nombre de la cola fallida
+        const nombreColaOriginal = cola.startsWith(RABBITMQ_QUEUE_PREFIX) 
+          ? cola 
+          : `${RABBITMQ_QUEUE_PREFIX}${cola}`;
+        
+        const baseQueueName = nombreColaOriginal.startsWith(RABBITMQ_QUEUE_PREFIX) 
+          ? nombreColaOriginal.substring(RABBITMQ_QUEUE_PREFIX.length) 
+          : nombreColaOriginal;
+        
+        const nombreColaFallidos = `${RABBITMQ_QUEUE_PREFIX}${baseQueueName.replace('_eventos_', '_fallidos_eventos_')}`;
+        
+        // Verificar la cola DLQ
+        await this.canal.checkQueue(nombreColaFallidos);
+        console.log(`[RabbitMQ:${this.nombreServicio}] ✅ Cola DLQ verificada y lista: ${nombreColaFallidos}`);
+      } catch (error) {
+        console.error(`[RabbitMQ:${this.nombreServicio}] ❌ Error al verificar cola DLQ para ${cola}: ${error.message}`);
+      }
+    }
+  }
 }
 
-// Instancias de conexión por servicio
+// Registro de conectores para reutilización
 const conectores = new Map<string, ConectorRabbitMQ>();
 
 /**
@@ -574,107 +996,171 @@ export function obtenerConectorRabbitMQ(nombreServicio: string): ConectorRabbitM
   if (!conectores.has(nombreServicio)) {
     conectores.set(nombreServicio, new ConectorRabbitMQ(nombreServicio));
   }
-  
   return conectores.get(nombreServicio)!;
 }
 
 /**
- * Inicializa la conexión con RabbitMQ para un servicio
- * 
- * @param {string} nombreServicio - Nombre del servicio
- * @returns {Promise<ConectorRabbitMQ>} - Instancia del conector inicializado
+ * Inicializa la conexión a RabbitMQ para un servicio
+ * @param {string} nombreServicio - Nombre del servicio que se conecta
+ * @returns {Promise<ConectorRabbitMQ>} Instancia del conector inicializado
  */
 export async function inicializarRabbitMQ(nombreServicio: string): Promise<ConectorRabbitMQ> {
-  const conector = obtenerConectorRabbitMQ(nombreServicio);
-  await conector.iniciar();
-  return conector;
+  try {
+    // Obtener o crear la instancia del conector
+    const conector = obtenerConectorRabbitMQ(nombreServicio);
+    
+    // Iniciar la conexión si no está iniciada
+    if (!conector['iniciado']) {
+      await conector.iniciar();
+      console.log(`[RabbitMQ] Conector para ${nombreServicio} inicializado correctamente`);
+    }
+
+    // Verificar que el exchange principal existe (no intentamos crear colas)
+    const canal = conector['canal'];
+    if (canal) {
+      try {
+        await canal.checkExchange(RABBITMQ_EXCHANGE);
+        console.log(`[RabbitMQ] ✅ Exchange ${RABBITMQ_EXCHANGE} verificado correctamente`);
+      } catch (error) {
+        console.error(`[RabbitMQ] El exchange ${RABBITMQ_EXCHANGE} no existe, se creará`);
+        // Crear el exchange si no existe (esto es necesario para el funcionamiento básico)
+        await canal.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
+          durable: true,
+          autoDelete: false
+        });
+      }
+    }
+    
+    return conector;
+  } catch (error) {
+    console.error(`[RabbitMQ] Error al inicializar RabbitMQ para ${nombreServicio}:`, error);
+    throw error;
+  }
 }
 
 /**
  * Publica un evento en RabbitMQ
  * 
- * @param {string} nombreServicio - Nombre del servicio que publica
- * @param {TipoEvento | string} tipo - Tipo de evento
+ * @param {string} tipo - Tipo de evento a publicar
  * @param {any} datos - Datos del evento
- * @param {string} [idUsuario] - ID del usuario relacionado
- * @param {string} [idCorrelacion] - ID de correlación para seguimiento
- * @returns {Promise<boolean>} - True si se publicó correctamente
+ * @param {string} [nombreServicio='api-gateway'] - Nombre del servicio que publica
+ * @param {Object} [opciones] - Opciones adicionales para la publicación
+ * @returns {Promise<boolean>} - Indica si la publicación fue exitosa
  */
 export async function publicarEvento(
-  nombreServicio: string,
-  tipo: TipoEvento | string,
+  tipo: string | TipoEvento,
   datos: any,
-  idUsuario?: string,
-  idCorrelacion?: string
+  nombreServicio: string = 'api-gateway',
+  opciones?: {
+    persistente?: boolean;
+    expiracion?: number;
+    prioridad?: number;
+    idCorrelacion?: string;
+    headers?: Record<string, any>;
+  }
 ): Promise<boolean> {
   const conector = obtenerConectorRabbitMQ(nombreServicio);
-  
-  // Inicializar si no está iniciado
-  if (!conector.listenerCount('conectado')) {
-    await conector.iniciar();
-  }
-  
-  return await conector.publicarEvento(tipo, datos, {
-    idUsuario,
-    idCorrelacion: idCorrelacion || crearIdCorrelacion()
-  });
+  return await conector.publicarEvento(tipo, datos, opciones);
 }
 
 /**
  * Suscribe a eventos específicos
  * 
+ * @param {string} nombreCola - Nombre de la cola donde recibir eventos
+ * @param {string[]} clavesEnrutamiento - Claves de enrutamiento para filtrar eventos
+ * @param {CallbackMensaje} callback - Función a ejecutar cuando se recibe un mensaje
  * @param {string} nombreServicio - Nombre del servicio que se suscribe
- * @param {string} nombreCola - Nombre de la cola
- * @param {(TipoEvento | string)[]} tiposEventos - Tipos de eventos a suscribirse
- * @param {CallbackMensaje} callback - Función a ejecutar cuando llega un mensaje
- * @returns {Promise<string>} - ID único de la suscripción
+ * @param {Object} [opciones] - Opciones adicionales para la suscripción
+ * @returns {Promise<string>} - Identificador único de la suscripción
  */
-export async function suscribirseAEventos(
-  nombreServicio: string,
+export async function suscribirseEventos(
   nombreCola: string,
-  tiposEventos: (TipoEvento | string)[],
-  callback: CallbackMensaje
-): Promise<string> {
-  const conector = obtenerConectorRabbitMQ(nombreServicio);
-  
-  // Inicializar si no está iniciado
-  if (!conector.listenerCount('conectado')) {
-    await conector.iniciar();
+  clavesEnrutamiento: string[],
+  callback: CallbackMensaje,
+  nombreServicio: string = 'api-gateway',
+  opciones?: {
+    durable?: boolean;
+    prefetch?: number;
+    autoAck?: boolean;
+    requeue?: boolean;
+    maxReintentos?: number;
+    tiempoEspera?: number;
   }
+): Promise<string> {
+  const conector = await inicializarRabbitMQ(nombreServicio);
   
-  return await conector.suscribirseAEventos(
-    nombreCola,
-    tiposEventos.map(tipo => tipo.toString()),
-    callback
-  );
+  // Si el nombre de la cola no incluye 'api-gateway', se formatea como 'api-gateway_eventos_<nombreCola>'
+  const colaFormateada = nombreCola.includes('api-gateway') ? nombreCola : `api-gateway_eventos_${nombreCola}`;
+  const nombreColaCompleto = obtenerNombreColaCompleto(colaFormateada);
+  
+  return conector.suscribirse(nombreColaCompleto, clavesEnrutamiento, callback, opciones);
 }
 
 /**
- * Suscribe a todos los eventos de una categoría
+ * Detiene la conexión con RabbitMQ
+ * 
+ * @param {string} [nombreServicio='api-gateway'] - Nombre del servicio
+ * @returns {Promise<void>}
+ */
+export async function detenerRabbitMQ(nombreServicio: string = 'api-gateway'): Promise<void> {
+  if (conectores.has(nombreServicio)) {
+    const conector = conectores.get(nombreServicio)!;
+    await conector.detener();
+    conectores.delete(nombreServicio);
+  }
+}
+
+/**
+ * Obtiene métricas de RabbitMQ para un servicio específico
+ * 
+ * @param {string} [nombreServicio='api-gateway'] - Nombre del servicio
+ * @returns {Object} Objeto con métricas
+ */
+export function obtenerMetricasRabbitMQ(nombreServicio: string = 'api-gateway'): any {
+  if (conectores.has(nombreServicio)) {
+    const conector = conectores.get(nombreServicio)!;
+    return conector.obtenerMetricas();
+  }
+  return { enviados: {}, recibidos: {}, errores: {} };
+}
+
+/**
+ * Suscribe a todos los eventos de una categoría específica.
  * 
  * @param {string} nombreServicio - Nombre del servicio que se suscribe
- * @param {string} nombreCola - Nombre de la cola
- * @param {string} categoria - Categoría de eventos (ej: "usuario", "mapa")
- * @param {CallbackMensaje} callback - Función a ejecutar cuando llega un mensaje
- * @returns {Promise<string>} - ID único de la suscripción
+ * @param {string} nombreCola - Nombre de la cola donde recibir eventos
+ * @param {string} categoria - Categoría de eventos a la que suscribirse (auth, mapas, notificaciones, sociales, usuarios)
+ * @param {CallbackMensaje} callback - Función a ejecutar cuando se recibe un mensaje
+ * @param {Object} [opciones] - Opciones adicionales para la suscripción
+ * @returns {Promise<string>} - Identificador único de la suscripción
  */
 export async function suscribirseACategoria(
   nombreServicio: string,
   nombreCola: string,
   categoria: string,
-  callback: CallbackMensaje
-): Promise<string> {
-  const conector = obtenerConectorRabbitMQ(nombreServicio);
-  
-  // Inicializar si no está iniciado
-  if (!conector.listenerCount('conectado')) {
-    await conector.iniciar();
+  callback: CallbackMensaje,
+  opciones?: {
+    durable?: boolean;
+    prefetch?: number;
+    autoAck?: boolean;
+    requeue?: boolean;
+    maxReintentos?: number;
+    tiempoEspera?: number;
   }
+): Promise<string> {
+  const conector = await inicializarRabbitMQ(nombreServicio);
   
-  return await conector.suscribirseAEventos(
-    nombreCola,
-    [`${categoria}.*`], // Wildcard para todos los eventos de la categoría
-    callback
+  // Asegurar que se use una cola con el formato correcto (con el prefijo del servicio)
+  const nombreColaCompleto = obtenerNombreColaCompleto(nombreCola);
+  
+  // No permitir crear colas desde aquí, solo usar colas existentes
+  return conector.suscribirse(
+    nombreColaCompleto,
+    [`${categoria}.*`],
+    callback,
+    {
+      ...opciones
+    }
   );
 }
 
@@ -682,121 +1168,112 @@ export async function suscribirseACategoria(
  * Suscribe a todos los eventos del sistema
  * 
  * @param {string} nombreServicio - Nombre del servicio que se suscribe
- * @param {string} nombreCola - Nombre de la cola
- * @param {CallbackMensaje} callback - Función a ejecutar cuando llega un mensaje
- * @returns {Promise<string>} - ID único de la suscripción
+ * @param {string} nombreCola - Nombre de la cola donde recibir eventos
+ * @param {CallbackMensaje} callback - Función a ejecutar cuando se recibe un mensaje
+ * @param {Object} [opciones] - Opciones adicionales para la suscripción
+ * @returns {Promise<string>} - Identificador único de la suscripción
  */
 export async function suscribirseTodosEventos(
   nombreServicio: string,
   nombreCola: string,
-  callback: CallbackMensaje
-): Promise<string> {
-  const conector = obtenerConectorRabbitMQ(nombreServicio);
-  
-  // Inicializar si no está iniciado
-  if (!conector.listenerCount('conectado')) {
-    await conector.iniciar();
+  callback: CallbackMensaje,
+  opciones?: {
+    durable?: boolean;
+    prefetch?: number;
+    autoAck?: boolean;
+    requeue?: boolean;
+    maxReintentos?: number;
+    tiempoEspera?: number;
   }
+): Promise<string> {
+  const conector = await inicializarRabbitMQ(nombreServicio);
   
-  return await conector.suscribirseAEventos(
-    nombreCola,
-    ['#'], // Wildcard para todos los eventos
-    callback
+  // Asegurar que se use una cola con el formato correcto (con el prefijo del servicio)
+  // Si solo se pasa un nombre simple como "notificaciones", formatearlo como "api-gateway_eventos_notificaciones"
+  let colaFormateada = nombreCola;
+  if (!nombreCola.includes('api-gateway') && !nombreCola.includes('eventos')) {
+    colaFormateada = `api-gateway_eventos_${nombreCola}`;
+  }
+  const nombreColaCompleto = obtenerNombreColaCompleto(colaFormateada);
+  
+  // No permitir crear colas desde aquí, solo usar colas existentes
+  return conector.suscribirse(
+    nombreColaCompleto,
+    ['#'], // Patrón comodín que suscribe a todos los eventos
+    callback,
+    {
+      ...opciones
+    }
   );
 }
 
 /**
- * Detiene la conexión con RabbitMQ para un servicio
- * 
- * @param {string} nombreServicio - Nombre del servicio
+ * Purga todas las colas conocidas, excluyendo aquellas que se desean mantener.
+ * Borra tanto la cola principal como su cola de mensajes fallidos asociada.
  * @returns {Promise<void>}
  */
-export async function detenerRabbitMQ(nombreServicio: string): Promise<void> {
-  if (conectores.has(nombreServicio)) {
-    const conector = conectores.get(nombreServicio)!;
-    await conector.detener();
-    conectores.delete(nombreServicio);
-    console.log(`[RabbitMQ:${nombreServicio}] Servicio detenido y eliminado`);
-  }
-}
+export async function purgarColasExcluyendo(): Promise<void> {
+  console.log('[RabbitMQ] La función purgarColasExcluyendo ha sido deshabilitada');
+  console.log('[RabbitMQ] Utilice los scripts en colasConfig para gestionar las colas');
+  
+  // No realizamos ninguna acción de borrado
+  // Las colas deben gestionarse mediante los scripts dedicados
+  return;
 
-/**
- * Detiene todas las conexiones con RabbitMQ
- * 
- * @returns {Promise<void>}
- */
-export async function detenerTodasLasConexiones(): Promise<void> {
-  for (const [nombreServicio, conector] of conectores.entries()) {
-    try {
-      await conector.detener();
-      console.log(`[RabbitMQ:${nombreServicio}] Detenido correctamente`);
-    } catch (error) {
-      console.error(`[RabbitMQ:${nombreServicio}] Error al detener:`, error);
+  // El código siguiente está comentado para evitar borrar colas no deseadas
+  /*
+  // Lista de colas permitidas (se mantendrán)
+  const colasPermitidas = [
+    'mapyourworld_api-gateway_eventos_auth',
+    'mapyourworld_api-gateway_eventos_mapas',
+    'mapyourworld_api-gateway_eventos_notificaciones',
+    'mapyourworld_api-gateway_eventos_sociales',
+    'mapyourworld_api-gateway_eventos_usuarios',
+    'mapyourworld_api-gateway_fallidos_eventos_auth',
+    'mapyourworld_api-gateway_fallidos_eventos_mapas',
+    'mapyourworld_api-gateway_fallidos_eventos_notificaciones',
+    'mapyourworld_api-gateway_fallidos_eventos_sociales',
+    'mapyourworld_api-gateway_fallidos_eventos_usuarios',
+    'mapyourworld_api-gateway_fallidos_notificaciones',
+    'mapyourworld_api-gateway_notificaciones'
+  ];
+
+  // Lista de colas conocidas en el sistema
+  const colasConocidas = [
+    `${RABBITMQ_QUEUE_PREFIX}eventos_auth`,
+    `${RABBITMQ_QUEUE_PREFIX}eventos_mapas`,
+    `${RABBITMQ_QUEUE_PREFIX}eventos_notificaciones`,
+    `${RABBITMQ_QUEUE_PREFIX}eventos_sociales`,
+    `${RABBITMQ_QUEUE_PREFIX}eventos_usuarios`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_eventos_auth`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_eventos_mapas`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_eventos_notificaciones`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_eventos_sociales`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_eventos_usuarios`,
+    `${RABBITMQ_QUEUE_PREFIX}fallidos_notificaciones`,
+    `${RABBITMQ_QUEUE_PREFIX}notificaciones`
+  ];
+
+  // Obtener instancia del conector (usamos 'api-gateway' como nombre de servicio)
+  const conector = obtenerConectorRabbitMQ('api-gateway');
+
+  for (const cola of colasConocidas) {
+    if (!colasPermitidas.includes(cola)) {
+      console.log(`[purga] Eliminando cola: ${cola}`);
+      await conector.eliminarColaPublica(cola);
+      const colaDLQ = `${RABBITMQ_DLQ_PREFIX}${cola}`;
+      console.log(`[purga] Eliminando cola DLQ: ${colaDLQ}`);
+      await conector.eliminarColaPublica(colaDLQ);
+    } else {
+      console.log(`[purga] Conservando cola permitida: ${cola}`);
     }
   }
-  
-  conectores.clear();
-  console.log('[RabbitMQ] Todas las conexiones detenidas');
+  */
 }
 
-/**
- * Crea un ID de correlación único para seguimiento de mensajes
- * 
- * @returns {string} - ID único
- */
-export function crearIdCorrelacion(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-}
-
-/**
- * Convierte un string a clave de enrutamiento válida para RabbitMQ
- * 
- * @param {string} valor - Valor a convertir
- * @returns {string} - Clave de enrutamiento
- */
-export function aClaveEnrutamiento(valor: string): string {
-  // Si ya tiene formato de clave de enrutamiento, devolverlo tal cual
-  if (valor.includes('.') || valor.includes('*') || valor === '#') {
-    return valor;
-  }
-  
-  // Convertir a lowercase y reemplazar espacios con puntos
-  return valor.toLowerCase().replace(/\s+/g, '.');
-}
-
-/**
- * Verifica si un tipo de evento es válido
- * 
- * @param {string} tipo - Tipo de evento a verificar
- * @returns {boolean} - True si es válido
- */
-export function esTipoEventoValido(tipo: string): boolean {
-  // Verificar si es un valor de la enumeración TipoEvento
-  return Object.values(TipoEvento).includes(tipo as TipoEvento);
-}
-
-/**
- * Obtiene la categoría de un tipo de evento
- * 
- * @param {string} tipo - Tipo de evento
- * @returns {string} - Categoría del evento
- */
-export function obtenerCategoriaEvento(tipo: string): string {
-  // Extraer la categoría (parte antes del primer punto)
-  const partes = tipo.split('.');
-  return partes.length > 0 ? partes[0] : '';
-}
-
-/**
- * Obtiene la acción de un tipo de evento
- * 
- * @param {string} tipo - Tipo de evento
- * @returns {string} - Acción del evento
- */
-export function obtenerAccionEvento(tipo: string): string {
-  // Extraer la acción (parte después del primer punto)
-  const partes = tipo.split('.');
-  return partes.length > 1 ? partes.slice(1).join('.') : '';
+// Agrego helper para evitar duplicar el prefijo
+function obtenerNombreColaCompleto(nombreCola: string): string {
+  return nombreCola.startsWith(RABBITMQ_QUEUE_PREFIX) ? nombreCola : `${RABBITMQ_QUEUE_PREFIX}${nombreCola}`;
 }
 
 // Exportar la clase y funciones

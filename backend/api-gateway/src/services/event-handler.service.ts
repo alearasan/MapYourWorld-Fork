@@ -12,7 +12,8 @@ import {
   suscribirseTodosEventos,
   detenerRabbitMQ,
   TipoEvento,
-  MensajeEvento
+  MensajeEvento,
+  obtenerConectorRabbitMQ
 } from '../models/rabbit-mq';
 import { logger } from '../utils/logger';
 import { eventSecurityService } from './event-security.service';
@@ -23,6 +24,21 @@ import { eventSecurityService } from './event-security.service';
 export class EventHandlerService {
   private readonly NOMBRE_SERVICIO = 'api-gateway';
   private readonly NOMBRE_COLA_EVENTOS = 'eventos';
+  private readonly COLAS_REQUERIDAS = [
+    'mapyourworld_api-gateway_eventos_auth',
+    'mapyourworld_api-gateway_eventos_mapas',
+    'mapyourworld_api-gateway_eventos_notificaciones',
+    'mapyourworld_api-gateway_eventos_sociales',
+    'mapyourworld_api-gateway_eventos_usuarios',
+    'mapyourworld_api-gateway_eventos_notificaciones'
+  ];
+  private readonly MAPEO_COLAS = {
+    mapas: 'mapyourworld_api-gateway_eventos_mapas',
+    notificaciones: 'mapyourworld_api-gateway_eventos_notificaciones',
+    sociales: 'mapyourworld_api-gateway_eventos_sociales',
+    usuarios: 'mapyourworld_api-gateway_eventos_usuarios',
+    autenticacion: 'mapyourworld_api-gateway_eventos_auth'
+  };
   private suscripciones: string[] = [];
   private iniciado = false;
 
@@ -45,6 +61,15 @@ export class EventHandlerService {
       await this.suscribirseAEventosUsuarios();
       await this.suscribirseAEventosAutenticacion();
 
+      // Verificar colas DLQ
+      try {
+        const conector = obtenerConectorRabbitMQ(this.NOMBRE_SERVICIO);
+        await conector.verificarColasDLQ();
+        logger.info('Colas DLQ verificadas correctamente');
+      } catch (error) {
+        logger.warn('Error al verificar colas DLQ:', error);
+      }
+
       // También podemos suscribirnos a todos los eventos si es necesario
       // const idTodos = await this.suscribirseATodosLosEventos();
       // this.suscripciones.push(idTodos);
@@ -64,7 +89,7 @@ export class EventHandlerService {
     try {
       const idSuscripcion = await suscribirseACategoria(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_mapas`,
+        this.MAPEO_COLAS.mapas,
         'mapa',
         this.procesarEventoMapa.bind(this)
       );
@@ -84,7 +109,7 @@ export class EventHandlerService {
     try {
       const idSuscripcion = await suscribirseACategoria(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_notificaciones`,
+        this.MAPEO_COLAS.notificaciones,
         'notificacion',
         this.procesarEventoNotificacion.bind(this)
       );
@@ -104,7 +129,7 @@ export class EventHandlerService {
     try {
       const idSuscripcion = await suscribirseACategoria(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_sociales`,
+        this.MAPEO_COLAS.sociales,
         'social',
         this.procesarEventoSocial.bind(this)
       );
@@ -124,7 +149,7 @@ export class EventHandlerService {
     try {
       const idSuscripcion = await suscribirseACategoria(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_usuarios`,
+        this.MAPEO_COLAS.usuarios,
         'usuario',
         this.procesarEventoUsuario.bind(this)
       );
@@ -152,7 +177,7 @@ export class EventHandlerService {
 
       const idSuscripcion = await suscribirseACategoria(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_auth`,
+        this.MAPEO_COLAS.autenticacion,
         'usuario',
         this.procesarEventoAutenticacion.bind(this)
       );
@@ -170,9 +195,12 @@ export class EventHandlerService {
    */
   private async suscribirseATodosLosEventos(): Promise<string> {
     try {
+      // Agregamos una propiedad para esta cola específica
+      const COLA_TODOS_EVENTOS = 'mapyourworld_api-gateway_eventos_todos';
+      
       const idSuscripcion = await suscribirseTodosEventos(
         this.NOMBRE_SERVICIO,
-        `${this.NOMBRE_COLA_EVENTOS}_todos`,
+        COLA_TODOS_EVENTOS,
         this.procesarEvento.bind(this)
       );
 

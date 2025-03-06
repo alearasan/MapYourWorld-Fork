@@ -163,7 +163,7 @@ class NotificacionesController {
       // Suscribirse a todos los eventos
       await suscribirseTodosEventos(
         NOMBRE_SERVICIO,
-        'notificaciones',
+        'api-gateway_eventos_notificaciones',
         this.procesarEventoRabbitMQ.bind(this)
       );
       
