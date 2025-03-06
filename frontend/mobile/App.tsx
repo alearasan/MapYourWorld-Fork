@@ -85,11 +85,12 @@ const distritosEjemplo = [
   },
 ];
 
-
+// Definimos un wrapper para MapScreen que incluye los distritos de ejemplo
+const MapScreenWithDistritos = (props: any) => <MapScreen {...props} distritos={distritosEjemplo} />;
 
 const App = () => {
   return (
-<NavigationContainer>
+    <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Welcome" 
         component={WelcomeScreen} 
@@ -133,21 +134,21 @@ const App = () => {
           )
           
         }}/>
-        <Stack.Screen name="Map" 
-        component={(props:any) => <MapScreen {...props} distritos={distritosEjemplo} />} 
-        options={{
-          headerTitle: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image
-              source={require('./src/assets/images/logo.png')} 
-              style={{ width: 35, height: 35, marginRight: 5 }}
-            />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
-           
-          </View>
-          )
-          
-        }} />
+        <Stack.Screen 
+          name="Map" 
+          component={MapScreenWithDistritos}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
+              </View>
+            )
+          }} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

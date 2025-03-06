@@ -32,7 +32,7 @@ const WelcomeScreen = () => {
     navigation.navigate('Login');
   };
 
-  fetch('http://localhost:5999/districts')
+  fetch('http://192.168.1.80:5999/districts')
   .then(response => {
     if (!response.ok) {
       throw new Error('Error en la respuesta del servidor');
