@@ -3,8 +3,7 @@
  * Implementa un sistema de caché en memoria con TTL para mejorar el rendimiento
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { Express } from 'express';
+import { Request, Response, NextFunction, Express, Router } from 'express';
 
 interface CacheOptions {
   ttl?: number;         // Tiempo de vida en ms (por defecto 5 minutos)
@@ -82,8 +81,7 @@ class MemoryCache {
   set(key: string, value: any, customTtl?: number): void {
     // Si ya alcanzamos el tamaño máximo, eliminar el más antiguo
     if (this.cache.size >= this.options.maxSize) {
-      const oldestKey = this.getOldestKey();
-      if (oldestKey) this.cache.delete(oldestKey);
+      this.removeOldestItem();
     }
     
     // Estimar el tamaño (aproximado) del valor
@@ -109,9 +107,7 @@ class MemoryCache {
     this.misses = 0;
   }
   
-  getOldestKey(): string | null {
-    if (this.cache.size === 0) return null;
-    
+  protected removeOldestItem(): void {
     let oldestKey: string | null = null;
     let oldestTime = Infinity;
     
@@ -122,7 +118,9 @@ class MemoryCache {
       }
     }
     
-    return oldestKey;
+    if (oldestKey !== null) {
+      this.cache.delete(oldestKey);
+    }
   }
   
   cleanup(): void {
@@ -182,21 +180,34 @@ export const setupCache = (app: Express): void => {
     console.log('[Cache] Sistema de caché inicializado');
   }
   
-  // Añadir endpoints para gestión de caché
-  app.get('/api/gateway/cache/stats', (req: Request, res: Response) => {
+  // Crear un router para manejar los endpoints de caché
+  const cacheRouter = Router();
+  
+  // Definir la función de handler para estadísticas
+  const statsHandler = (req: Request, res: Response): void => {
     if (!cacheInstance) {
-      return res.status(500).json({ error: 'Sistema de caché no inicializado' });
+      res.status(500).json({ error: 'Sistema de caché no inicializado' });
+      return;
     }
     res.json(cacheInstance.getStats());
-  });
+  };
   
-  app.post('/api/gateway/cache/clear', (req: Request, res: Response) => {
+  // Definir la función de handler para limpiar la caché
+  const clearHandler = (req: Request, res: Response): void => {
     if (!cacheInstance) {
-      return res.status(500).json({ error: 'Sistema de caché no inicializado' });
+      res.status(500).json({ error: 'Sistema de caché no inicializado' });
+      return;
     }
     cacheInstance.clear();
     res.json({ message: 'Caché limpiada correctamente' });
-  });
+  };
+  
+  // Configurar endpoints para la gestión de caché usando el router
+  cacheRouter.get('/stats', statsHandler);
+  cacheRouter.post('/clear', clearHandler);
+  
+  // Montar el router en la aplicación
+  app.use('/api/gateway/cache', cacheRouter);
 };
 
 export const cacheMiddleware = (duration?: number) => {

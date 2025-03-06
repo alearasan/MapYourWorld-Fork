@@ -24,7 +24,9 @@
     "build:social": "cd social-service && npm run build",
     "build:gateway": "cd api-gateway && npm run build",
     "metrics-dashboard": "cd api-gateway && npm run metrics-dashboard",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "run:backend": "ts-node runBackend.ts",
+    "run:backend:prod": "ts-node runBackend.ts --prod"
   },
   "dependencies": {
     "@turf/turf": "7.2.0",
@@ -36,6 +38,7 @@
     "aws-sdk": "2.1692.0",
     "bcrypt": "5.1.1",
     "bcryptjs": "3.0.2",
+    "chalk": "4.1.2",
     "class-validator": "0.14.1",
     "compression": "1.8.0",
     "cors": "2.8.5",
@@ -69,8 +72,7 @@
     "socket.io-client": "3.0.0",
     "typeorm": "0.3.21",
     "winston": "3.17.0",
-    "ws": "8.18.1",
-    "chalk": "4.1.2"
+    "ws": "8.18.1"
   },
   "devDependencies": {
     "@types/amqplib": "0.10.7",
@@ -78,8 +80,10 @@
     "@types/compression": "1.7.5",
     "@types/cors": "2.8.17",
     "@types/express": "5.0.0",
+    "@types/jest": "29.5.14",
     "@types/memory-cache": "0.2.6",
     "@types/multer": "1.4.12",
+    "@types/node": "22.13.9",
     "@types/node-fetch": "2.6.12",
     "@types/nodemailer": "6.4.17",
     "@types/opossum": "8.1.8",
@@ -87,8 +91,7 @@
     "@typescript-eslint/eslint-plugin": "8.26.0",
     "@typescript-eslint/parser": "8.26.0",
     "babel-plugin-module-resolver": "5.0.2",
-    "@types/node": "22.13.9",
-    "@types/jest": "29.5.14",
+    "concurrently": "9.1.2",
     "cross-env": "7.0.3",
     "eslint": "9.21.0",
     "jest": "29.7.0",
