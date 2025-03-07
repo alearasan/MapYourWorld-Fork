@@ -1,0 +1,12 @@
+name: Test Workflow
+on:
+  push:
+    branches:
+      - '*'  # Run on all branches
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This is a test workflow"
+      - run: echo "Current branch is ${{ github.ref }}"
