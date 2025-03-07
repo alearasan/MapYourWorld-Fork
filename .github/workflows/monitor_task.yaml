@@ -3,8 +3,8 @@ name: Monitor task
 on:
   issues:
     types: [opened]
-#  push:
-#    branches: [ main, develop, feature/CI-CD ]
+  push:
+    branches: [ main, develop, feature/CI-CD ]
 
 permissions:
   issues: write
@@ -19,15 +19,35 @@ jobs:
         with:
           fetch-depth: 2  # To access the latest commit
 
+      - name: Install GitHub CLI
+        run: |
+          # Make sure gh cli is properly installed
+          if ! command -v gh &> /dev/null; then
+            echo "Installing GitHub CLI..."
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh -y
+          fi
+          # Configure GitHub CLI for API use
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
       - name: Process new issue
         if: github.event_name == 'issues' && github.event.action == 'opened'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
+          # Get issue number and ensure it's an integer
+          ISSUE_NUMBER=${{ github.event.issue.number }}
           echo "Processing newly created issue #$ISSUE_NUMBER..."
+          # ensure that its a valid integer
+          if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Invalid issue number: $ISSUE_NUMBER. Skipping."
+            exit 0
+          fi
+          # Debug output
+          echo "Owner: ${{ github.repository_owner }}"
+          echo "Repo: ${{ github.event.repository.name }}"
           
-          # Get Project data for this issue
+          # Get Project data for this issue - using explicit integer
           PROJECT_DATA=$(gh api graphql -f query='
             query($owner:String!, $repo:String!, $issue_number:Int!) {
               repository(owner:$owner, name:$repo) {
@@ -47,6 +67,113 @@ jobs:
           
           # Debug output
           echo "PROJECT_DATA: $PROJECT_DATA"
+          
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
+          PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
+          
+          if [ -z "$ITEM_ID" ] || [ -z "$PROJECT_ID" ]; then
+            echo "Issue is not associated with a project or couldn't retrieve project data"
+            exit 0
+          fi
+          
+          # Get Status field ID and option ID for "Status"
+          FIELDS_DATA=$(gh api graphql -f query='
+            query($project_id:ID!) {
+              node(id:$project_id) {
+                ... on ProjectV2 {
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f project_id=$PROJECT_ID)
+          
+          STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id // empty')
+          STATUS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Status") | .id // empty')
+          
+          if [ -z "$STATUS_FIELD_ID" ] || [ -z "$STATUS_OPTION_ID" ]; then
+            echo "Could not find Status field or Status option"
+            exit 1
+          fi
+          
+          # Set status to "Status"
+          gh api graphql -f query='
+            mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project_id
+                itemId: $item_id
+                fieldId: $field_id
+                value: { 
+                  singleSelectOptionId: $option_id
+                }
+              }) {
+                clientMutationId
+              }
+            }
+          ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$STATUS_OPTION_ID
+
+      - name: Process commit
+        if: github.event_name == 'push'
+        run: |
+          # Get commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          
+          # Extract issue number from commit message (format: "... #123 ...")
+          ISSUE_NUM=$(echo "$COMMIT_MSG" | grep -oP '#\K[0-9]+' || echo "")
+          
+          if [ -z "$ISSUE_NUM" ]; then
+            echo "No issue number found in commit message. Skipping."
+            exit 0
+          fi
+          
+          # Ensure issue number is an integer
+          if ! [[ "$ISSUE_NUM" =~ ^[0-9]+$ ]]; then
+            echo "Invalid issue number: $ISSUE_NUM. Skipping."
+            exit 0
+          fi
+          
+          # Check for keywords anywhere in the message
+          if echo "$COMMIT_MSG" | grep -q "start"; then
+            KEYWORD="start"
+          elif echo "$COMMIT_MSG" | grep -q "to_review"; then
+            KEYWORD="to_review"
+          elif echo "$COMMIT_MSG" | grep -q "end"; then
+            KEYWORD="end"
+          else
+            echo "No keyword (start, to_review, end) found in commit message. Skipping."
+            exit 0
+          fi
+          
+          echo "Processing commit for issue $ISSUE_NUM with action: $KEYWORD"
+          
+          # Get Project data for this issue - using validated integer
+          PROJECT_DATA=$(gh api graphql -f query='
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
+              repository(owner:$owner, name:$repo) {
+                issue(number:$issue_number) {
+                  projectItems(first:1) {
+                    nodes {
+                      id
+                      project {
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number=$ISSUE_NUM)
           
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
           PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
