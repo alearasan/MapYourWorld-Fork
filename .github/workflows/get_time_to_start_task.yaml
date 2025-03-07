@@ -1,0 +1,52 @@
+name: Track Issue Transitions
+
+on:
+  project_card:
+    types:
+      - created
+      - moved
+
+jobs:
+  track_time:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Issue Transition
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueNumber = context.payload.project_card.content_url.split('/').pop();
+            const columnName = context.payload.project_card.column_name;
+            const projectId = context.payload.project_card.project_id;
+
+            const timeNow = new Date().toISOString();
+            const storageKey = `issue-${issueNumber}-start-time`;
+
+            // If an issue is created directly in "To Do" column, store timestamp
+            // If it was not, but it is MOVED to "To Do" column, store timestamp
+            if (columnName === "To Do") {
+              await github.rest.actions.setRepoVariable({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: storageKey,
+                value: timeNow,
+              });
+            } else if (columnName === "In Progress") {
+              // Retrieve the "To Do" timestamp and calculate time difference
+              try {
+                const startTime = process.env[storageKey];
+                if (startTime) {
+                  const elapsedTime = new Date(timeNow) - new Date(startTime);
+                  const elapsedHours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                  const elapsedMinutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                  
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNumber,
+                    body: `Issue moved to "In Progress". Time spent in "To Do": ${elapsedHours}h ${elapsedMinutes}m.`,
+                  });
+                }
+              } catch (error) {
+                console.error("Error retrieving time:", error);
+              }
+            }
