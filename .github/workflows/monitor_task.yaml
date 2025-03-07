@@ -37,7 +37,7 @@ jobs:
         run: |
           # Get issue number and ensure it's an integer
           ISSUE_NUMBER=${{ github.event.issue.number }}
-          echo "Processing newly created issue #$ISSUE_NUMBER..."
+          echo "Processing newly created issue $ISSUE_NUMBER..."
           # ensure that its a valid integer
           if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
             echo "Invalid issue number: $ISSUE_NUMBER. Skipping."
@@ -49,9 +49,9 @@ jobs:
           
           # Get Project data for this issue - using explicit integer
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $issue_number:Int!) {
+            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$issue_number) {
+                issue(number:$ISSUE_NUMBER) {
                   projectItems(first:1) {
                     nodes {
                       id
@@ -159,9 +159,9 @@ jobs:
           
           # Get Project data for this issue - using validated integer
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $issue_number:Int!) {
+            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$issue_number) {
+                issue(number:$ISSUE_NUMBER) {
                   projectItems(first:1) {
                     nodes {
                       id
@@ -262,9 +262,9 @@ jobs:
           
           # Get Project data for this issue
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $issue_number:Int!) {
+            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$issue_number) {
+                issue(number:$ISSUE_NUMBER) {
                   projectItems(first:1) {
                     nodes {
                       id
