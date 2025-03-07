@@ -44,17 +44,17 @@ jobs:
               
               console.log(`Processing card for issue #${issueNumber} in column "${columnName}"`);
               
-              // If moved to "To Do", add a comment recording the start time
-              if (columnName === "To Do") {
+              // If moved to "Todo", add a comment recording the start time
+              if (columnName === "Todo") {
                 const timeNow = new Date().toISOString();
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issueNumber,
-                  body: `Issue added to "To Do" at ${timeNow}. [TIMESTAMP:${timeNow}]`
+                  body: `Issue added to "Todo" at ${timeNow}. [TIMESTAMP:${timeNow}]`
                 });
                 
-                console.log(`Added "To Do" timestamp for issue #${issueNumber}`);
+                console.log(`Added "Todo" timestamp for issue #${issueNumber}`);
               }
               // If moved to "In Progress", calculate elapsed time
               else if (columnName === "In Progress") {
@@ -65,7 +65,7 @@ jobs:
                   issue_number: issueNumber
                 });
                 
-                // Find the most recent "To Do" timestamp
+                // Find the most recent "Todo" timestamp
                 let startTimeComment = null;
                 for (const comment of comments.data.reverse()) {
                   if (comment.body.includes("[TIMESTAMP:")) {
@@ -89,7 +89,7 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       issue_number: issueNumber,
-                      body: `Issue moved to "In Progress". Time spent in "To Do": ${elapsedHours}h ${elapsedMinutes}m.`
+                      body: `Issue moved to "In Progress". Time spent in "Todo": ${elapsedHours}h ${elapsedMinutes}m.`
                     });
                     
                     console.log(`Added elapsed time comment for issue #${issueNumber}`);
