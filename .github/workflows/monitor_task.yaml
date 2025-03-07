@@ -3,8 +3,8 @@ name: Monitor task
 on:
   issues:
     types: [opened]
-  push:
-    branches: [ main, develop, feature/CI-CD ]
+#  push:
+#    branches: [ main, develop, feature/CI-CD ]
 
 permissions:
   issues: write
