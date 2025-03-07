@@ -8,7 +8,7 @@ on:
 
 permissions:
   issues: write
-  project: write
+  projects: write
   contents: read
 
 # issues are opened in "Status" column in projects, and at some point, moved manually to "Todo" column
