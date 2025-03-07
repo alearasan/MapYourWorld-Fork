@@ -44,13 +44,14 @@ jobs:
             echo "Invalid issue number: $ISSUE_NUMBER. Skipping."
             exit 0
           fi
+          
           # Debug output
           echo "Owner: ${{ github.repository_owner }}"
           echo "Repo: ${{ github.event.repository.name }}"
           
           # Get Project data for this issue - using explicit integer
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $ISSUE_NUMBER:String!) {
+            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
               repository(owner:$owner, name:$repo) {
                 issue(number:$ISSUE_NUMBER) {
                   projectItems(first:1) {
