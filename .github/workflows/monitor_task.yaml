@@ -1,0 +1,310 @@
+name: Monitor task
+
+on:
+  issues:
+    types: [opened]
+  push:
+    branches: [ main, develop, feature/CI-CD ]
+
+permissions:
+  issues: write
+  project: write
+  contents: read
+
+# issues are opened in "Status" column in projects, and at some point, moved manually to "Todo" column
+# commits are made with keywords "start", "to_review", "end" (these must be the last word), and the issue number with "#" (e.g. "#123") in the message (anywhere)
+# this is because: 
+# 1. theres no way to track issue status changes in gh projects
+# 2. each commit does not contain explicit issue number (not even branches are associated with issues)
+
+jobs:
+  update-task-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # To access the latest commit
+
+      - name: Process new issue
+        if: github.event_name == 'issues' && github.event.action == 'opened'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          echo "Processing newly created issue #$ISSUE_NUMBER..."
+          
+          # Get Project data for this issue
+          PROJECT_DATA=$(gh api graphql -f query='
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
+              repository(owner:$owner, name:$repo) {
+                issue(number:$issue_number) {
+                  projectItems(first:1) {
+                    nodes {
+                      id
+                      project {
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f owner=${{ github.repository_owner }} -f repo=${{ github.repository.name }} -f issue_number=$ISSUE_NUMBER)
+          
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id')
+          PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id')
+          
+          # Get Status field ID and option ID for "Status"
+          FIELDS_DATA=$(gh api graphql -f query='
+            query($project_id:ID!) {
+              node(id:$project_id) {
+                ... on ProjectV2 {
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f project_id=$PROJECT_ID)
+          
+          STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id')
+          STATUS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Status") | .id')
+          
+          # Set status to "Status"
+          gh api graphql -f query='
+            mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project_id
+                itemId: $item_id
+                fieldId: $field_id
+                value: { 
+                  singleSelectOptionId: $option_id
+                }
+              }) {
+                clientMutationId
+              }
+            }
+          ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$STATUS_OPTION_ID
+
+      - name: Process commit
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          # Get commit message and extract the last word
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          LAST_WORD=$(echo "$COMMIT_MSG" | tr -s ' ' '\n' | tail -n 1)
+          
+          # Extract issue number from commit message (format: "... #123 ...")
+          ISSUE_NUM=$(echo "$COMMIT_MSG" | grep -oP '#\K[0-9]+' || echo "")
+          
+          if [ -z "$ISSUE_NUM" ]; then
+            echo "No issue number found in commit message. Skipping."
+            exit 0
+          fi
+          
+          echo "Processing commit for issue #$ISSUE_NUM with action: $LAST_WORD"
+          
+          # Get Project data for this issue
+          PROJECT_DATA=$(gh api graphql -f query='
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
+              repository(owner:$owner, name:$repo) {
+                issue(number:$issue_number) {
+                  projectItems(first:1) {
+                    nodes {
+                      id
+                      project {
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f owner=${{ github.repository_owner }} -f repo=${{ github.repository.name }} -f issue_number=$ISSUE_NUM)
+          
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id')
+          PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id')
+          
+          # Get field IDs
+          FIELDS_DATA=$(gh api graphql -f query='
+            query($project_id:ID!) {
+              node(id:$project_id) {
+                ... on ProjectV2 {
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                      ... on ProjectV2DateField {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -f project_id=$PROJECT_ID)
+          
+          # Get field IDs
+          STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id')
+          START_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real start date") | .id')
+          END_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real end date") | .id')
+          
+          # Get status option IDs
+          IN_PROGRESS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id')
+          REVIEW_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Review") | .id')
+          DONE_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id')
+          
+          TODAY=$(date -u +"%Y-%m-%d")
+          
+          # Process based on the last word in commit message
+          case "$LAST_WORD" in
+            "start")
+              echo "Setting task to In Progress and recording start date"
+              # Set status to "In Progress"
+              gh api graphql -f query='
+                mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project_id
+                    itemId: $item_id
+                    fieldId: $field_id
+                    value: { 
+                      singleSelectOptionId: $option_id
+                    }
+                  }) {
+                    clientMutationId
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$IN_PROGRESS_OPTION_ID
+              
+              # Set "Real start date" to today
+              gh api graphql -f query='
+                mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $date:Date!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project_id
+                    itemId: $item_id
+                    fieldId: $field_id
+                    value: { 
+                      date: $date
+                    }
+                  }) {
+                    clientMutationId
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$START_DATE_FIELD_ID -f date=$TODAY
+              ;;
+              
+            "to_review")
+              echo "Setting task to Review"
+              # Set status to "Review"
+              gh api graphql -f query='
+                mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project_id
+                    itemId: $item_id
+                    fieldId: $field_id
+                    value: { 
+                      singleSelectOptionId: $option_id
+                    }
+                  }) {
+                    clientMutationId
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$REVIEW_OPTION_ID
+              ;;
+              
+            "end")
+              echo "Setting task to Done and recording end date"
+              # Set status to "Done"
+              gh api graphql -f query='
+                mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project_id
+                    itemId: $item_id
+                    fieldId: $field_id
+                    value: { 
+                      singleSelectOptionId: $option_id
+                    }
+                  }) {
+                    clientMutationId
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$DONE_OPTION_ID
+              
+              # Set "Real end date" to today
+              gh api graphql -f query='
+                mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $date:Date!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $project_id
+                    itemId: $item_id
+                    fieldId: $field_id
+                    value: { 
+                      date: $date
+                    }
+                  }) {
+                    clientMutationId
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$END_DATE_FIELD_ID -f date=$TODAY
+              
+              # Get item data to calculate time difference
+              ITEM_DATA=$(gh api graphql -f query='
+                query($project_id:ID!, $item_id:ID!) {
+                  node(id: $project_id) {
+                    ... on ProjectV2 {
+                      item(id: $item_id) {
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldDateValue {
+                              field {
+                                ... on ProjectV2FieldCommon {
+                                  name
+                                }
+                              }
+                              date
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID)
+              
+              # Extract start date
+              START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.item.fieldValues.nodes[] | select(.field.name=="Real start date") | .date')
+              
+              if [ -n "$START_DATE" ]; then
+                # Calculate time difference in days
+                START_SEC=$(date -d "$START_DATE" +%s)
+                END_SEC=$(date -d "$TODAY" +%s)
+                DAYS_DIFF=$(( (END_SEC - START_SEC) / 86400 ))
+                
+                # Add comment with time information
+                gh issue comment $ISSUE_NUM --body "✅ Task completed in $DAYS_DIFF days (from $START_DATE to $TODAY)"
+              else
+                gh issue comment $ISSUE_NUM --body "✅ Task completed on $TODAY (no start date recorded)"
+              fi
+              ;;
+              
+            *)
+              echo "No action taken for commit keyword: $LAST_WORD"
+              ;;
+          esac
