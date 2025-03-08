@@ -1,4 +1,4 @@
-name: Monitor Task
+name: Monitor task
 
 on:
   push:
