@@ -36,8 +36,8 @@ jobs:
         if: github.event_name == 'issues' && github.event.action == 'opened'
         run: |
           # Get issue number and ensure it's an integer
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          ISSUE_NUMBER=$((ISSUE_NUMBER + 0))
+          ISSUE_NUMBER=$(echo "${{ github.event.issue.number }}" | awk '{print int($1)}')
+
           echo "Processing newly created issue $ISSUE_NUMBER..."
           # ensure that its a valid integer
           if ! [[ "$ISSUE_NUMBER" =~ ^[0-9]+$ ]]; then
@@ -51,7 +51,7 @@ jobs:
           
           # Get Project data for this issue - using explicit integer
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
               repository(owner:$owner, name:$repo) {
                 issue(number:$ISSUE_NUMBER) {
                   projectItems(first:1) {
@@ -161,9 +161,9 @@ jobs:
           
           # Get Project data for this issue - using validated integer
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$ISSUE_NUMBER) {
+                issue(number:$issue_number) {
                   projectItems(first:1) {
                     nodes {
                       id
@@ -264,9 +264,9 @@ jobs:
           
           # Get Project data for this issue
           PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $ISSUE_NUMBER:Int!) {
+            query($owner:String!, $repo:String!, $issue_number:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$ISSUE_NUMBER) {
+                issue(number:$issue_number) {
                   projectItems(first:1) {
                     nodes {
                       id
