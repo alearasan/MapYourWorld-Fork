@@ -4,10 +4,6 @@ on:
   push:
     branches: [ main, develop, feature/CI-CD ]
 
-permissions:
-  issues: write
-  contents: read
-
 jobs:
   update-task-status:
     runs-on: ubuntu-latest
@@ -28,7 +24,7 @@ jobs:
             sudo apt install gh -y
           fi
           # Configure GitHub CLI for API use
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
 
       - name: Process commit
         env:
