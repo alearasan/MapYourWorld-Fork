@@ -78,7 +78,7 @@ jobs:
                 }
               }
             }
-          ' -f owner="${{ github.repository_owner }}" -f repo="$(echo "${{ github.repository }}" | cut -d'/' -f2)" -f issue_number=$ISSUE_NUM)
+          ' -f owner="${{ github.repository_owner }}" -f repo="$(echo "${{ github.repository }}" | cut -d'/' -f2)" -F issue_number=$ISSUE_NUM)
                     
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
           PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
