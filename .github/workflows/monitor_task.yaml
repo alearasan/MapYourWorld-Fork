@@ -2,7 +2,6 @@ name: Monitor task
 
 on:
   push:
-    branches: [ main, develop, feature/CI-CD ]
 
 jobs:
   update-task-status:
