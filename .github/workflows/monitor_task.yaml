@@ -99,9 +99,10 @@ jobs:
                           name
                         }
                       }
-                      ... on ProjectV2DateField {
+                      ... on ProjectV2Field {
                         id
                         name
+                        dataType
                       }
                     }
                   }
@@ -112,8 +113,8 @@ jobs:
           
           # Get field IDs
           STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id // empty')
-          START_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real start date") | .id // empty')
-          END_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real end date") | .id // empty')
+          START_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real start date" and .dataType=="DATE") | .id // empty')
+          END_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real end date" and .dataType=="DATE") | .id // empty')          
           
           # Get status option IDs
           IN_PROGRESS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id // empty')
