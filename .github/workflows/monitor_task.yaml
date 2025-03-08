@@ -59,7 +59,8 @@ jobs:
           fi
           
           echo "Processing commit for issue #$ISSUE_NUM with action: $KEYWORD"
-          
+          echo "Owner: ${{ github.repository_owner }}, Repo: ${{ github.repository.name }}"
+
           # Get Project data for this issue
           PROJECT_DATA=$(gh api graphql -f query='
             query($owner:String!, $repo:String!, $issue_number:Int!) {
@@ -76,7 +77,7 @@ jobs:
                 }
               }
             }
-          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number=$ISSUE_NUM)
+          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number="$((ISSUE_NUM))")
           
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
           PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
