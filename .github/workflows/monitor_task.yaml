@@ -60,6 +60,7 @@ jobs:
           
           echo "Processing commit for issue #$ISSUE_NUM with action: $KEYWORD"
           echo "Owner: ${{ github.repository_owner }}, Repo: ${{ github.repository.name }}"
+          echo "Issue number: $((ISSUE_NUM))"
 
           # Get Project data for this issue
           PROJECT_DATA=$(gh api graphql -f query='
