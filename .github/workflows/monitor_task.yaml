@@ -53,7 +53,7 @@ jobs:
           PROJECT_DATA=$(gh api graphql -f query='
             query($owner:String!, $repo:String!, $issue_number:Int!) {
               repository(owner:$owner, name:$repo) {
-                issue(number:$ISSUE_NUMBER) {
+                issue(number:$issue_number) {
                   projectItems(first:1) {
                     nodes {
                       id
