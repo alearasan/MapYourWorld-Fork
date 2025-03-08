@@ -215,27 +215,25 @@ jobs:
               
               # Get item data to calculate time difference
               ITEM_DATA=$(gh api graphql -f query='
-                query($project_id:ID!, $item_id:ID!) {
-                  node(id: $project_id) {
-                    ... on ProjectV2 {
-                      item(id: $item_id) {
-                        fieldValues(first: 20) {
-                          nodes {
-                            ... on ProjectV2ItemFieldDateValue {
-                              field {
-                                ... on ProjectV2FieldCommon {
-                                  name
+                              query($item_id:ID!) {
+                                node(id: $item_id) {
+                                  ... on ProjectV2Item {
+                                    fieldValues(first: 20) {
+                                      nodes {
+                                        ... on ProjectV2ItemFieldDateValue {
+                                          field {
+                                            ... on ProjectV2FieldCommon {
+                                              name
+                                            }
+                                          }
+                                          date
+                                        }
+                                      }
+                                    }
+                                  }
                                 }
                               }
-                              date
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID)
+                            ' -f item_id=$ITEM_ID)
               
               # Extract start date
               START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.item.fieldValues.nodes[] | select(.field.name=="Real start date") | .date // empty')
