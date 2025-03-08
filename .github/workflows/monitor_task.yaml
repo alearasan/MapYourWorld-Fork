@@ -236,7 +236,7 @@ jobs:
                             ' -f item_id=$ITEM_ID)
               
               # Extract start date
-              START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.item.fieldValues.nodes[] | select(.field.name=="Real start date") | .date // empty')
+              START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.fieldValues.nodes[] | select(.field.name=="Real start date") | .date // empty')
               
               if [ -n "$START_DATE" ]; then
                 # Calculate time difference in days
