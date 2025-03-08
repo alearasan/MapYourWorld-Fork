@@ -59,7 +59,7 @@ jobs:
           fi
           
           echo "Processing commit for issue #$ISSUE_NUM with action: $KEYWORD"
-          echo "Owner: ${{ github.repository_owner }}, Repo: ${{ github.repository.name }}"
+          echo "Owner: ${{ github.repository_owner }}, Repo: $(echo "${{ github.repository }}" | cut -d'/' -f2)"
           echo "Issue number: $((ISSUE_NUM))"
 
           # Get Project data for this issue
@@ -78,8 +78,8 @@ jobs:
                 }
               }
             }
-          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number="$((ISSUE_NUM))")
-          
+          ' -f owner="${{ github.repository_owner }}" -f repo="$(echo "${{ github.repository }}" | cut -d'/' -f2)" -f issue_number=$ISSUE_NUM)
+                    
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
           PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
           
