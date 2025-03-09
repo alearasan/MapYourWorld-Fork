@@ -8,7 +8,12 @@ export class AuthRepository {
   constructor() {
     this.repository = AppDataSource.getRepository(User);
   }
-
+  /**
+   * Encuentra todos los usuarios
+   * @returns Todos los usuarios
+   */
+  async findAll(): Promise<User[]> {
+    return this.repository.find();
   /**
    * Encuentra un usuario por su ID
    * @param id ID del usuario

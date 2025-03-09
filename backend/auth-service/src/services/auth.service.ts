@@ -7,9 +7,8 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '@backend/auth-service/src/models/user.model';
 import { sendVerificationEmail,sendPasswordResetEmail } from '@backend/auth-service/src/services/email.service';
-import { publishEvent } from '@shared/libs/rabbitmq';
 import { generateToken,verifyToken} from '@shared/config/jwt.config';
-import AuthRepository from '@backend/auth-service/src/repositories/auth.repository';
+import { AuthRepository } from '@backend/auth-service/src/repositories/auth.repository';
 
 const repo = new AuthRepository();
 
@@ -42,14 +41,6 @@ export const registerUser = async (userData: any): Promise<User> => {
   const verificationToken = crypto.randomBytes(32).toString('hex'); 
   await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
 
-  // 5. Publicar evento de usuario registrado
-  // TODO: Implementar atributos user profile cuando el modeloe esté listo
-  await publishEvent('user.registered', {
-    userId: newUser.id.toString(),
-    email: newUser.email,
-    timestamp: new Date().toISOString()
-  });
-
   return newUser;
 };
 
@@ -76,13 +67,6 @@ export const loginUser = async (email: string, password: string): Promise<{user:
   const token = generateToken({
     userId: user.id.toString(),
     email: user.email
-  });
-
-  // 4. Publicar evento de inicio de sesión
-  await publishEvent('user.loggedin', {
-    userId: user.id.toString(),
-    email: user.email,
-    timestamp: new Date().toISOString()
   });
 
   // 6. Devolver usuario y token, quitando la contraseña en la respuesta para seguridad
@@ -125,7 +109,6 @@ export const verifyUserToken = async (token: string): Promise<{
  * @param newPassword Nueva contraseña
  */
 export const changePassword = async (userId: string, currentPassword: string, newPassword: string): Promise<boolean> => {
-  // TODO: Implementar cambio de contraseña
   // 1. Buscar usuario por ID
   const user = await repo.findById(userId);
   if (!user) {
@@ -154,7 +137,6 @@ export const changePassword = async (userId: string, currentPassword: string, ne
  * @param email Email del usuario
  */
 export const requestPasswordReset = async (email: string): Promise<boolean> => {
-  // TODO: Implementar solicitud de restablecimiento de contraseña
   // 1. Buscar usuario por email
   const user = await repo.findByEmail(email);
   if (!user) {
@@ -169,12 +151,53 @@ export const requestPasswordReset = async (email: string): Promise<boolean> => {
   // Pasamos el usuario
   await sendPasswordResetEmail(user.email, user.profile?.username || '', token);
   
-  // 5. Publicar evento de solicitud de reset
-  await publishEvent('user.password.reset.requested', {
-    userId: user.id.toString(),
-    email: user.email,
-    timestamp: new Date().toISOString()
-  });
-
   return true;
 }; 
+
+/**
+ * Restablece la contraseña usando un token
+ * @param token Token de recuperación
+ * @param newPassword Nueva contraseña
+ * @returns true si el restablecimiento fue exitoso
+ */
+export const resetPassword = async (token: string, newPassword: string): Promise<boolean> => {
+  if (!token || !newPassword) {
+    throw new Error('Token y nueva contraseña son requeridos');
+  }
+
+  // Validar la nueva contraseña
+  if (newPassword.length < 8) {
+    throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
+  }
+  if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+    throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
+  }
+  
+  // Buscar usuario por token (buscar entre todos los usuarios para encontrar el que coincide)
+  const users = await repo.findAll(); 
+  
+  // La verificación depende de cómo almacenaste el token en requestPasswordReset
+  let matchedUser: User | null = null;
+  
+  for (const user of users) {
+    // Intentar verificar si este usuario corresponde al token
+    try {
+      const tokenMatch = await bcrypt.compare(token + user.id.toString(), user.password);
+      if (tokenMatch) {
+        matchedUser = user;
+        break;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  
+  if (!matchedUser) {
+    throw new Error('Token inválido o expirado');
+  }
+  // Actualizar la contraseña
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await repo.updatePassword(matchedUser.id, hashedPassword);
+ 
+  return true;
+};
