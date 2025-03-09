@@ -135,7 +135,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.49:3000/api/districts/districts');
+      const response = await fetch('http://192.168.1.46:3000/api/districts');
       const data = await response.json();
   
       if (data.success && data.districts) {
@@ -178,11 +178,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     try {
   
       // Enviar la solicitud al backend con isUnlocked a false
-      const response = await fetch(`http://192.168.1.49:3000/api/districts/districts/unlock/${districtId}/1`, {
+      const response = await fetch(`http://192.168.1.46:3000/api/districts/unlock/${districtId}/1`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          isUnlocked: false,  // Aquí cambiamos el valor de isUnlocked
+          isUnlocked: true,  // Aquí cambiamos el valor de isUnlocked
         }),
       });
   
@@ -194,7 +194,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         // Actualizar el estado del frontend para reflejar el cambio
         setDistritosBackend((prevDistritos) =>
           prevDistritos.map((d) =>
-            d.id === districtId ? { ...d, isUnlocked: false } : d
+            d.id === districtId ? { ...d, isUnlocked: true } : d
           )
         );
       } else {
@@ -265,7 +265,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
       if (distritoEncontrado) {
         const { id, nombre, isUnlocked } = distritoEncontrado;
   
-        if (isUnlocked) {
+        if (!isUnlocked) {
           desbloquearDistrito(id);
         }
   

@@ -1,11 +1,16 @@
-const { exec } = require("child_process");
+const { spawn } = require("child_process");
 
-const startBackend = exec("cd backend && npx ts-node backend_endpoint.ts");
-const startFrontend = exec("cd frontend &&  cd mobile && npm start");
+//Cargar la BD
 
-// Redirigir la salida de los procesos a la consola principal
-startBackend.stdout.on("data", (data) => console.log(`[Backend] ${data}`));
-startBackend.stderr.on("data", (data) => console.error(`[Backend Error] ${data}`));
 
-startFrontend.stdout.on("data", (data) => console.log(`[Frontend] ${data}`));
-startFrontend.stderr.on("data", (data) => console.error(`[Frontend Error] ${data}`));
+spawn("npx ts-node map-service/src/mocks/district_create.ts", { cwd: "backend/map-service/src", shell: true, stdio: "inherit" })
+
+process.on("close", (code) => {
+    console.log(`[Process exited with code] ${code}`);
+  });
+
+
+spawn("npx ts-node backend_endpoint.ts", { cwd: "backend", shell: true, stdio: "ignore" });
+
+
+spawn("npm start", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });

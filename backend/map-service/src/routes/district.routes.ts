@@ -3,15 +3,15 @@ import { createDistrict, getDistrictById, getAllDistricts, unlockDistrict, getUs
 
 const router: Router = Router();
 
-router.post('/district/create', createDistrict);
+router.post('/create', createDistrict);
 
-router.get('/district/:districtId', getDistrictById);
+router.get('/:districtId', getDistrictById);
 
-router.get('/districts', getAllDistricts);
+router.get('/', getAllDistricts);
 
-router.get('/districts/update/:districtId', updateDistrict );
+router.put('/update/:districtId', updateDistrict );
 
-router.put('/districts/unlock/:districtId/:userId', unlockDistrict);
+router.put('/unlock/:districtId/:userId', unlockDistrict);
 
 router.get('/districts/user/unlock/:userId', getUserUnlockedDistricts);
 

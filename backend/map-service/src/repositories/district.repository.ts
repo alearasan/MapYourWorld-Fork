@@ -34,7 +34,7 @@ export default class DistrictRepository {
 
     async unlockDistrict(districtId: string): Promise<District> {
         const district = await this.getDistrictById(districtId);
-        district.isUnlocked = false;
+        district.isUnlocked = true;
         return await this.districtRepo.save(district);
     }
 
