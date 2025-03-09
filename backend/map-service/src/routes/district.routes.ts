@@ -11,7 +11,7 @@ router.get('/districts', getAllDistricts);
 
 router.get('/districts/update/:districtId', updateDistrict );
 
-router.get('/districts/unlock/:districtId/:userId', unlockDistrict);
+router.put('/districts/unlock/:districtId/:userId', unlockDistrict);
 
 router.get('/districts/user/unlock/:userId', getUserUnlockedDistricts);
 

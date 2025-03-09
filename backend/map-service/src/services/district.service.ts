@@ -159,7 +159,7 @@ export const unlockDistrict = async (
   // 1. Verificar si el usuario puede desbloquear el distrito
   const unlockedDistrict = await repo.unlockDistrict(districtId);
   // 3. Publicar evento de distrito desbloqueado
-  if (unlockedDistrict.isUnlocked === true) {
+  if (unlockedDistrict.isUnlocked === false) {
     return { success: true, message: 'Distrito desbloqueado correctamente' };
   } else {
     throw new Error('Error al desbloquear el distrito');
