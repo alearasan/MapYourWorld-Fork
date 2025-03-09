@@ -22,7 +22,7 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
         type: feature.geometry.type,
         coordinates: feature.geometry.coordinates
     } as Geometry,
-    isUnlocked: true,
+    isUnlocked: false,
 }));
 
 async function createAllDistricts() {

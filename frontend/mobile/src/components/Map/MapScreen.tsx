@@ -135,7 +135,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.46:3000/api/districts');
+      const response = await fetch('http://192.168.1.49:3000/api/districts');
       const data = await response.json();
   
       if (data.success && data.districts) {
@@ -178,7 +178,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     try {
   
       // Enviar la solicitud al backend con isUnlocked a false
-      const response = await fetch(`http://192.168.1.46:3000/api/districts/unlock/${districtId}/1`, {
+      const response = await fetch(`http://192.168.1.49:3000/api/districts/unlock/${districtId}/1`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -309,7 +309,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                     key={index}
                     coordinates={distrito.coordenadas}
                     strokeColor={"#808080"}
-                    fillColor={!distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
+                    fillColor={distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
                     strokeWidth={2}
                   />
                 );
