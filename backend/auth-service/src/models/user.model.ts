@@ -50,8 +50,9 @@ export class User {
    * Relación inversa de 1:1 con UserProfile.
    * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
    */
-  // @OneToOne(() => UserProfile, (profile) => profile.userId)
-  // profile?: UserProfile;
+  
+  @OneToOne(() => UserProfile, (profile) => profile.id)
+  profile?: UserProfile;
 
   /**
    * Relación 1:N con Map
