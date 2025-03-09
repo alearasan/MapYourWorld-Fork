@@ -97,16 +97,7 @@ export const updateMap = async (
     }
 
     // 4. Si se modifican los límites, verificar que no hay solapamiento
-    if (updateData.boundaries) {
-      const existingMap = await AppDataSource.query(`
-      SELECT 1 
-      FROM Map 
-      WHERE ST_Intersects(boundaries, ST_GeomFromGeoJSON($1))
-    `, [JSON.stringify(updateData.boundaries)]);
-      if (existingMap.length > 0) {
-        throw new Error("Las coordenadas introducidas se solapan con otro mapa ya existente.");
-      }
-    }
+  
 
     // 5. Actualizar el mapa en la base de datos
     const savedMap = await repo.updateMap(MapId, updateData);
