@@ -9,7 +9,9 @@ import { Role, User } from '@backend/auth-service/src/models/user.model';
 import { sendVerificationEmail,sendPasswordResetEmail } from '@backend/auth-service/src/services/email.service';
 import { publishEvent } from '@shared/libs/rabbitmq';
 import { generateToken,verifyToken} from '@shared/config/jwt.config';
-import { getRepository } from 'typeorm';
+import AuthRepository from '@backend/auth-service/src/repositories/auth.repository';
+
+const repo = new AuthRepository();
 
 /**
  * Registra un nuevo usuario en el sistema
@@ -22,8 +24,7 @@ export const registerUser = async (userData: any): Promise<User> => {
   }
 
   // 2. Verificar que el email no existe en la base de datos
-  const userRepository = getRepository(User);
-  const existingUser = await userRepository.findOne({where: { email: userData.email }});
+  const existingUser = await repo.findByEmail(userData.email);
   if (existingUser) {
     throw new Error('El usuario ya existe con este email');
   }
@@ -37,10 +38,9 @@ export const registerUser = async (userData: any): Promise<User> => {
   newUser.role = Role.USER;
   newUser.password = hashedPassword;
     
-  await userRepository.save(newUser);
-  const verificationToken = crypto.randomBytes(32).toString('hex'); // TODO: Cambiar si se implementa token de verificación en el modelo de user
-  // Para el email, usamos el firstName en lugar del username
-  await sendVerificationEmail(newUser.email, 'User', verificationToken);
+  await repo.save(newUser);
+  const verificationToken = crypto.randomBytes(32).toString('hex'); 
+  await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
 
   // 5. Publicar evento de usuario registrado
   // TODO: Implementar atributos user profile cuando el modeloe esté listo
@@ -60,11 +60,7 @@ export const registerUser = async (userData: any): Promise<User> => {
  */
 export const loginUser = async (email: string, password: string): Promise<{user: User, token: string}> => {
   // 1. Buscar usuario por email
-  const userRepository = getRepository(User);
-  const user = await userRepository.findOne({ 
-    where: { email },
-    select: ['id', 'email', 'password', 'role'] 
-  });
+  const user = await repo.findWithPassword(email);
   
   if (!user) {
     throw new Error('Usuario no encontrado');
@@ -82,12 +78,7 @@ export const loginUser = async (email: string, password: string): Promise<{user:
     email: user.email
   });
 
-  // 4. Actualizar lastLogin y guardar
-  //TODO: Implementar cuando hayan timestamps en el modelo
-  //user.lastLogin = new Date();
-  //await userRepository.save(user);
-
-  // 5. Publicar evento de inicio de sesión
+  // 4. Publicar evento de inicio de sesión
   await publishEvent('user.loggedin', {
     userId: user.id.toString(),
     email: user.email,
@@ -108,15 +99,13 @@ export const verifyUserToken = async (token: string): Promise<{
   email: string;
   role: Role;
 }> => {
-  // TODO: Implementar la verificación de token
   // 1. Verificar firma y expiración del token
   const decoded = verifyToken(token);
   if(!decoded) {
     throw new Error('Token inválido o expirado');
   } 
   // 2. Obtener información actualizada del usuario
-  const userRepository = getRepository(User);
-  const user = await userRepository.findOne({ where: { id: decoded.userId } });
+  const user = await repo.findById(decoded.userId);
   
   if (!user) {
     throw new Error('Usuario no encontrado');
@@ -138,8 +127,7 @@ export const verifyUserToken = async (token: string): Promise<{
 export const changePassword = async (userId: string, currentPassword: string, newPassword: string): Promise<boolean> => {
   // TODO: Implementar cambio de contraseña
   // 1. Buscar usuario por ID
-  const userRepository = getRepository(User);
-  const user = await userRepository.findOne({where:{id:userId}});
+  const user = await repo.findById(userId);
   if (!user) {
     throw new Error('Usuario no encontrado');
   }
@@ -156,8 +144,8 @@ export const changePassword = async (userId: string, currentPassword: string, ne
     throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
   }
   // 4. Actualizar contraseña y guardar
-  user.password=newPassword;
-  await userRepository.save(user);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await repo.updatePassword(user.id, hashedPassword);
   return true;
 };
 
@@ -168,20 +156,18 @@ export const changePassword = async (userId: string, currentPassword: string, ne
 export const requestPasswordReset = async (email: string): Promise<boolean> => {
   // TODO: Implementar solicitud de restablecimiento de contraseña
   // 1. Buscar usuario por email
-  const userRepository = getRepository(User);
-  const user = await userRepository.findOne({where:{email}});
+  const user = await repo.findByEmail(email);
   if (!user) {
     throw new Error('Usuario no encontrado');
   }
   // 2. Generar token único y temporal
   const token = crypto.randomBytes(32).toString('hex');
   user.password = await bcrypt.hash(token + user.id.toString(), 10);
-  await userRepository.save(user);
+  await repo.save(user);
   
   // 4. Enviar email con instrucciones
   // Pasamos el usuario
-  //TODO: pasar nombre del usuario cuando esté en el modelo de user-profile
-  await sendPasswordResetEmail(user.email, email, token);
+  await sendPasswordResetEmail(user.email, user.profile?.username || '', token);
   
   // 5. Publicar evento de solicitud de reset
   await publishEvent('user.password.reset.requested', {

@@ -33,16 +33,6 @@ router.post(
       .withMessage('La contraseña debe contener al menos una letra mayúscula')
       .matches(/[!@#$%^&*(),.?":{}|<>]/)
       .withMessage('La contraseña debe contener al menos un carácter especial'),
-    body('firstName')
-      .notEmpty()
-      .withMessage('El nombre es obligatorio')
-      .isLength({ min: 2 })
-      .withMessage('El nombre debe tener al menos 2 caracteres'),
-    body('lastName')
-      .notEmpty()
-      .withMessage('El apellido es obligatorio')
-      .isLength({ min: 2 })
-      .withMessage('El apellido debe tener al menos 2 caracteres'),
   ],
   register
 );

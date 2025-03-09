@@ -20,27 +20,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, firstName, lastName } = req.body;
-
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'El usuario ya existe con este email' 
-      });
-      return;
-    }
-
-    // Crear nuevo usuario
-    const user = new User({
+    const { email, password } = req.body;
+    const user = await authService.registerUser({
       email,
-      password,
-      firstName,
-      lastName,
-      plan: 'free',
-      active: true,
-      lastLogin: new Date()
+      password
+      role: Role.USER
     });
 
     // Guardar usuario
@@ -49,16 +33,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     // Generar token JWT
     const token = generateToken({
       userId: user._id.toString(),
-      email: user.email,
-      plan: user.plan
+      email: user.email
     });
 
     // Publicar evento de usuario registrado
     await publishEvent('user.registered', {
       userId: user._id.toString(),
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
       timestamp: new Date()
     });
 
@@ -70,9 +51,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user._id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
@@ -90,7 +69,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validar entrada
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       res.status(400).json({ success: false, errors: errors.array() });
@@ -98,54 +76,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const { email, password } = req.body;
-
-    // Buscar usuario por email con password (select: false por defecto)
-    const user = await User.findOne({ email }).select('+password');
-    
-    if (!user) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Credenciales incorrectas' 
-      });
-      return;
-    }
-
-    // Verificar si el usuario está activo
-    if (!user.active) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'La cuenta está desactivada. Por favor contacta con soporte.' 
-      });
-      return;
-    }
-
-    // Comparar contraseña
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Credenciales incorrectas' 
-      });
-      return;
-    }
-
-    // Actualizar último login
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Generar token JWT
-    const token = generateToken({
-      userId: user._id.toString(),
-      email: user.email,
-      plan: user.plan
-    });
-
-    // Publicar evento de inicio de sesión
-    await publishEvent('user.loggedin', {
-      userId: user._id.toString(),
-      email: user.email,
-      timestamp: new Date()
-    });
+    const { user, token } = await authService.loginUser(email, password);
 
     // Responder con éxito
     res.status(200).json({
@@ -155,9 +86,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user._id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
@@ -195,25 +124,6 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Buscar usuario por ID
-    const user = await User.findById((decoded as DecodedToken).userId);
-    if (!user) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
-      });
-      return;
-    }
-
-    // Verificar si el usuario está activo
-    if (!user.active) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'La cuenta está desactivada' 
-      });
-      return;
-    }
-
     // Responder con éxito
     res.status(200).json({
       success: true,
@@ -221,9 +131,7 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: user._id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        plan: user.plan
+        role: user.role
       }
     });
   } catch (error) {
