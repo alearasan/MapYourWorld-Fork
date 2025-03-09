@@ -1,10 +1,10 @@
-import { createDistrict } from "@backend/map-service/src/services/district.service";
-import { AppDataSource } from '@backend/database/appDataSource';
+import { createDistrict } from "../services/district.service";
+import { AppDataSource } from '../../../database/appDataSource';
 import { Geometry } from 'geojson';
 
 import * as fs from 'fs';
 
-const filePath = '../database/map.geojson';
+const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
 const geojsonData = JSON.parse(rawData);
 

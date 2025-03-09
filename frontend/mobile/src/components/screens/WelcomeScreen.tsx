@@ -31,7 +31,8 @@ const WelcomeScreen = () => {
   const handleLoginPress = () => {
     navigation.navigate('Login');
   };
-  
+
+
   return (
     <ImageBackground
       source={require("../../assets/images/login_background.webp")} 

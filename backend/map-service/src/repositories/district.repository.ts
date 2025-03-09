@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { District } from '@backend/map-service/src/models/district.model';
-import { AppDataSource } from '@backend/database/appDataSource'; // Importa la instancia de conexión
+import { District } from '../models/district.model'; // Importa tu entidad
+import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 
 export default class DistrictRepository {
     private districtRepo: Repository<District>;

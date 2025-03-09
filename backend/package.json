@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run start:auth\" \"npm run start:user\" \"npm run start:map\" \"npm run start:social\" \"npm run start:notification\" \"npm run start:gateway\"",
-    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:social\" \"npm run dev:notification\" \"npm run dev:gateway\"",
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:map\" \"npm run dev:social\" \"npm run dev:notification\" \"npm run dev:gateway\" \"dev:backend\"",
     "build": "npm run build:social && npm run build:gateway",
     "test": "jest",
     "start:auth": "cd auth-service && npm start",
@@ -19,6 +19,7 @@
     "dev:map": "cd map-service && npm run dev",
     "dev:social": "cd social-service && npm run dev",
     "dev:notification": "cd notification-service && npm run dev",
+    "dev:backend": "npx ts-node backend_endpoint.ts",
     "dev:gateway": "cd api-gateway && npm run dev",
     "dev:db": "cd database && ts-node db.ts",
     "build:social": "cd social-service && npm run build",

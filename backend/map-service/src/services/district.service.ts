@@ -3,10 +3,10 @@
  * Gestiona la creación, consulta y desbloqueo de distritos del mapa
  */
 
-import { publishEvent } from '@shared/libs/rabbitmq';
-import db from '@backend/database/db';
-import { District } from '@backend/map-service/src/models/district.model';
-import { AppDataSource } from '@backend/database/appDataSource';
+//import { publishEvent } from '@shared/libs/rabbitmq';
+import db from '../../../database/db';
+import { District } from '../models/district.model';
+import { AppDataSource } from '../../../database/appDataSource';
 import DistrictRepository from '../repositories/district.repository';
 
 const repo = new DistrictRepository();
@@ -37,15 +37,8 @@ export const createDistrict = async (
     // 2. Verificar que el usuario tiene permisos de administrador
 
     // 3. Validar que los límites geográficos no se solapan con otros distritos
-    const existingDistrict = await db.oneOrNone(`
-        SELECT 1 
-        FROM district 
-        WHERE ST_Intersects(boundaries, ST_GeomFromText($1, 4326))
-      `, [districtData.boundaries]);
 
-    if (existingDistrict) {
-      throw new Error("Las coordenadas introducidas se solapan con otro distrito ya existente.")
-    }
+
 
 
     // 3. Crear y guardar el distrito correctamente
@@ -63,14 +56,6 @@ export const createDistrict = async (
 
     console.log("Distrito creado correctamente:", newDistrict);
     return newDistrict;
-    // 5. Publicar evento de distrito creado
-    await publishEvent('district.created', {
-      districtId: createdDistrict.id,
-      name: createdDistrict.name,
-      description: createdDistrict.description,
-      boundaries: createdDistrict.boundaries,
-      timestamp: new Date()
-    });
 
   } catch (error) {
     console.log(error)
@@ -108,7 +93,7 @@ export const getDistrictById = async (districtId: string): Promise<District | nu
  * Obtiene todos los distritos
  * @param includeInactive Indica si se deben incluir distritos inactivos
  */
-export const getAllDistricts = async (includeInactive: boolean = false): Promise<District[]> => {
+export const getAllDistricts = async (): Promise<District[]> => {
   // TODO: Implementar la obtención de todos los distritos
   // 1. Consultar todos los distritos en la base de datos
   const districts = await repo.getDistricts();

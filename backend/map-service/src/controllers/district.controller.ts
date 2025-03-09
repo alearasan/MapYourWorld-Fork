@@ -49,8 +49,7 @@ export const getDistrictById = async (req: Request, res: Response): Promise<void
  */
 export const getAllDistricts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { includeInactive } = req.query;
-    const districts = await DistrictService.getAllDistricts(includeInactive === 'true');
+    const districts = await DistrictService.getAllDistricts();
 
     res.status(200).json({ success: true, districts });
   } catch (error) {

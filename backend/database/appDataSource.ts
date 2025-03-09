@@ -1,8 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { District } from '@backend/map-service/src/models/district.model'; // Importa tus entidades
-import { UserProfile } from '@backend/user-service/src/models/userProfile.model';
-import { User } from '@backend/auth-service/src/models/user.model'; 
+import { District } from '../map-service/src/models/district.model'; // Importa tus entidades
+import { UserProfile } from '../user-service/src/models/userProfile.model';
 
 
 export const AppDataSource = new DataSource({
