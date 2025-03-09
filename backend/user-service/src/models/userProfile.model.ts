@@ -4,7 +4,7 @@ import {
     Column,
     OneToOne,
   } from 'typeorm';
-  import { User } from '@backend/auth-service/src/models/user.model';
+  // import { User } from '@backend/auth-service/src/models/user.model';
   
   @Entity('user_profiles')
   export class UserProfile {

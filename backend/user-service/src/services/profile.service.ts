@@ -7,6 +7,8 @@
 import { UserProfileRepository } from '../repositories/userProfile.repository';
 import { UserProfile } from '../models/userProfile.model';
 
+const userProfileRepository = new UserProfileRepository();
+
 /**
  * Obtiene el perfil completo de un usuario por su ID de perfil (UUID).
  * @param profileId UUID del perfil (campo 'id' de UserProfile)
@@ -15,8 +17,7 @@ export const getUserProfile = async (
   profileId: string
 ): Promise<UserProfile | null> => {
   try {
-    const userRepository = new UserProfileRepository();
-    const userProfile = await userRepository.findById(profileId);
+    const userProfile = await userProfileRepository.findById(profileId);
     return userProfile || null;
   } catch (error) {
     console.error(`Error al obtener perfil con ID ${profileId}:`, error);
@@ -38,8 +39,7 @@ export const updateUserProfile = async (
   profileData: Partial<Omit<UserProfile, 'id'>>
 ): Promise<UserProfile | null> => {
   try {
-    const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(profileId);
+    const existingProfile = await userProfileRepository.findById(profileId);
     if (!existingProfile) {
       return null;
     }
@@ -49,7 +49,7 @@ export const updateUserProfile = async (
       profileData.username &&
       profileData.username !== existingProfile.username
     ) {
-      const userWithSameUsername = await userRepository.findByUsername(
+      const userWithSameUsername = await userProfileRepository.findByUsername(
         profileData.username
       );
       if (userWithSameUsername) {
@@ -57,7 +57,7 @@ export const updateUserProfile = async (
       }
     }
 
-    const updatedProfile = await userRepository.update(profileId, profileData);
+    const updatedProfile = await userProfileRepository.update(profileId, profileData);
     if (!updatedProfile) {
       throw new Error('Error al actualizar el perfil');
     }
@@ -90,8 +90,7 @@ export const updateUserPicture = async (
   pictureData: string
 ): Promise<{ success: boolean; pictureUrl: string }> => {
   try {
-    const userRepository = new UserProfileRepository();
-    const existingProfile = await userRepository.findById(profileId);
+    const existingProfile = await userProfileRepository.findById(profileId);
     if (!existingProfile) {
       throw new Error('Perfil no encontrado');
     }
@@ -109,7 +108,7 @@ export const updateUserPicture = async (
       throw new Error('Formato de imagen no soportado');
     }
 
-    const updatedProfile = await userRepository.update(profileId, {
+    const updatedProfile = await userProfileRepository.update(profileId, {
       picture: pictureUrl,
     });
     if (!updatedProfile) {
@@ -151,10 +150,9 @@ export const searchUsers = async (
     }
 
     const sanitizedQuery = query.trim();
-    const userRepository = new UserProfileRepository();
 
 
-    const [users, total] = await userRepository.search(
+    const [users, total] = await userProfileRepository.search(
       sanitizedQuery,
       limit,
       offset
