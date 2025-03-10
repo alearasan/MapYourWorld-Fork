@@ -8,6 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import districtRoutes from './map-service/src/routes/district.routes';
+import regionRoutes from './map-service/src/routes/region.routes';
 
 
 // Cargar variables de entorno
@@ -30,6 +31,7 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use('/api/districts', districtRoutes)
+app.use('/api/region', regionRoutes)
 
 
 // Interfaz para los servicios

@@ -36,5 +36,11 @@ export default class RegionRepository {
     async getRegions(): Promise<Region[]> {
             return await this.regionRepo.find();
     }
+    async deleteRegion(regionId: string): Promise<boolean> {
+        const result = await this.regionRepo.delete(regionId);
+        // Si 'affected' es null o undefined, lo convertimos a 0
+        return (result.affected ?? 0) > 0;
+      }
+      
     
 }
