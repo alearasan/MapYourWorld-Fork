@@ -20,16 +20,12 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 3000;
 
-app.use('/api/districts', districtRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/profiles', profileRoutes);
-
 // Definir las rutas
-
 
 app.use('/api/districts', districtRoutes)
 app.use('/api/region', regionRoutes)
-
+app.use('/api/auth', authRoutes);
+app.use('/api/profiles', profileRoutes);
 
 // Interfaz para los servicios
 interface Service {
