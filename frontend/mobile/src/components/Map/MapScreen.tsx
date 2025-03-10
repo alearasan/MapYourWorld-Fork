@@ -5,8 +5,10 @@ import * as Location from "expo-location";
 
 // Definir el tipo para los distritos
 interface Distrito {
+  id: string;
   nombre: string;
   coordenadas: { latitude: number; longitude: number }[];
+  isUnlocked: boolean;
 }
 
 // Definir el tipo para los distritos desde el backend
@@ -133,25 +135,25 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.46:3000/api/districts/districts');
+      const response = await fetch('http://192.168.1.49:3000/api/districts');
       const data = await response.json();
-      
+  
       if (data.success && data.districts) {
-        // Transformar los datos del backend al formato que necesita el mapa
         const distritosMapeados = data.districts
           .map((distrito: DistritoBackend) => {
             try {
               const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-              
-              // Solo considerar polígonos con suficientes puntos
+  
               if (coordenadasTransformadas.length < 3) {
                 console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                 return null;
               }
-              
+  
               return {
+                id: distrito.id,
                 nombre: distrito.name,
-                coordenadas: coordenadasTransformadas
+                coordenadas: coordenadasTransformadas,
+                isUnlocked: distrito.isUnlocked, // Agregar el atributo isUnlocked
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -159,7 +161,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
             }
           })
           .filter((d: Distrito | null): d is Distrito => d !== null);
-        
+  
         setDistritosBackend(distritosMapeados);
       } else {
         Alert.alert("Error", "No se pudieron cargar los distritos");
@@ -171,6 +173,41 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
       setLoading(false);
     }
   };
+
+  const desbloquearDistrito = async (districtId: string) => {
+    try {
+  
+      // Enviar la solicitud al backend con isUnlocked a false
+      const response = await fetch(`http://192.168.1.49:3000/api/districts/unlock/${districtId}/1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isUnlocked: true,  // Aquí cambiamos el valor de isUnlocked
+        }),
+      });
+  
+      const data = await response.json();
+
+      if (data.success) {
+        console.log(`✅ Distrito ${districtId} desbloqueado exitosamente.`);
+  
+        // Actualizar el estado del frontend para reflejar el cambio
+        setDistritosBackend((prevDistritos) =>
+          prevDistritos.map((d) =>
+            d.id === districtId ? { ...d, isUnlocked: true } : d
+          )
+        );
+      } else {
+        console.warn(`⚠️ No se pudo desbloquear el distrito ${districtId}`);
+      }
+    } catch (error) {
+      console.error("❌ Error al desbloquear el distrito:", error);
+    }
+  };
+  
+  
+  
+  
 
   useEffect(() => {
     // Cargar los distritos desde el backend cuando se monte el componente
@@ -214,46 +251,39 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Actualizar la verificación de si el usuario está dentro de algún distrito
   useEffect(() => {
     if (location && distritosBackend.length > 0) {
-      // Verificar todos los distritos
       let dentroDeAlguno = false;
-      let nombreDistrito = "";
-      
+      let distritoEncontrado: Distrito | null = null;
+  
       for (const distrito of distritosBackend) {
         if (isPointInPolygon(location, distrito.coordenadas)) {
           dentroDeAlguno = true;
-          nombreDistrito = distrito.nombre;
-          
-          // Verificar si es la primera vez que se visita este distrito
-          if (!distritosVisitados.has(nombreDistrito)) {
-            // Marcar el distrito como visitado
-            const nuevosVisitados = new Set(distritosVisitados);
-            nuevosVisitados.add(nombreDistrito);
-            setDistritosVisitados(nuevosVisitados);
-            
-            // Actualizar el distrito actual
-            setDistritoActual(nombreDistrito);
-            
-            // Mostrar el logro después de 2 segundos
-            setTimeout(() => {
-              setMostrarLogro(true);
-              
-              // Ocultar el logro después de 6 segundos (4 segundos de visualización + 2 de animación)
-              setTimeout(() => {
-                setMostrarLogro(false);
-              }, 6000);
-            }, 4000);
-          }
-          
+          distritoEncontrado = distrito;
           break;
         }
       }
-      
-      // Si no está dentro de ningún distrito, resetear el distrito actual
-      if (!dentroDeAlguno) {
+  
+      if (distritoEncontrado) {
+        const { id, nombre, isUnlocked } = distritoEncontrado;
+  
+        if (!isUnlocked) {
+          desbloquearDistrito(id);
+        }
+  
+        if (!distritosVisitados.has(nombre)) {
+          setDistritosVisitados(new Set(distritosVisitados).add(nombre));
+          setDistritoActual(nombre);
+  
+          setTimeout(() => {
+            setMostrarLogro(true);
+            setTimeout(() => setMostrarLogro(false), 6000);
+          }, 4000);
+        }
+      } else {
         setDistritoActual(null);
       }
     }
   }, [location, distritosBackend]);
+  
 
   return (
     <View style={styles.container}>
@@ -263,31 +293,30 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         </View>
       ) : (
         <>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: 37.3754,  // Coordenadas aproximadas de Sevilla
-              longitude: -5.9903,
-              latitudeDelta: 0.1,
-              longitudeDelta: 0.1,
-            }}
-            showsUserLocation={true}
-          >
-            {/* Renderizar los polígonos de los distritos */}
-            {distritosBackend.map((distrito, index) => {
-              const isInside = location ? isPointInPolygon(location, distrito.coordenadas) : false;
-              
-              return (
-                <Polygon
-                  key={index}
-                  coordinates={distrito.coordenadas}
-                  strokeColor={isInside ? "#00FF00" : "#808080"}
-                  fillColor={isInside ? "rgba(0, 255, 0, 0.2)" : "rgba(128, 128, 128, 0.2)"}
-                  strokeWidth={2}
-                />
-              );
-            })}
-          </MapView>
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: 37.3754,
+                longitude: -5.9903,
+                latitudeDelta: 0.1,
+                longitudeDelta: 0.1,
+              }}
+              showsUserLocation={true}
+            >
+              {distritosBackend.map((distrito, index) => {
+                return (
+                  <Polygon
+                    key={index}
+                    coordinates={distrito.coordenadas}
+                    strokeColor={"#808080"}
+                    fillColor={distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
+                    strokeWidth={2}
+                  />
+                );
+              })}
+            </MapView>
+
+
           
           {/* Componente de logro */}
           {distritoActual && <LogroComponent visible={mostrarLogro} distrito={distritoActual} />}
