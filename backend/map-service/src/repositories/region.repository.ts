@@ -9,16 +9,32 @@ export default class RegionRepository {
         this.regionRepo = AppDataSource.getRepository(Region);
     }
 
-    async saveRegion(name: string, description: string): Promise<Region> {
-        const region = this.regionRepo.create({
-            name,description
-        });
-        return await this.regionRepo.save(region);
+    async createRegion(regionData: Omit<Region, 'id'>): Promise<Region> {
+            const region = this.regionRepo.create(regionData);
+            return await this.regionRepo.save(region);
     }
 
-    async getRegion(name: string): Promise<Region[]> {
-        return await this.regionRepo.find({
-            where: { name }
-        });
+    async getRegionById(regionId: string): Promise<Region> {
+            const region = await this.regionRepo.findOneBy({ id: regionId });
+            if (!region) {
+                throw new Error(`Region with id ${regionId} not found`);
+            }
+            return region;
     }
+    async getRegionByName(regionName: string): Promise<Region> {
+        const region = await this.regionRepo.findOneBy({ name: regionName });
+        if (!region) {
+            throw new Error(`Region with name ${regionName} not found`);
+        }
+        return region;
+    }
+    async updateRegion(regionId: string, regionData: Partial<Region>): Promise<Region> {
+            const region = await this.getRegionById(regionId);
+            Object.assign(region, regionData);
+            return await this.regionRepo.save(region);
+    }
+    async getRegions(): Promise<Region[]> {
+            return await this.regionRepo.find();
+    }
+    
 }
