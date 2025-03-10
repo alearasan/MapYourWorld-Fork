@@ -29,7 +29,7 @@ import {
     @ManyToOne(() => User, (user) => user.sentFriendRequests)
     requester!: User;
   
-    @ManyToOne(() => User, (user) => user.receivedFriendRequests)
+    @ManyToOne(() => User, (user) => user.receivedFriendRequests )
     recipient!: User;
   
     @Column({
