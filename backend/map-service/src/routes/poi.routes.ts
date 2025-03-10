@@ -18,10 +18,4 @@ router.delete('/:id', POIController.deletePOI);
 // Buscar POIs cercanos a una ubicación
 router.get('/nearby', POIController.findNearbyPOIs);
 
-// Registrar visita a un POI
-router.post('/visit', POIController.registerPOIVisit);
-
-// Calificar un POI
-router.post('/rate', POIController.ratePOI);
-
 export default router;
