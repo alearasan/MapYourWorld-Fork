@@ -4,6 +4,7 @@ import {
   updateProfile,
   updatePicture,
   searchProfiles,
+  createProfile,
 } from '../controllers/profile.controller';
 
 const router: Router = Router();
@@ -31,5 +32,11 @@ router.put('/:profileId/picture', updatePicture);
  * GET /api/profiles?query=texto
  */
 router.get('/', searchProfiles);
+
+/**
+ * Crea un nuevo perfil
+ * POST /api/profiles
+ */
+router.post('/', createProfile);
 
 export default router;
