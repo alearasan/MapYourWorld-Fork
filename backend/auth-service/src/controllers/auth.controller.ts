@@ -5,7 +5,7 @@
 import { Request, Response } from 'express';
 import { User, Role } from '../models/user.model';
 import { validationResult } from 'express-validator';
-import { generateToken, verifyToken } from '../shared/config/jwt.config';
+import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
@@ -96,6 +96,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 /**
  * Verifica un token JWT y devuelve los datos del usuario
  */
+
+/*
 export const verify = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
@@ -115,7 +117,7 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
         success: false, 
         message: 'Token inválido o expirado' 
       });
-      return:
+      return;
     }
 
     // Buscar usuario por ID
@@ -149,10 +151,13 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
    
   }
 };
+*/
 
 /**
  * Cambia la contraseña de un usuario autenticado
  */
+
+/*
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
   try {
     // Validar entrada
@@ -163,7 +168,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     const authReq = req as AuthenticatedRequest;
-    const userId = authReq.user?.id;
+    const userId = authReq.user?.userId;
     
     if (!userId) {
       res.status(401).json({ 

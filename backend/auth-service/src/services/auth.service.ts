@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
 import { sendVerificationEmail,sendPasswordResetEmail } from '../services/email.service';
-import { generateToken,verifyToken} from '../shared/config/jwt.config';
+import { generateToken,verifyToken} from '../../../../shared/config/jwt.config';
 import { AuthRepository } from '../repositories/auth.repository';
 
 const repo = new AuthRepository();

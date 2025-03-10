@@ -52,6 +52,7 @@ export class User {
    */
   
   @OneToOne(() => UserProfile, (profile) => profile.id)
+
   profile?: UserProfile;
 
   /**

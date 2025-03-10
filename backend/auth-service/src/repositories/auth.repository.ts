@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { User, Role } from '@backend/auth-service/src/models/user.model';
-import { AppDataSource } from '@backend/database/appDataSource';
+import { User, Role } from '../models/user.model';
+import { AppDataSource } from '../../../database/appDataSource';
 
 export class AuthRepository {
   private repository: Repository<User>;
@@ -14,6 +14,7 @@ export class AuthRepository {
    */
   async findAll(): Promise<User[]> {
     return this.repository.find();
+  }
   /**
    * Encuentra un usuario por su ID
    * @param id ID del usuario
