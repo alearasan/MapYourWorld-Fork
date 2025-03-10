@@ -22,8 +22,8 @@ const PORT = process.env.PORT || 3000;
 
 // Definir las rutas
 
-app.use('/api/districts', districtRoutes)
-app.use('/api/region', regionRoutes)
+app.use('/api/districts', districtRoutes);
+app.use('/api/region', regionRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 
