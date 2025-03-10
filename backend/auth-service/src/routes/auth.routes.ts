@@ -6,10 +6,9 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { register, login, verify, forgotPassword, resetPassword, changePassword } from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { AuthenticatedRequest } from '@backend/auth-service/src/types';
 import { requireAdmin, isAuthenticated } from '../middleware/auth.middleware';
 import adminRoutes from './admin.routes';
-
+import { AuthenticatedRequest } from '../types';
 const router: Router = Router();
 
 // Ruta para registrar un usuario
@@ -99,15 +98,16 @@ router.post(
 );
 
 // Ruta para obtener el perfil del usuario autenticado
-router.get('/profile', authMiddleware(), (req: AuthenticatedRequest, res) => {
+router.get('/profile', authMiddleware(), (req: AuthenticatedRequest, res: Response) => {
   res.status(200).json({
     success: true,
     user: req.user
   });
+  
 });
 
 // Ruta para cerrar sesión
-router.post('/logout', (req, res) => {
+router.post('/logout', (req, res, next) => {
   res.status(200).json({
     success: true,
     message: 'Sesión cerrada correctamente'
@@ -116,4 +116,5 @@ router.post('/logout', (req, res) => {
 
 // Rutas para permisos de administrador
 router.use('/admin', isAuthenticated, requireAdmin, adminRoutes);
-export default router; 
+
+export default router;

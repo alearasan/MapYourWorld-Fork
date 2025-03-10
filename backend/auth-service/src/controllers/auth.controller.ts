@@ -3,12 +3,12 @@
  */
 
 import { Request, Response } from 'express';
-import { User, Role } from '@backend/auth-service/src/models/user.model';
+import { User, Role } from '../models/user.model';
 import { validationResult } from 'express-validator';
-import { publishEvent } from '@shared/libs/rabbitmq';
-import { generateToken, verifyToken, DecodedToken } from '@shared/config/jwt.config';
-import * as authService from '@backend/auth-service/src/services/auth.service';
-import { sendPasswordChangeNotification } from '@backend/auth-service/src/services/email.service';
+import { generateToken, verifyToken } from '../shared/config/jwt.config';
+import * as authService from '../services/auth.service';
+import { sendPasswordChangeNotification } from '../services/email.service';
+import { AuthenticatedRequest } from '../types';
 
 /**
  * Registra un nuevo usuario
@@ -81,6 +81,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: user.role
       }
     });
+    
   } catch (error) {
     console.error('Error en login:', error);
     res.status(500).json({ 
@@ -88,6 +89,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Error al iniciar sesión',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
+   
   }
 };
 
@@ -113,7 +115,7 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
         success: false, 
         message: 'Token inválido o expirado' 
       });
-      return;
+      return:
     }
 
     // Buscar usuario por ID
@@ -136,6 +138,7 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
         role: user.role
       }
     });
+    
   } catch (error) {
     console.error('Error en verificación:', error);
     res.status(500).json({ 
@@ -143,8 +146,9 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
       message: 'Error al verificar token',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
+   
   }
-}; 
+};
 
 /**
  * Cambia la contraseña de un usuario autenticado
@@ -174,7 +178,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     await authService.changePassword(userId, currentPassword, newPassword);
 
     try {
-      await sendPasswordChangeNotification(authReq.user.email, authReq.user.username || '');
+      await sendPasswordChangeNotification(authReq.user.email, authReq.user.firstName || '');
     } catch (emailError) {
       console.error('Error al enviar notificación de cambio de contraseña:', emailError);
     }
@@ -183,6 +187,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Contraseña cambiada correctamente'
     });
+    
   } catch (error) {
     console.error('Error al cambiar contraseña:', error);
     res.status(500).json({ 
@@ -190,6 +195,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       message: 'Error al cambiar contraseña',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
+    
   }
 };
 
@@ -215,6 +221,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Si el email está registrado, recibirás instrucciones para restablecer tu contraseña'
     });
+    
   } catch (error) {
     console.error('Error al solicitar reseteo de contraseña:', error);
     // Por seguridad, no revelamos el error específico
@@ -222,6 +229,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Se produjo un error al solicitar el reseteo de contraseña'
     });
+   
   }
 };
 
@@ -244,6 +252,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       success: true,
       message: 'Contraseña restablecida correctamente'
     });
+    
   } catch (error) {
     console.error('Error al restablecer contraseña:', error);
     res.status(500).json({ 
@@ -251,5 +260,6 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       message: 'Error al restablecer contraseña',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
+    
   }
 };

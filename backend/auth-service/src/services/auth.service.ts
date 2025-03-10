@@ -5,10 +5,10 @@
 
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { Role, User } from '@backend/auth-service/src/models/user.model';
-import { sendVerificationEmail,sendPasswordResetEmail } from '@backend/auth-service/src/services/email.service';
-import { generateToken,verifyToken} from '@shared/config/jwt.config';
-import { AuthRepository } from '@backend/auth-service/src/repositories/auth.repository';
+import { Role, User } from '../models/user.model';
+import { sendVerificationEmail,sendPasswordResetEmail } from '../services/email.service';
+import { generateToken,verifyToken} from '../shared/config/jwt.config';
+import { AuthRepository } from '../repositories/auth.repository';
 
 const repo = new AuthRepository();
 

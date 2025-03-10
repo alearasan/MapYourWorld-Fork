@@ -11,7 +11,7 @@ import {
   JoinTable,
   ManyToOne,
 } from 'typeorm';
-import { UserProfile } from '@backend/user-service/src/models/userProfile.model';
+import {UserProfile} from "../../../user-service/src/models/userProfile.model";
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
 //TODO Aún está pendiente de hacer y corregir la importación
