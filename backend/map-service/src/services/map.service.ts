@@ -17,7 +17,6 @@ const repo = new MapRepository();
 /**
  * Crea un nuevo mapa
  * @param MapData Datos del mapa a crear
- * @param userId ID del usuario administrador que crea el mapa
  */
 
 export const createMap = async (
@@ -26,8 +25,8 @@ export const createMap = async (
 
   try {
 
-    if (!MapData.name || !MapData.description) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o descripción.")
+    if (!MapData.name || !MapData.createdAt) {
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
     }
 
     const newMap = repo.createMap(MapData);
@@ -37,7 +36,6 @@ export const createMap = async (
     //   MapId: createdMap.id,
     //   name: createdMap.name,
     //   description: createdMap.description,
-    //   boundaries: createdMap.boundaries,
     //   timestamp: new Date()
     // });
 
@@ -46,12 +44,11 @@ export const createMap = async (
     return newMap;
 
   } catch (error) {
-    console.log(error)
+    throw new Error("Error al crear el mapa");
   }
 
 
 
-  throw new Error('Método no implementado');
 };
 
 
@@ -81,7 +78,6 @@ export const getMapById = async (MapId: string): Promise<Map | null> => {
  * Actualiza un mapa existente
  * @param MapId ID del mapa a actualizar
  * @param updateData Datos a actualizar del mapa
- * @param userId ID del usuario administrador que realiza la actualización
  */
 export const updateMap = async (
   MapId: string,
@@ -109,4 +105,31 @@ export const updateMap = async (
     throw error;
   }
 
+};
+
+/**
+ * Elimina un mapa existente
+ * @param MapId ID del mapa a eliminar
+ */
+export const deleteMap = async (MapId: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    // 1. Verificar que el mapa existe
+    const map = await repo.getMapById(MapId);
+    if (!map) {
+      return { success: false, message: `Mapa con ID ${MapId} no encontrado` };
+    }
+
+    // 2. Comprobar que el usuario tiene permisos para eliminar el mapa (opcional, según tu lógica de negocio)
+
+    // 3. Eliminar el mapa de la base de datos
+    await repo.deleteMap(MapId);
+
+    // 4. Publicar evento de mapa eliminado (opcional, según tu lógica de negocio)
+
+    // 5. Retornar éxito
+    return { success: true, message: 'Mapa eliminado correctamente' };
+  } catch (error) {
+    console.error("Error al eliminar el mapa:", error);
+    return { success: false, message: 'Error al eliminar el mapa' };
+  }
 };

@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { District } from '../map-service/src/models/district.model'; // Importa tus entidades
 import { UserProfile } from '../user-service/src/models/userProfile.model';
+import { Map } from '../map-service/src/models/map.model';
 
 
 export const AppDataSource = new DataSource({
@@ -13,7 +14,7 @@ export const AppDataSource = new DataSource({
     database: 'mapyourworldDB',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     logging: true,
-    entities: [District, UserProfile], // Aquí van todas tus entidades
+    entities: [District, UserProfile, Map], // Aquí van todas tus entidades
     migrations: [],
     subscribers: [],
     extra: {

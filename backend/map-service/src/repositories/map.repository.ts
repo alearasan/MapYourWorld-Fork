@@ -29,5 +29,10 @@ export default class MapRepository {
         return await this.mapRepo.save(map);
     }
 
+    async deleteMap(mapId: string): Promise<void> {
+        const map = await this.getMapById(mapId);
+        await this.mapRepo.remove(map);
+    }
+
 
 }
