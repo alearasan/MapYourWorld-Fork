@@ -1,15 +1,11 @@
 import { createDistrict } from "../services/district.service";
-import { AppDataSource, initializeDatabase } from '../../../database/appDataSource';
+import { AppDataSource } from '../../../database/appDataSource';
 import { Geometry } from 'geojson';
-
 import * as fs from 'fs';
 
 const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
 const geojsonData = JSON.parse(rawData);
-
-
-
 
 const userId = 'some-admin-user-id'; // Usa un ID de usuario con permisos de administrador
 
@@ -23,9 +19,15 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
     isUnlocked: false,
 }));
 
-async function createAllDistricts() {
+export async function createAllDistricts() {
     try {
-        await initializeDatabase();
+        // Inicializar la base de datos si no está inicializada
+        if (!AppDataSource.isInitialized) {
+            console.log("🔄 Inicializando la base de datos...");
+            await AppDataSource.initialize();
+            console.log("✅ Base de datos inicializada.");
+        }
+
         for (const districtData of districtsData) {
             const result = await createDistrict(districtData, userId);
             console.log(`Distrito creado correctamente: ${districtData.name}`, result);

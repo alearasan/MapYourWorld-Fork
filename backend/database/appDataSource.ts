@@ -5,7 +5,6 @@ import { UserProfile } from '../user-service/src/models/userProfile.model';
 import { User } from '../auth-service/src/models/user.model';
 import { Friend } from '../social-service/src/models/friend.model';
 
-
 export const AppDataSource = new DataSource({
     type: 'postgres', // O el tipo de base de datos que uses (mysql, sqlite, etc.)
     host: 'localhost',
@@ -14,7 +13,7 @@ export const AppDataSource = new DataSource({
     password: 'mapyourworld13',
     database: 'mapyourworldDB',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
-    dropSchema: true,
+    dropSchema: true, // Asegúrate de que esto esté en false para no perder datos
     logging: true,
     entities: [District, UserProfile, User, Friend], // Aquí van todas tus entidades
     migrations: [],
@@ -35,6 +34,3 @@ export async function initializeDatabase() {
         process.exit(1);
     }
 }
-
-
-
