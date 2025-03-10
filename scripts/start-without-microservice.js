@@ -14,3 +14,4 @@ spawn("npx ts-node backend_endpoint.ts", { cwd: "backend", shell: true, stdio: "
 
 
 spawn("npm start", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });
+
