@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import districtRoutes from './map-service/src/routes/district.routes';
 import authRoutes from './auth-service/src/routes/auth.routes';
 import profileRoutes from './user-service/src/routes/profile.routes';
+import socialRoutes from './social-service/src/routes/social.routes';
 
 
 
