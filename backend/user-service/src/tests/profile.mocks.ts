@@ -15,9 +15,9 @@ import {
 
 import { UserProfile } from '../models/userProfile.model';
 import { UserProfileRepository } from '../repositories/userProfile.repository';
-import { AppDataSource } from '@backend/database/appDataSource';
+import { AppDataSource } from '../../../database/appDataSource';
 
-const RabbitMQ = require('@shared/libs/rabbitmq');
+const RabbitMQ = require('../../../../shared/libs/rabbitmq');
 RabbitMQ.publishEvent = async (eventName: string, data: any): Promise<void> => {
   console.log(`Mock publishEvent called with event: ${eventName}`);
   console.log(JSON.stringify(data, null, 2));
