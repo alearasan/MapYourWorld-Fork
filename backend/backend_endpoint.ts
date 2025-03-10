@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 import districtRoutes from './map-service/src/routes/district.routes';
 import authRoutes from './auth-service/src/routes/auth.routes';
 import profileRoutes from './user-service/src/routes/profile.routes';
-
+import pointOfInterest from './map-service/src/routes/poi.routes';
 
 
 // Cargar variables de entorno
@@ -35,7 +35,7 @@ const PORT = process.env.PORT || 3000;
 app.use('/api/districts', districtRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
-
+app.use('/api/poi', pointOfInterest);
 
 // Interfaz para los servicios
 interface Service {
