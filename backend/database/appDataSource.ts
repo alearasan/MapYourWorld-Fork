@@ -13,6 +13,7 @@ export const AppDataSource = new DataSource({
     password: 'mapyourworld13',
     database: 'mapyourworldDB',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
+    dropSchema: true,
     logging: true,
     entities: [District, UserProfile, User], // Aquí van todas tus entidades
     migrations: [],
@@ -23,9 +24,16 @@ export const AppDataSource = new DataSource({
     }
 });
 
-// Inicializar la conexión antes de usarla
-AppDataSource.initialize()
-    .then(() => {
-        console.log('Conexión a la base de datos establecida correctamente');
-    })
-    .catch((error) => console.error('Error al conectar a la base de datos:', error));
+export async function initializeDatabase() {
+    try {
+        console.log("🔄 Conectando a la base de datos...");
+        await AppDataSource.initialize();
+        console.log("✅ Base de datos conectada y tablas sincronizadas.");
+    } catch (error) {
+        console.error("❌ Error al inicializar la base de datos:", error);
+        process.exit(1);
+    }
+}
+
+
+

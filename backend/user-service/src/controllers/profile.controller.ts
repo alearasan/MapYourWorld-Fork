@@ -4,6 +4,7 @@ import {
   updateUserProfile,
   updateUserPicture,
   searchUsers,
+  createUserProfile,
 } from '../services/profile.service';
 
 export const getProfile: RequestHandler = async (req, res, next) => {
@@ -65,3 +66,15 @@ export const searchProfiles: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
+  export const createProfile: RequestHandler = async (req, res, next) => {
+    try {
+      const profileData = req.body;
+      const newProfile = await createUserProfile(profileData);
+      res.status(201).json(newProfile);
+    } catch (error) {
+      console.error('Error al crear el perfil:', error);
+      next(error);
+    }
+  };
+

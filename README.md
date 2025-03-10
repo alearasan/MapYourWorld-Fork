@@ -319,9 +319,9 @@ Si tienes problemas con la autenticación:
 
 ## 🤝 Contribuir
 
-1. Crear una rama para tu característica: `git checkout -b feature/nombre-caracteristica`
+1. Crear una rama para tu característica: `git checkout -b feature/[backend/frontend]_nombre_caracteristica`
 2. Realizar cambios y commits: `git commit -am 'Añadir nueva característica'`
-3. Subir a tu rama: `git push origin feature/nombre-caracteristica`
+3. Subir a tu rama: `git push origin feature/[backend/frontend]_nombre_caracteristica`
 4. Crear un Pull Request
 
 ### Convenciones de código

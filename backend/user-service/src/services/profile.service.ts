@@ -177,3 +177,24 @@ export const searchUsers = async (
     );
   }
 };
+
+  /**
+   * Crea un nuevo perfil de usuario.
+   * @param profileData Datos del nuevo perfil.
+   */
+  export const createUserProfile = async (
+    profileData: Partial<UserProfile>
+  ): Promise<UserProfile> => {
+    try {
+      const newProfile = await userProfileRepository.create(profileData);
+      return newProfile;
+    } catch (error) {
+      console.error('Error al crear el perfil:', error);
+      throw new Error(
+        `No se pudo crear el perfil: ${
+          error instanceof Error ? error.message : 'Error desconocido'
+        }`
+      );
+    }
+};
+

@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { UserProfile } from '../models/userProfile.model';
-import { AppDataSource } from '@backend/database/appDataSource';
+import { AppDataSource } from '../../../database/appDataSource';
 
 export class UserProfileRepository {
   private repository: Repository<UserProfile>;
