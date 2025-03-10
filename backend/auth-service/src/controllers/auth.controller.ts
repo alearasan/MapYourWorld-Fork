@@ -8,6 +8,7 @@ import { validationResult } from 'express-validator';
 import { publishEvent } from '@shared/libs/rabbitmq';
 import { generateToken, verifyToken, DecodedToken } from '@shared/config/jwt.config';
 import * as authService from '@backend/auth-service/src/services/auth.service';
+import { sendPasswordChangeNotification } from '@backend/auth-service/src/services/email.service';
 
 /**
  * Registra un nuevo usuario
@@ -216,10 +217,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     });
   } catch (error) {
     console.error('Error al solicitar reseteo de contraseña:', error);
-    // Por seguridad, no revelamos el error específico al cliente
-    res.status(200).json({
+    // Por seguridad, no revelamos el error específico
+    res.status(400).json({
       success: true,
-      message: 'Si el email está registrado, recibirás instrucciones para restablecer tu contraseña'
+      message: 'Se produjo un error al solicitar el reseteo de contraseña'
     });
   }
 };
