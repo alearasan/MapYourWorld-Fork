@@ -283,3 +283,12 @@ export const findNearbyPOIs = async (
   
   return await query.getMany();
 };
+/**
+ * Obtiene todos los puntos de interés
+ * @returns Lista de puntos de interés
+ */
+export const getAllPOIs = async (): Promise<PointOfInterest[]> => {
+  return await poiRepository.find({
+    relations: ['user', 'district']
+  });
+};
