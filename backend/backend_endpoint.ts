@@ -9,6 +9,7 @@ import profileRoutes from './user-service/src/routes/profile.routes';
 import pointOfInterest from './map-service/src/routes/poi.routes';
 import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
+import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts } from './map-service/src/mocks/district_create';
 
@@ -32,6 +33,7 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/poi', pointOfInterest);
 app.use('/api/friends', friendRoutes);
 app.use('/api/maps', mapRoutes)
+app.use('/api/collabMap', collabMapRoutes)
 
 
 
