@@ -248,3 +248,34 @@ export const resetPassword = async (token: string, newPassword: string): Promise
  
   return true;
 };
+
+/**
+ * Cierra la sesión de un usuario
+ * @param userId ID del usuario
+ * @param token Token JWT a invalidar
+ * @returns true si se cerró la sesión correctamente
+ */
+export const logout = async (userId: string, token?: string): Promise<boolean> => {
+  try {
+    // 1. Buscar usuario por ID
+    const user = await repo.findById(userId);
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    
+    // 2. Verificar que el token coincide con el almacenado (opcional)
+    if (token && user.token_data !== token) {
+      return false;
+    }
+    
+    // 3. Limpiar el token_data para invalidar la sesión
+    user.token_data = null;
+    await repo.save(user);
+    
+    return true;
+
+  } catch (error) {
+    console.error('Error en logout:', error);
+    throw error;
+  }
+};
