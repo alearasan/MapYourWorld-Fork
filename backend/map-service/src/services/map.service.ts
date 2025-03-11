@@ -52,6 +52,42 @@ export const createMap = async (
 };
 
 
+
+
+export const createColaborativeMap = async (
+  MapData: Omit<Map, 'id'>,
+): Promise<Map> => {
+
+  try {
+
+    if (!MapData.name || !MapData.createdAt) {
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
+    }
+
+    const newMap = repo.createMapColaborativo(MapData);
+
+    // // 5. Publicar evento de mapa creado
+    // await publishEvent('Map.created', {
+    //   MapId: createdMap.id,
+    //   name: createdMap.name,
+    //   description: createdMap.description,
+    //   timestamp: new Date()
+    // });
+
+
+    console.log("mapa colaborativo creado correctamente:", newMap);
+    return newMap;
+
+  } catch (error) {
+    throw new Error("Error al crear el mapa colaborativo");
+  }
+
+
+
+};
+
+
+
  
 
 /**

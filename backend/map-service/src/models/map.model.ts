@@ -6,7 +6,7 @@ export class Map {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column({ type: 'varchar', length: 255, nullable: false })
+    @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
     name!: string;
 
     @Column({ type: 'text', nullable: true })
@@ -14,6 +14,10 @@ export class Map {
 
     @Column({ type: 'date', nullable: false })
     createdAt!: Date;
+
+    @Column({ type: 'boolean', default: false })
+    is_colaborative!: Boolean;
+    
 
     @ManyToMany(() => User, (user) => user.maps_joined)
     users_joined!: User[];

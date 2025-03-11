@@ -26,6 +26,29 @@ export const createMap = async (req: Request, res: Response): Promise<void> => {
 };
 
 
+
+export const createMapColaborative = async (req: Request, res: Response): Promise<void> => {
+  try {
+
+    console.log("req.body", req.body); 
+    const MapData = req.body;
+
+    if (!MapData) {
+      res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
+      return;
+    }
+
+    const newMap = await MapService.createColaborativeMap(MapData);
+    res.status(201).json({ success: true, message: 'mapa colaborativo creado correctamente', Map: newMap });
+  } catch (error) {
+    console.error('Error al crear mapa colaborativo:', error);
+    res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error al crear mapa colaborativo' });
+  }
+};
+
+
+
+
 /**
  * Obtiene un mapa por su ID
  */

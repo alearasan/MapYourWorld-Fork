@@ -13,6 +13,13 @@ export default class MapRepository {
         const map = this.mapRepo.create(mapData);
         return await this.mapRepo.save(map);
     }
+
+    async createMapColaborativo(mapData: Omit<Map, 'id'>): Promise<Map> {
+        const map = this.mapRepo.create(mapData);
+        map.is_colaborative = true;
+        return await this.mapRepo.save(map);
+    }
+     
  
     async getMapById(mapId: string): Promise<Map> {
         const map = await this.mapRepo.findOne({ where:{ id: mapId }, relations: ['users_joined']});
