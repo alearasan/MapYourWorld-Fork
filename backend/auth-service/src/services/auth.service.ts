@@ -36,9 +36,17 @@ export const registerUser = async (userData: any): Promise<User> => {
   newUser.email = userData.email;
   newUser.role = Role.USER;
   newUser.password = hashedPassword;
+  newUser.active = false;
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  newUser.token_data = JSON.stringify({
+    verificationType: 'email',
+    token: verificationToken,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
+  });
+  newUser.profile = userData.profile;
     
-  await repo.save(newUser);
-  const verificationToken = crypto.randomBytes(32).toString('hex'); 
+  await repo.save(newUser); 
   await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
 
   return newUser;
@@ -63,13 +71,19 @@ export const loginUser = async (email: string, password: string): Promise<{user:
     throw new Error('Credenciales incorrectas');
   }
 
-  // 3. Generar token JWT
+  // 3. Verificar que la cuenta esté activa
+  if (user.is_active === false) {
+    throw new Error('La cuenta no está activada. Por favor, verifica tu email');
+  }
+
+  // 4. Generar token JWT
   const token = generateToken({
     userId: user.id.toString(),
     email: user.email
   });
-
-  // 6. Devolver usuario y token, quitando la contraseña en la respuesta para seguridad
+  user.token_data = token;
+  await repo.save(user);
+  // 5. Devolver usuario y token, quitando la contraseña en la respuesta para seguridad
   const { password: _, ...userWithoutPassword } = user;
   return { user: userWithoutPassword as User, token };
 };
@@ -94,7 +108,11 @@ export const verifyUserToken = async (token: string): Promise<{
   if (!user) {
     throw new Error('Usuario no encontrado');
   }
-
+  // 3. Verificar que el token está en token_data     
+    let tokenData;
+    if (user.token_data !== token) {
+      throw new Error('Sesión inválida. Por favor, inicie sesión nuevamente');
+    }
   return {
     userId: user.id.toString(),
     email: user.email,
@@ -129,6 +147,10 @@ export const changePassword = async (userId: string, currentPassword: string, ne
   // 4. Actualizar contraseña y guardar
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   await repo.updatePassword(user.id, hashedPassword);
+  // 6. Invalidar todas las sesiones existentes por seguridad
+  user.token_data = null;
+  await repo.save(user);
+  
   return true;
 };
 
@@ -143,9 +165,30 @@ export const requestPasswordReset = async (email: string): Promise<boolean> => {
     throw new Error('Usuario no encontrado');
   }
   // 2. Generar token único y temporal
-  const token = crypto.randomBytes(32).toString('hex');
-  user.password = await bcrypt.hash(token + user.id.toString(), 10);
-  await repo.save(user);
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  // 3. Almacenar el token en token_data sin afectar los tokens existentes
+  try {
+    // Intentar parsear token_data existente
+    const tokenData = JSON.parse(user.token_data || '{}');
+    
+    // Añadir información del token de restablecimiento
+    tokenData.resetPassword = {
+      token: resetToken,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString() // 1 hora de validez
+    };
+    
+    user.token_data = JSON.stringify(tokenData);
+    await repo.save(user);
+    
+    // 4. Enviar email con instrucciones
+    await sendPasswordResetEmail(user.email, user.profile?.username || '', resetToken);
+    
+    return true;
+  } catch (error) {
+    console.error('Error al guardar token de recuperación:', error);
+    throw new Error('Error al procesar la solicitud de recuperación de contraseña');
+  }
   
   // 4. Enviar email con instrucciones
   // Pasamos el usuario
@@ -198,6 +241,10 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   // Actualizar la contraseña
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   await repo.updatePassword(matchedUser.id, hashedPassword);
+
+  // 4. Limpiar el token de reseteo
+  matchedUser.token_data = null;
+  await repo.save(matchedUser);
  
   return true;
 };

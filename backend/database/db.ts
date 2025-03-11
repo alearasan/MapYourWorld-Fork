@@ -21,7 +21,8 @@ db.none(`
       username VARCHAR(50) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
       is_active BOOLEAN DEFAULT FALSE,
-      password VARCHAR(700) NOT NULL,
+      password VARCHAR(50) NOT NULL,
+      token_data VARCHAR(700),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
