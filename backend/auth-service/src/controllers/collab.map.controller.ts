@@ -21,7 +21,7 @@ export const joinMap = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Error al unirse al mapa:', error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: 'Error al unirse al mapa',
       error: error instanceof Error ? error.message : 'Error desconocido'

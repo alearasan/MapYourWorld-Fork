@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as MapService from '../services/map.service';
+import { User } from '../../../auth-service/src/models/user.model';
 
 /**
  * Crea un nuevo mapa
@@ -10,14 +11,14 @@ export const createMap = async (req: Request, res: Response): Promise<void> => {
   try {
 
     console.log("req.body", req.body); 
-    const MapData = req.body;
+    const {MapData, userId} = req.body;
 
     if (!MapData) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    const newMap = await MapService.createMap(MapData);
+    const newMap = await MapService.createMap(MapData, userId);
     res.status(201).json({ success: true, message: 'mapa creado correctamente', Map: newMap });
   } catch (error) {
     console.error('Error al crear mapa:', error);
@@ -31,14 +32,14 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
   try {
 
     console.log("req.body", req.body); 
-    const MapData = req.body;
+    const {MapData, userId} = req.body;
 
     if (!MapData) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    const newMap = await MapService.createColaborativeMap(MapData);
+    const newMap = await MapService.createColaborativeMap(MapData, userId);
     res.status(201).json({ success: true, message: 'mapa colaborativo creado correctamente', Map: newMap });
   } catch (error) {
     console.error('Error al crear mapa colaborativo:', error);
@@ -68,6 +69,26 @@ export const getMapById = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ success: false, message: 'Error al obtener mapa' });
   }
 };
+
+
+
+export const getUsersOnMapById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const mapId = req.params.MapId;
+
+
+    if (!mapId) {
+      res.status(404).json({ success: false, message: 'mapa no encontrado' });
+      return;
+    }
+    const users = await MapService.getMapUsersById(mapId);
+    res.status(200).json({ success: true,message: "Usuarios encontrados: ",users });
+  } catch (error) {
+    console.error('Error al obtener mapa:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener',error });
+  }
+};
+
 
 
 /**

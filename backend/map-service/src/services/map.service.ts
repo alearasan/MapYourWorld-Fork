@@ -8,6 +8,7 @@ import db from '../../../database/db';
 import { Map } from '../models/map.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import MapRepository from '../repositories/map.repository';
+import { User } from '../../../auth-service/src/models/user.model';
 
 const repo = new MapRepository();
 
@@ -21,6 +22,7 @@ const repo = new MapRepository();
 
 export const createMap = async (
   MapData: Omit<Map, 'id'>,
+  userId: string
 ): Promise<Map> => {
 
   try {
@@ -29,7 +31,7 @@ export const createMap = async (
       throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
     }
 
-    const newMap = repo.createMap(MapData);
+    const newMap = repo.createMap(MapData, userId);
 
     // // 5. Publicar evento de mapa creado
     // await publishEvent('Map.created', {
@@ -56,6 +58,7 @@ export const createMap = async (
 
 export const createColaborativeMap = async (
   MapData: Omit<Map, 'id'>,
+  userId: string
 ): Promise<Map> => {
 
   try {
@@ -64,7 +67,8 @@ export const createColaborativeMap = async (
       throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
     }
 
-    const newMap = repo.createMapColaborativo(MapData);
+
+    const newMap = repo.createMapColaborativo(MapData, userId);
 
     // // 5. Publicar evento de mapa creado
     // await publishEvent('Map.created', {
@@ -108,6 +112,21 @@ export const getMapById = async (MapId: string): Promise<Map | null> => {
     return Map;
   }
 
+};
+
+
+
+export const getMapUsersById = async (MapId: string): Promise<User[]> => {
+  // TODO: Implementar la obtención de un mapa por ID
+  // 1. Buscar el mapa en la base de datos
+  const users = await repo.getUsersOnMapById(MapId);
+  // 2. Retornar null si no se encuentra
+  if (users === null) {
+    throw new Error(`mapa con ID ${MapId} sin usuarios asociados`);
+  }
+  else {
+    return users;
+  }
 };
 
 /**

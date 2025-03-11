@@ -1,6 +1,7 @@
 import CollabMapRepository from '../repositories/collab.map.repository'; 
-
+import MapRepository  from '../../../map-service/src/repositories/map.repository'; // Importa tu entidad
 const repo = new CollabMapRepository();
+const mapRepo = new MapRepository();
 
 
 /**
@@ -12,8 +13,12 @@ export const joinMap = async (
   MapId: string,
   UserId: string
 ): Promise<void> => {
-  // TODO: Implementar la union a un mapa
+
   try {
+    const mapa = await mapRepo.getMapById(MapId);
+    if ((mapa.is_colaborative === true && mapa.users_joined.length > 4) || !mapa.is_colaborative) {
+      throw new Error("No puedes unirte a este mapa");
+    }
     await repo.joinMap(MapId, UserId);
   } catch (error) {
     console.error("Error al unirte al mapa:", error);

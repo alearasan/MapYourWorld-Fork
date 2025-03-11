@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import { User } from '../../..//auth-service/src/models/user.model';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
+import { User } from '../../../auth-service/src/models/user.model';
 
 @Entity('maps')
 export class Map {
@@ -21,5 +21,8 @@ export class Map {
 
     @ManyToMany(() => User, (user) => user.maps_joined)
     users_joined!: User[];
+
+    @ManyToOne(() => User, (user) => user.id)
+    user_created!: User; 
 
 }

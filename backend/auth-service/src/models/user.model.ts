@@ -86,6 +86,9 @@ export class User {
   maps_joined!: Map[];
 
 
+
+
+
   /**
    * Relación N:N (autorreferenciada) para "is friend of"
    * Un usuario puede tener muchos amigos (que también son usuarios).
