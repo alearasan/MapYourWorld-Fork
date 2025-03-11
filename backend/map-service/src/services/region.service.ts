@@ -3,7 +3,7 @@
  * Gestiona la creación, consulta y actualización de regiones del mapa
  */
 
-import { Region } from '@backend/map-service/src/models/region.model';
+import { Region } from '../models/region.model';
 import RegionRepository from '../repositories/region.repository';
 
 const repo = new RegionRepository();

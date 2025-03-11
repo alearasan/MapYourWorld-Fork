@@ -10,17 +10,17 @@ import {
 
 const router: Router = Router();
 
-router.post('/region/create', createRegion);
+router.post('/create', createRegion);
 
-router.get('/region/:regionId', getRegionById);
+router.get('/:regionId', getRegionById);
 
-router.get('/region/name/:regionName', getRegionByName);
+router.get('/name/:regionName', getRegionByName);
 
-router.get('/regions', getAllRegions);
+router.get('/', getAllRegions);
 
-router.put('/regions/update/:regionId', updateRegion);
+router.put('/update/:regionId', updateRegion);
 
-router.delete('/region/delete/:regionId', deleteRegion);
+router.delete('/delete/:regionId', deleteRegion);
 
 
 export default router;

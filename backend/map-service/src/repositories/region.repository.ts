@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { AppDataSource } from '@backend/database/appDataSource';
-import { Region } from '@backend/map-service/src/models/region.model';
+import { AppDataSource } from '../../../database/appDataSource';
+import { Region } from '../models/region.model';
 
 export default class RegionRepository {
     private regionRepo: Repository<Region>;
