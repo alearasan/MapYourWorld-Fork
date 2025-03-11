@@ -12,16 +12,12 @@ router.get('/:id', POIController.getPOIById);
 // Actualizar un POI existente
 router.put('/:id', POIController.updatePOI);
 
+router.post('/sin-token', POIController.createPOISinToken);
+
 // Eliminar/desactivar un POI
 router.delete('/:id', POIController.deletePOI);
 
 // Buscar POIs cercanos a una ubicación
 router.get('/nearby', POIController.findNearbyPOIs);
-
-// Registrar visita a un POI
-router.post('/visit', POIController.registerPOIVisit);
-
-// Calificar un POI
-router.post('/rate', POIController.ratePOI);
 
 export default router;

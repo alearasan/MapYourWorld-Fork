@@ -1,4 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Geometry } from 'geojson';
+import { District } from './district.model';
+import { User } from '../../../auth-service/src/models/user.model';
+
+export enum Category {
+  MONUMENTOS = 'MONUMENTOS',
+  ESTACIONES = 'ESTACIONES',
+  MERCADOS = 'MERCADOS',
+  PLAZAS = 'PLAZAS'
+}
 
 @Entity('point_of_interest')
 export class PointOfInterest {
@@ -11,42 +21,23 @@ export class PointOfInterest {
   @Column({ nullable: true })
   description!: string;
 
-  @Column('json')
-  location!: {
-    latitude: number;
-    longitude: number;
-  };
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: false })
+  location!: Geometry;
+
+  @Column({ type: 'enum', enum: Category })
+  category!: Category;
 
   @Column()
-  type!: string;
+  images!: string;
 
   @Column()
-  category!: string;
+  createdAt!: Date;
 
-  @Column('simple-array')
-  tags!: string[];
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'userId' })
+  user!: User;
 
-  @Column('simple-array')
-  images!: string[];
-
-  @Column()
-  createdBy!: string;
-
-  @Column()
-  createdAt!: string;
-
-  @Column()
-  updatedAt!: string;
-
-  @Column('int')
-  visitCount!: number;
-
-  @Column('float')
-  rating!: number;
-
-  @Column()
-  isActive!: boolean;
-
-  @Column()
-  districtId!: string;
+  @ManyToOne(() => District, (district) => district.id)
+  @JoinColumn({ name: 'districtId' })
+  district!: District;
 }
