@@ -2,11 +2,16 @@
  * App principal de MapYourWorld Mobile
  */
 import React, { useState } from 'react';
-import { SafeAreaView, StatusBar, View, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StatusBar, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { registerRootComponent } from 'expo';
+
+// importamos los estilos web sólo si estamos en web
+if (Platform.OS === 'web') {
+  require('./src/assets/styles/web.css');
+}
 
 // Importamos las pantallas
 import WelcomeScreen from './src/components/screens/WelcomeScreen';
@@ -66,7 +71,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800">Welcome</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Welcome</StyledText>
           </View>
           )
           
@@ -80,7 +85,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800">Register</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Register</StyledText>
           </View>
           )
           
@@ -94,7 +99,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Login</StyledText>
           </View>
           )
           
@@ -109,7 +114,7 @@ const App = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
+                <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">MapYourWorld</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,
