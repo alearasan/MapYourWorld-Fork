@@ -24,3 +24,4 @@ jobs:
           args: >
             -Dsonar.projectKey=ISPP-Grupo-7_MapYourWorld
             -Dsonar.organization=ispp-grupo-7
+            -Dsonar.branch.name=develop
