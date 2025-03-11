@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image, Platform } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Button from '@components/UI/Button';
-import TextInput from '@components/UI/TextInput';
-import {styles} from '@assets/styles/styles';
-
-// importamos los estilos web sólo si estamos en web
-const web = Platform.OS === 'web'
-if (web) {
-  require('../../assets/styles/web.css');
-  require('../../assets/styles/auth.css');
-}
+import Button from '../UI/Button';
+import TextInput from '../UI/TextInput';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -107,78 +99,68 @@ const RegisterScreen = () => {
   };
 
   return (
-  <ImageBackground
-          source={require("../../assets/images/login_background.webp")} 
-          style={styles.background_image}
-          resizeMode="cover"
-      className='image-background'
-  >
-      <View style={styles.semi_transparent_overlay} />
-      <StyledScrollView className="flex-1 base-container">
-        <StyledView className="flex-1 p-6 justify-start min-h-screen mt-20 auth-container">
-          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
-          <StyledView className="flex-row items-center justify-center mb-6 disappear">
-            <Image source={require('../../assets/images/logo.png')} style={{ width: 35, height: 35 }} />
+    <StyledView className="flex-1 bg-gray-100">
+      <StyledScrollView className="flex-1">
+        <StyledView className="flex-1 p-6 justify-center min-h-screen">
+          {/* Header */}
+          <StyledView className="flex-row items-center justify-center mb-6">
+            <StyledView className="w-12 h-12 bg-teal-500 rounded-md"></StyledView>
             <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
           </StyledView>
-            <StyledText className="text-2xl font-bold text-center mb-2 title">
+          
+          {/* Formulario */}
+          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
+            <StyledText className="text-2xl font-bold text-center mb-2">
               Crea tu cuenta
             </StyledText>
-            <StyledText className="text-gray-600 text-center mb-6 normal-text">
+            <StyledText className="text-gray-600 text-center mb-6">
               Comienza a documentar tus aventuras hoy mismo
             </StyledText>
             
-            <StyledView className='input'>
-              <TextInput
-                label="Nombre completo"
-                placeholder="Nombre completo"
-                value={formData.fullName}
-                onChangeText={(text) => handleChange('fullName', text)}
-                autoCapitalize="words"
-                error={errors.fullName}
-                icon="user"
-              />
-            </StyledView>
+            <TextInput
+              label="Nombre completo"
+              placeholder="Nombre completo"
+              value={formData.fullName}
+              onChangeText={(text) => handleChange('fullName', text)}
+              autoCapitalize="words"
+              error={errors.fullName}
+              icon="user"
+            />
             
-            <StyledView className='input'>
-              <TextInput
-                label="Correo electrónico"
-                placeholder="Correo electrónico"
-                value={formData.email}
-                onChangeText={(text) => handleChange('email', text)}
-                keyboardType="email-address"
-                error={errors.email}
-                icon="mail"
-              />
-            </StyledView>
+            <TextInput
+              label="Correo electrónico"
+              placeholder="Correo electrónico"
+              value={formData.email}
+              onChangeText={(text) => handleChange('email', text)}
+              keyboardType="email-address"
+              error={errors.email}
+              icon="mail"
+            />
             
-            <StyledView className='input'>
-              <TextInput
-                label="Contraseña"
-                placeholder="Contraseña"
-                value={formData.password}
-                onChangeText={(text) => handleChange('password', text)}
-                secureTextEntry
-                error={errors.password}
-                icon="lock"
-              />
-            </StyledView>
-            
+            <TextInput
+              label="Contraseña"
+              placeholder="Contraseña"
+              value={formData.password}
+              onChangeText={(text) => handleChange('password', text)}
+              secureTextEntry
+              error={errors.password}
+              icon="lock"
+            />
             
             <Button 
               title="Registrarse" 
               onPress={handleRegister}
               isLoading={isLoading}
               fullWidth
-              className="mt-4 mb-3 button primary"
+              className="mt-4 mb-3"
             />
             
-            <StyledView className="flex-row justify-center mt-4 link">
+            <StyledView className="flex-row justify-center mt-4">
               <StyledText className="text-gray-600">
                 ¿Ya tienes una cuenta?{' '}
               </StyledText>
               <StyledText 
-                className="text-teal-500 font-medium teal"
+                className="text-teal-500 font-medium"
                 onPress={goToLogin}
               >
                 Inicia sesión
@@ -187,7 +169,7 @@ const RegisterScreen = () => {
           </StyledView>
         </StyledView>
       </StyledScrollView>
-  </ImageBackground>
+    </StyledView>
   );
 };
 

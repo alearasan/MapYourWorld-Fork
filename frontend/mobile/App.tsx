@@ -8,11 +8,6 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { registerRootComponent } from 'expo';
 
-// importamos los estilos web sólo si estamos en web
-if (Platform.OS === 'web') {
-  require('./src/assets/styles/web.css');
-}
-
 // Importamos las pantallas
 import WelcomeScreen from './src/components/screens/WelcomeScreen';
 import LoginScreen from './src/components/screens/LoginScreen';
@@ -71,7 +66,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Welcome</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Welcome</StyledText>
           </View>
           )
           
@@ -85,7 +80,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Register</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Register</StyledText>
           </View>
           )
           
@@ -99,7 +94,7 @@ const App = () => {
               source={require('./src/assets/images/logo.png')} 
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
-            <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">Login</StyledText>
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
           </View>
           )
           
@@ -114,7 +109,7 @@ const App = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800 navbar-text">MapYourWorld</StyledText>
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,
