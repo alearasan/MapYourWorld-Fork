@@ -4,6 +4,7 @@ import MapView, { Polygon } from "react-native-maps";
 import * as Location from "expo-location";
 import { Marker } from 'react-native-maps';
 import PuntoDeInteresForm from "../POI/PoiForm";
+import { API_URL } from '../../constants/config';
 
 // Definir el tipo para los distritos
 interface Distrito {
@@ -144,7 +145,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.18.9:3000/api/districts');
+      const response = await fetch(`${API_URL}/api/districts`);
       const data = await response.json();
   
       if (data.success && data.districts) {
