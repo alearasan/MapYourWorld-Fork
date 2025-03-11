@@ -1,28 +1,4 @@
-<p align="center">
-  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
-  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
-</p>
-
-<h1 align="center">Planificación del Sprint 1</h1>
-
-<p align="center">
-    Grupo 7
-</p>
-<p align="center">
-    ISPP-MapYourWorld
-</p>
-<p align="center">
-    Devising a project
-</p>
-<p align="center">
-    Alfonso Alonso, Alejandro Aragón, José María Baquero, Pablo Caballero, Ricardo Carreño, Franco Dell Águila, Alberto Escobar, Jaime Gómez, Claudio González, Ángel Neria, Pablo Olivencia, Antonio Porcar, Alba Ramos, Pedro Pablo Santos, Manuel Vélez, Gonzalo García.
-</p>
-<p align="center">
-    Sprint 1
-</p>
-<p align="center">
-    18/02/2025
-</p>
+![portada](../../Imagenes/Planificacion/Portada-Spirnt1.png)
 
 
 **CONTROL DE VERSIONES**

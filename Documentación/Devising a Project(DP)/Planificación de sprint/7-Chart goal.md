@@ -1,31 +1,16 @@
-![Logotipo](media/image1.png){width="2.015277777777778in" height="1.8395833333333333in"}
+![portada](../Imagenes/Planificacion/Portada-Chart.png)
 
-![Patrón de fondo](media/image2.png){width="8.674305555555556in" height="12.270199037620298in"}
 
-**Chart Goal**
+**CONTROL DE VERSIONES**
 
-![Captura de pantalla de un celular](media/image3.png){width="2.1777777777777776in" height="1.0875in"}
-
-**Grupo 7**
-
-**ISPP-MapYourWorld**
-
-**Devising a project**
-
-Alfonso Alonso, Alejandro Aragón, José María Baquero, Pablo Caballero, Ricardo Carreño, Franco Dell'Aguila, Alberto Escobar, Jaime Gómez, Claudio González, Ángel Neria, Pablo Olivencia, Antonio Porcar, Alba Ramos, Pedro Pablo Santos, Manuel Vélez, Gonzalo García.
-
-03/02/2025
-
-| **CONTROL DE VERSIONES** |
-|--------------------------|
-| **VERSIÓN** | **FECHA** | **COMENTARIOS** | **AUTOR** |
-|---------|-----------|--------------------------|--------------------|
-| v1      | 03/02/2025 | Primera versión         | Pablo Caballero    |
-| v1.1    | 09/02/2025 | Revisión del documento  | Antonio Porcar, Pablo Olivencia y Ricardo Carreño |
+| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR                                      |
+|---------|----------|--------------------------|-------------------------------------------|
+| V1.0    | 03/02/2025 | Primera versión         | Pablo Caballero|
+| V1.1    | 09/02/2025 | Revisión                | Antonio Porcar, Pablo Olivencia y Ricardo Carreño  |
 
 # Índice
 
-1. [Introducción](#introduccion)
+1. [Introducción](#introducción)
 2. [Lista de hitos](#lista-de-hitos)
 
 # Introducción

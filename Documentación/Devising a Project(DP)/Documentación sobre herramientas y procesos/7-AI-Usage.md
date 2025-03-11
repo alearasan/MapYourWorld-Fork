@@ -1,4 +1,4 @@
-![Portada](../Imagenes/Herramientas%20y%20procesos/Portada-Ai.png)
+![Portada](../Imagenes/Herramientasyprocesos/Portada-Ai.png)
 
 ## Uso de Inteligencia Artificial
 

@@ -1,4 +1,4 @@
-![Portada](../Imagenes/Herramientas%20y%20procesos/Portada-an.png)
+![Portada](../Imagenes/Herramientasyprocesos/Portada-an.png)
 
 ### CONTROL DE VERSIONES
 

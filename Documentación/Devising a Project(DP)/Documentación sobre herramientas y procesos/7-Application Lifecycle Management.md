@@ -1,4 +1,4 @@
-![Portada](../Imagenes/Herramientas%20y%20procesos/Portada-ap.png)
+![Portada](../Imagenes/Herramientasyprocesos/Portada-ap.png)
 
 ## Application Lifecycle Management
 

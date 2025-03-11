@@ -1,4 +1,4 @@
-![Portada](../Imagenes/Herramientas%20y%20procesos/Portada-Stack.png)
+![Portada](../Imagenes/Herramientasyprocesos/Portada-Stack.png)
 
 ## Stack Tecnológico
 
