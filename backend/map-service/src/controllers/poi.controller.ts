@@ -193,3 +193,17 @@ export const findNearbyPOIs = async (req: AuthenticatedRequest, res: Response): 
     });
   }
 };
+/**
+ * Obtiene todos los puntos de interés
+ */
+export const getAllPOIs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const pois = await POIService.getAllPOIs();
+    res.status(200).json({ success: true, pois });
+  } catch (error) {
+    console.error('Error al obtener todos los POIs:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Error al obtener los POIs' 
+    });
+  }
+};

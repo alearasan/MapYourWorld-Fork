@@ -7,7 +7,8 @@ export enum Category {
   MONUMENTOS = 'MONUMENTOS',
   ESTACIONES = 'ESTACIONES',
   MERCADOS = 'MERCADOS',
-  PLAZAS = 'PLAZAS'
+  PLAZAS = 'PLAZAS',
+  OTROS = 'OTROS'
 }
 
 @Entity('point_of_interest')
@@ -27,7 +28,7 @@ export class PointOfInterest {
   @Column({ type: 'enum', enum: Category })
   category!: Category;
 
-  @Column()
+  @Column({ nullable: true })
   images!: string;
 
   @Column()

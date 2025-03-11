@@ -14,47 +14,42 @@ interface PuntoDeInteresFormProps {
   pointOfInterest: any;
   setPointOfInterest: (pointOfInterest: any) => void;
   setShowForm: (showForm: boolean) => void;
+  onSave: (newPOI: any) => void; // Se añade la prop onSave
 }
 
 const categories = [
-  { label: 'Cultura', value: 'CULTURA' },
-  { label: 'Naturaleza', value: 'NATURALEZA' },
-  { label: 'Gastronomía', value: 'GASTRONOMIA' },
-  { label: 'Historia', value: 'HISTORIA' },
-  { label: 'Arte', value: 'ARTE' },
+  { label: 'Monumentos', value: 'MONUMENTOS' },
+  { label: 'Estaciones', value: 'ESTACIONES' },
+  { label: 'Mercados', value: 'MERCADOS' },
+  { label: 'Plazas', value: 'PLAZAS' },
+  { label: 'Otros', value: 'OTROS' },
 ];
 
 const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
   pointOfInterest,
   setPointOfInterest,
   setShowForm,
+  onSave,
 }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   // Estado inicial para reiniciar el formulario
   const initialPoint = { name: '', description: '', category: '', photos: [] };
 
-  // NUEVO: Función para seleccionar una foto desde la galería del móvil usando Expo Image Picker
+  // Función para seleccionar una foto desde la galería usando Expo Image Picker
   const handleAddPhoto = async () => {
-    // Solicitar permisos para acceder a la galería (si es necesario)
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert('Permiso denegado', 'Se requiere acceso a la galería para seleccionar una imagen.');
       return;
     }
-
-    // Abrir la galería para seleccionar una imagen
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
     });
-
     if (!result.canceled) {
-      // Para Expo SDK 48 y posteriores, la respuesta tiene un array "assets"
       const uri = result.assets[0].uri;
-      const updatedPhotos = pointOfInterest.photos
-        ? [...pointOfInterest.photos, uri]
-        : [uri];
+      const updatedPhotos = pointOfInterest.photos ? [...pointOfInterest.photos, uri] : [uri];
       setPointOfInterest({ ...pointOfInterest, photos: updatedPhotos });
     }
   };
@@ -65,26 +60,57 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    console.log('Punto de interés registrado:', pointOfInterest);
-    console.log('Hay que unir con las rutas de backend');
-    /*/try {
-      const response = await fetch("http://tu-backend-url/api/points-of-interest", {
+  
+    try {
+      
+      if (pointOfInterest.district === null ||!pointOfInterest.district.isUnlocked) {
+        Alert.alert('Selecciona un distrito válido', 'Este distrito está bloqueado. No se puede crear el punto de interés.');
+        return;
+      }
+
+      
+      const poiForMarker = {
+        name: pointOfInterest.name,
+        description: pointOfInterest.description,
+        latitude: pointOfInterest.latitude,
+        longitude: pointOfInterest.longitude,
+        district: pointOfInterest.district,
+      };
+  
+      // Convertir latitude/longitude a formato "location" para el backend
+      const formattedPoint = {
+        ...pointOfInterest,
+        location: {
+          type: "Point",
+          coordinates: [pointOfInterest.longitude, pointOfInterest.latitude],
+        },
+      };
+  
+      // Eliminar latitude y longitude del objeto que se envía al backend
+      delete formattedPoint.latitude;
+      delete formattedPoint.longitude;
+  
+      const response = await fetch("http://192.168.1.49:3000/api/poi/sin-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pointOfInterest),
+        body: JSON.stringify(formattedPoint),
       });
+  
       const data = await response.json();
-      if (data.success) {
+  
+      if (response.ok) {
         Alert.alert("Éxito", "Punto de interés creado correctamente.");
+        // Llamamos a onSave para pasar el nuevo POI al componente padre
+        onSave(poiForMarker);
         setPointOfInterest(initialPoint);
         setShowForm(false);
       } else {
-        Alert.alert("Error", "No se pudo crear el punto de interés.");
+        Alert.alert("Error", data.error || "No se pudo crear el punto de interés.");
       }
     } catch (error) {
       console.error("Error al crear el punto de interés:", error);
       Alert.alert("Error", "Ocurrió un error al crear el punto de interés.");
-    }/*/
+    }
   };
 
   return (
@@ -94,7 +120,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
           Registrar Punto de Interés
         </Text>
         <View className="mb-4">
-        <Text className="text-lg mb-1">Nombre</Text>
+          <Text className="text-lg mb-1">Nombre</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-3 py-2 mb-4"
             placeholder="Nombre del punto de interés"
@@ -104,12 +130,10 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
             }
           />
         </View>
-
         <View className="mb-4">
           <Text className="text-lg mb-1">Descripción</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-3 py-2 mb-4 h-20"
-            
             placeholder="Descripción del punto de interés"
             value={pointOfInterest.description}
             multiline
@@ -165,12 +189,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
         </View>
         <TouchableOpacity
           className="bg-blue-600 py-3 rounded-lg items-center mt-2"
-          onPress={() => {
-            
-            handleSubmit();
-            setPointOfInterest(initialPoint);
-            setShowForm(false);
-          }}
+          onPress={handleSubmit}
         >
           <Text className="text-white text-base font-semibold">Registrar</Text>
         </TouchableOpacity>

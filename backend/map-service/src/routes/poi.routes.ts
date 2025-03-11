@@ -6,6 +6,9 @@ const router: Router = Router();
 // Crear un nuevo POI
 router.post('/', POIController.createPOI);
 
+// Obtener todos los POIs
+router.get('/all', POIController.getAllPOIs);
+
 // Obtener un POI por su ID
 router.get('/:id', POIController.getPOIById);
 
