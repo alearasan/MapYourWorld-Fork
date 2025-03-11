@@ -1,15 +1,4 @@
-# Grupo 7
-
-**ISPP-MapYourWorld**
-
-_Devising a project_
-
-**Alfonso Alonso, Alejandro Aragón, José María Baquero, Pablo Caballero,  
-Ricardo Carrero, Franco Dell' Águila, Alberto Escobar, Jaime Gómez,  
-Claudio González, Ángel Neria, Pablo Olivencia, Antonio Porcar, Alba Ramos,  
-Pedro Pablo Santos, Manuel Vélez, Gonzalo García**
-
-18/02/2025
+![Portada](../Imagenes/Herramientas%20y%20procesos/Portada-ap.png)
 
 ## Application Lifecycle Management
 
