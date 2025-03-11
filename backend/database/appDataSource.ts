@@ -5,6 +5,7 @@ import { UserProfile } from '../user-service/src/models/userProfile.model';
 import { Map } from '../map-service/src/models/map.model';
 import { Region } from '../map-service/src/models/region.model';
 import { User } from '../auth-service/src/models/user.model';
+import { PointOfInterest } from '../map-service/src/models/poi.model';
 import { Friend } from '../social-service/src/models/friend.model';
 
 export const AppDataSource = new DataSource({
@@ -17,7 +18,7 @@ export const AppDataSource = new DataSource({
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     dropSchema: false, // Asegúrate de que esto esté en false para no perder datos
     logging: true,
-    entities: [District, UserProfile, User, Friend, Region, Map], // Aquí van todas tus entidades
+    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map], // Aquí van todas tus entidades
     migrations: [],
     subscribers: [],
     extra: {
