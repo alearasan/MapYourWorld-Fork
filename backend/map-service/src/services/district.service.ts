@@ -8,10 +8,16 @@ import db from '../../../database/db';
 import { District } from '../models/district.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import DistrictRepository from '../repositories/district.repository';
+import MapRepository from '../repositories/map.repository';
+import * as fs from 'fs';
+import { Geometry } from 'geojson';
+
+const filePath = 'database/map.geojson';
+const rawData = fs.readFileSync(filePath, 'utf-8');
+const geojsonData = JSON.parse(rawData);
 
 const repo = new DistrictRepository();
-
-
+const mapRepo = new MapRepository();
 
 
 /**
@@ -23,39 +29,31 @@ const repo = new DistrictRepository();
 
 
 export const createDistrict = async (
-  districtData: Omit<District, 'id'>,
-  userId: string
-): Promise<District> => {
+  mapId: string
+): Promise<void> => {
 
   try {
-    // TODO: Implementar la creación de un distrito
-    // 1. Validar los datos del distrito
-    if (!districtData.name || !districtData.boundaries || !districtData.description) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o coordenadas.")
+
+    const map = await mapRepo.getMapById(mapId);
+    if (!map) {
+      throw new Error(`Map with id ${mapId} not found`);
+    }
+    const districtData = geojsonData.features.map((feature: any, index: number) => ({
+        name: `Distrito ${index + 1}`, // Asigna un nombre genérico si no hay "properties"
+        description: 'Descripción genérica del distrito.', // Se puede personalizar
+        boundaries: {
+            type: feature.geometry.type,
+            coordinates: feature.geometry.coordinates
+        } as Geometry,
+        isUnlocked: false,
+        map: map
+    }));
+
+
+    for (const district of districtData) {
+      await repo.createDistrict(district);
     }
 
-    // 2. Verificar que el usuario tiene permisos de administrador
-
-    // 3. Validar que los límites geográficos no se solapan con otros distritos
-
-
-
-
-    // 3. Crear y guardar el distrito correctamente
-    const newDistrict = repo.createDistrict(districtData);
-
-    // // 5. Publicar evento de distrito creado
-    // await publishEvent('district.created', {
-    //   districtId: createdDistrict.id,
-    //   name: createdDistrict.name,
-    //   description: createdDistrict.description,
-    //   boundaries: createdDistrict.boundaries,
-    //   timestamp: new Date()
-    // });
-
-
-    console.log("Distrito creado correctamente:", newDistrict);
-    return newDistrict;
 
   } catch (error) {
     console.log(error)
