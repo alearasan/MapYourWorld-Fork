@@ -17,11 +17,11 @@ interface PuntoDeInteresFormProps {
 }
 
 const categories = [
-  { label: 'Cultura', value: 'CULTURA' },
-  { label: 'Naturaleza', value: 'NATURALEZA' },
-  { label: 'Gastronomía', value: 'GASTRONOMIA' },
-  { label: 'Historia', value: 'HISTORIA' },
-  { label: 'Arte', value: 'ARTE' },
+  { label: 'Monumentos', value: 'MONUMENTOS' },
+  { label: 'Estaciones', value: 'ESTACIONES' },
+  { label: 'Mercados', value: 'MERCADOS' },
+  { label: 'Plazas', value: 'PLAZAS' },
+  { label: 'Otros', value: 'OTROS' },
 ];
 
 const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
@@ -64,28 +64,51 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
     setDropdownVisible(false);
   };
 
+
   const handleSubmit = async () => {
-    console.log('Punto de interés registrado:', pointOfInterest);
-    console.log('Hay que unir con las rutas de backend');
-    /*/try {
-      const response = await fetch("http://tu-backend-url/api/points-of-interest", {
+    console.log("Punto de interés registrado:", pointOfInterest);
+  
+    try {
+  
+  
+  
+      // 🔹 Convertir latitude/longitude a formato "location"
+      const formattedPoint = {
+        ...pointOfInterest,
+        location: {
+          type: "Point",
+          coordinates: [pointOfInterest.longitude, pointOfInterest.latitude]
+        }
+      };
+  
+      // 🔹 Eliminar latitude y longitude del objeto enviado
+      delete formattedPoint.latitude;
+      delete formattedPoint.longitude;
+  
+      const response = await fetch("http://192.168.1.49:3000/api/poi/sin-token", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pointOfInterest),
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formattedPoint),
       });
+  
       const data = await response.json();
-      if (data.success) {
+  
+      if (response.ok) {
         Alert.alert("Éxito", "Punto de interés creado correctamente.");
         setPointOfInterest(initialPoint);
         setShowForm(false);
       } else {
-        Alert.alert("Error", "No se pudo crear el punto de interés.");
+        Alert.alert("Error", data.error || "No se pudo crear el punto de interés.");
       }
     } catch (error) {
       console.error("Error al crear el punto de interés:", error);
       Alert.alert("Error", "Ocurrió un error al crear el punto de interés.");
-    }/*/
+    }
   };
+  
+  
 
   return (
     <View className="w-80 bg-white rounded-lg p-5 shadow-lg self-center">
