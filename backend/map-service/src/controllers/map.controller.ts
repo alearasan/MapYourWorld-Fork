@@ -40,7 +40,7 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
     }
 
     const newMap = await MapService.createColaborativeMap(MapData, userId);
-    res.status(201).json({ success: true, message: 'mapa colaborativo creado correctamente', Map: newMap });
+    res.status(201).json({ success: true, message: 'mapa colaborativo creado correctamente'});
   } catch (error) {
     console.error('Error al crear mapa colaborativo:', error);
     res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error al crear mapa colaborativo' });
