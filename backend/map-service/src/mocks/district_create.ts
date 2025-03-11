@@ -19,6 +19,7 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
     } as Geometry,
     isUnlocked: false,
     map: null,
+    user: null
 }));
 
 

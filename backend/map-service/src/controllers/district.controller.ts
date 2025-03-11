@@ -8,14 +8,14 @@ import * as DistrictService from '../services/district.service';
 
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { mapId } = req.body;
+    const { mapId, userId } = req.body;
 
-    if (!mapId) {
+    if (!mapId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    await DistrictService.createDistrict(mapId);
+    await DistrictService.createDistrict(mapId, userId);
     res.status(201).json({ success: true, message: 'Distritos creados correctamente' });
   } catch (error) {
     console.error('Error al crear distrito:', error);

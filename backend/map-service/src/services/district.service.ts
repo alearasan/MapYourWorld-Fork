@@ -11,6 +11,7 @@ import DistrictRepository from '../repositories/district.repository';
 import MapRepository from '../repositories/map.repository';
 import * as fs from 'fs';
 import { Geometry } from 'geojson';
+import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
 
 const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
@@ -18,6 +19,7 @@ const geojsonData = JSON.parse(rawData);
 
 const repo = new DistrictRepository();
 const mapRepo = new MapRepository();
+const userRepo = new AuthRepository();    
 
 
 /**
@@ -29,14 +31,17 @@ const mapRepo = new MapRepository();
 
 
 export const createDistrict = async (
-  mapId?: string 
+  mapId?: string, 
+  userId?: string
 ): Promise<void> => {
   var map: any = null;
+  var user: any = null;
   try {
-    if (mapId){
+    if (mapId && userId) {
           map = await mapRepo.getMapById(mapId);
-      if (!map) {
-        throw new Error(`Map with id ${mapId} not found`);
+          user = await userRepo.findById(userId);
+      if (!map || !user) {
+        throw new Error("No se encontró el mapa o el usuario");
       }
   }
     const districtData = geojsonData.features.map((feature: any, index: number) => ({
@@ -47,7 +52,8 @@ export const createDistrict = async (
             coordinates: feature.geometry.coordinates
         } as Geometry,
         isUnlocked: false,
-        map: map
+        map: map,
+        user: user
     }));
 
 
