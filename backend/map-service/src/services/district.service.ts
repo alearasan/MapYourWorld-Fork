@@ -29,15 +29,16 @@ const mapRepo = new MapRepository();
 
 
 export const createDistrict = async (
-  mapId: string
+  mapId?: string 
 ): Promise<void> => {
-
+  var map: any = null;
   try {
-
-    const map = await mapRepo.getMapById(mapId);
-    if (!map) {
-      throw new Error(`Map with id ${mapId} not found`);
-    }
+    if (mapId){
+          map = await mapRepo.getMapById(mapId);
+      if (!map) {
+        throw new Error(`Map with id ${mapId} not found`);
+      }
+  }
     const districtData = geojsonData.features.map((feature: any, index: number) => ({
         name: `Distrito ${index + 1}`, // Asigna un nombre genérico si no hay "properties"
         description: 'Descripción genérica del distrito.', // Se puede personalizar
@@ -58,10 +59,6 @@ export const createDistrict = async (
   } catch (error) {
     console.log(error)
   }
-
-
-
-  throw new Error('Método no implementado');
 };
 
 

@@ -8,7 +8,8 @@ const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
 const geojsonData = JSON.parse(rawData);
 
-const userId = 'some-admin-user-id'; // Usa un ID de usuario con permisos de administrador
+
+const user_map_Id = 'some-admin-user-id'; // Usa un ID de usuario con permisos de administrador
 const districtsData = geojsonData.features.map((feature: any, index: number) => ({
     name: `Distrito ${index + 1}`, // Asigna un nombre genérico si no hay "properties"
     description: 'Descripción genérica del distrito.', // Se puede personalizar
@@ -36,7 +37,7 @@ export async function createAllDistricts() {
         }
 
         //for (const districtData of districtsData) {
-        await createDistrict(mapId);
+        await createDistrict();
         //     console.log(`✅ Distrito creado: ${districtData.name}`, result);
         // }
     } catch (error) {
