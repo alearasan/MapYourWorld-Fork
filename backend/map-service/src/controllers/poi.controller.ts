@@ -30,6 +30,35 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
   }
 };
 
+
+
+export const createPOISinToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const poiData = req.body;
+
+    // Extraer las coordenadas y convertirlas a un tipo geométrico de PostGIS
+
+    // Crear el objeto Geometry adecuado para PostGIS
+
+
+    // Actualizar los datos con la geometría convertida
+    const updatedPOIData = {
+      ...poiData,
+    };
+
+    // Llamar al servicio para crear el nuevo POI
+    const newPOI = await POIService.createPOISinToken(updatedPOIData);
+    
+    res.status(201).json(newPOI);
+  } catch (error) {
+    console.error('Error al crear el punto de interés:', error);
+    res.status(400).json({ 
+      error: error instanceof Error ? error.message : 'Error al crear el punto de interés' 
+    });
+  }
+};
+
+
 /**
  * Obtiene un punto de interés por su ID
  */

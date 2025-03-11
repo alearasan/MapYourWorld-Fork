@@ -21,7 +21,7 @@ export class PointOfInterest {
   @Column({ nullable: true })
   description!: string;
 
-  @Column('json')
+  @Column({ type: 'geometry', spatialFeatureType: 'Point', srid: 4326, nullable: false })
   location!: Geometry;
 
   @Column({ type: 'enum', enum: Category })
@@ -33,11 +33,11 @@ export class PointOfInterest {
   @Column()
   createdAt!: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @ManyToOne(() => District)
+  @ManyToOne(() => District, (district) => district.id)
   @JoinColumn({ name: 'districtId' })
   district!: District;
 }

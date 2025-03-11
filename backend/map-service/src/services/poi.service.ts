@@ -65,6 +65,70 @@ export const createPOI = async (
   return await poiRepository.save(newPOI);
 };
 
+
+
+
+
+
+
+export const createPOISinToken = async (
+  poiData: Omit<PointOfInterest, 'id'>,
+): Promise<PointOfInterest> => {
+  // TODO: Implementar la creación de un punto de interés
+  // 1. Validar los datos del punto de interés
+  // 2. Verificar que las coordenadas sean válidas
+  // 3. Comprobar si ya existe un POI similar en la ubicación
+  // 4. Guardar el POI en la base de datos
+
+  // 1. Validar los datos del punto de interés
+  if (!poiData.name || !poiData.location || !poiData.category) {
+    throw new Error('Nombre, ubicación y categoría son campos obligatorios');
+  }
+  
+  // 2. Verificar que las coordenadas sean válidas
+  const location = poiData.location;
+  if (!location || 
+      !location.type || 
+      location.type !== 'Point' || 
+      !location.coordinates || 
+      location.coordinates.length !== 2) {
+    throw new Error('Las coordenadas de ubicación son inválidas');
+  }
+  
+  // 3. Comprobar si ya existe un POI similar en la ubicación
+  const [longitude, latitude] = location.coordinates;
+  const existingPOI = await poiRepository.findOne({
+    where: {
+      name: poiData.name,
+      location: {
+        type: 'Point', 
+        coordinates: [longitude, latitude] 
+      } as any
+    }
+  });
+  
+  if (existingPOI) {
+    throw new Error('Ya existe un punto de interés similar en esta ubicación');
+  }
+  
+  // 4. Guardar el POI en la base de datos
+  const newPOI = poiRepository.create({
+    ...poiData,
+    createdAt: new Date()
+    });
+  
+  return await poiRepository.save(newPOI);
+};
+
+
+
+
+
+
+
+
+
+
 /**
  * Obtiene un punto de interés por su ID
  * @param poiId ID del punto de interés a obtener

@@ -12,6 +12,8 @@ router.get('/:id', POIController.getPOIById);
 // Actualizar un POI existente
 router.put('/:id', POIController.updatePOI);
 
+router.post('/sin-token', POIController.createPOISinToken);
+
 // Eliminar/desactivar un POI
 router.delete('/:id', POIController.deletePOI);
 
