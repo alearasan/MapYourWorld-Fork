@@ -186,7 +186,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
-      const response = await fetch("http://192.168.1.49:3000/api/poi/all");
+      const response = await fetch(`${API_URL}/api/poi/all`);
       const data = await response.json();
       if (data.pois) {  // Aquí se omite la validación de 'success'
         setPointsOfInterest(data.pois);
@@ -201,7 +201,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para desbloquear un distrito si el usuario se encuentra dentro de él
   const desbloquearDistrito = async (districtId: string) => {
     try {
-      const response = await fetch(`http://192.168.1.49:3000/api/districts/unlock/${districtId}/1`, {
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isUnlocked: true }),

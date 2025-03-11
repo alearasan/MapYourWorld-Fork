@@ -9,6 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { API_URL } from '../../constants/config';
+
 
 interface PuntoDeInteresFormProps {
   pointOfInterest: any;
@@ -90,7 +92,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
       delete formattedPoint.latitude;
       delete formattedPoint.longitude;
   
-      const response = await fetch("http://192.168.1.49:3000/api/poi/sin-token", {
+      const response = await fetch(`${API_URL}/api/poi/sin-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedPoint),
