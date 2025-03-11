@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import districtRoutes from './map-service/src/routes/district.routes';
+import mapRoutes from './map-service/src/routes/map.routes';
 import authRoutes from './auth-service/src/routes/auth.routes';
 import profileRoutes from './user-service/src/routes/profile.routes';
 import pointOfInterest from './map-service/src/routes/poi.routes';
@@ -30,6 +31,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/poi', pointOfInterest);
 app.use('/api/friends', friendRoutes);
+app.use('/api/maps', mapRoutes)
+
+
 
 // Interfaz para los servicios
 interface Service {
