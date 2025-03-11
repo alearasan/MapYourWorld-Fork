@@ -13,7 +13,7 @@ export const AppDataSource = new DataSource({
     password: 'mapyourworld13',
     database: 'mapyourworldDB',
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
-    dropSchema: true, // Asegúrate de que esto esté en false para no perder datos
+    dropSchema: false, // Asegúrate de que esto esté en false para no perder datos
     logging: true,
     entities: [District, UserProfile, User, Friend], // Aquí van todas tus entidades
     migrations: [],
