@@ -71,7 +71,7 @@ export class User {
    * Relación 1:N con Map
    * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).
    */
-  @ManyToMany(() => Map, (map) => map.users_joined)
+  @ManyToMany(() => Map, (map) => map.users_joined, {eager: true})
   @JoinTable({
     name: 'user_maps_joined',
     joinColumn: {

@@ -15,7 +15,7 @@ export default class MapRepository {
     }
  
     async getMapById(mapId: string): Promise<Map> {
-        const map = await this.mapRepo.findOneBy({ id: mapId });
+        const map = await this.mapRepo.findOne({ where:{ id: mapId }, relations: ['users_joined']});
         if (!map) {
             throw new Error(`District with id ${mapId} not found`);
         }
