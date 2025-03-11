@@ -28,18 +28,13 @@ function killProcess(port) {
 async function startServices() {
   await killProcess(8081);
 
-  // Inicializar la base de datos y poblarla
-  const initDbProcess = spawn("npx ts-node map-service/src/mocks/district_create.ts", { cwd: "backend/map-service/src", shell: true, stdio: "inherit" });
-
-  initDbProcess.on("close", (code) => {
-    console.log(`[Process exited with code] ${code}`);
-    
+  
     // Iniciar el servidor backend después de inicializar la base de datos
-    spawn("npx ts-node backend_endpoint.ts", { cwd: "backend", shell: true, stdio: "ignore" });
+    await spawn("npx ts-node backend_endpoint.ts", { cwd: "backend", shell: true, stdio: "ignore" });
 
     // Iniciar la aplicación frontend
-    spawn("npm start", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });
-  });
+    await spawn("npm start", { cwd: "frontend/mobile", shell: true, stdio: "inherit" });
+
 }
 
 startServices();

@@ -6,6 +6,7 @@ import districtRoutes from './map-service/src/routes/district.routes';
 import mapRoutes from './map-service/src/routes/map.routes';
 import authRoutes from './auth-service/src/routes/auth.routes';
 import profileRoutes from './user-service/src/routes/profile.routes';
+import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts } from './map-service/src/mocks/district_create';
@@ -21,7 +22,10 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 3000;
 
+// Definir las rutas
+
 app.use('/api/districts', districtRoutes);
+app.use('/api/regions', regionRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/friends', friendRoutes);
@@ -29,6 +33,7 @@ app.use('/api/maps', mapRoutes)
 
 
 
+// Interfaz para los servicios
 interface Service {
   name: string;
   url: string;
