@@ -1,15 +1,12 @@
 import { createDistrict } from "../services/district.service";
-import { AppDataSource, initializeDatabase } from '../../../database/appDataSource';
+import { AppDataSource } from '../../../database/appDataSource';
 import { Geometry } from 'geojson';
-
 import * as fs from 'fs';
+import { District } from "../models/district.model";
 
 const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
 const geojsonData = JSON.parse(rawData);
-
-
-
 
 const userId = 'some-admin-user-id'; // Usa un ID de usuario con permisos de administrador
 
@@ -23,16 +20,27 @@ const districtsData = geojsonData.features.map((feature: any, index: number) => 
     isUnlocked: false,
 }));
 
-async function createAllDistricts() {
+
+export async function createAllDistricts() {
     try {
-        await initializeDatabase();
+        if (!AppDataSource.isInitialized) {
+            console.log("🔄 Inicializando la base de datos...");
+            await AppDataSource.initialize();
+            console.log("✅ Base de datos inicializada.");
+        }
+
+        const existingDistricts = await AppDataSource.getRepository(District).count();
+        if (existingDistricts > 0) {
+            console.log("⚠️ Los distritos ya están en la base de datos. No se insertarán duplicados.");
+            return;
+        }
+
         for (const districtData of districtsData) {
             const result = await createDistrict(districtData, userId);
-            console.log(`Distrito creado correctamente: ${districtData.name}`, result);
+            console.log(`✅ Distrito creado: ${districtData.name}`, result);
         }
     } catch (error) {
-        console.error('Error al crear los distritos:', error);
+        console.error("❌ Error al crear los distritos:", error);
     }
 }
 
-createAllDistricts();

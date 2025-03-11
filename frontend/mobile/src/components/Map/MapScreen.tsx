@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated , Modal, TouchableOpacity, TextInput} from "react-native";
 import MapView, { Polygon } from "react-native-maps";
 import * as Location from "expo-location";
+import { Marker } from 'react-native-maps';
+import PuntoDeInteresForm from "../POI/PoiForm";
 
 // Definir el tipo para los distritos
 interface Distrito {
@@ -69,6 +71,13 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const [distritoActual, setDistritoActual] = useState<string | null>(null);
   const [mostrarLogro, setMostrarLogro] = useState<boolean>(false);
   const [distritosVisitados, setDistritosVisitados] = useState<Set<string>>(new Set());
+  const [showForm, setShowForm] = useState(false);
+  const [pointOfInterest, setPointOfInterest] = useState({
+    name: '',
+    description: '',
+    latitude: 0,
+    longitude: 0,
+  });
 
   // Función para verificar si el punto está dentro del polígono
   const isPointInPolygon = (point: { latitude: number; longitude: number }, polygon: { latitude: number; longitude: number }[]) => {
@@ -135,7 +144,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.49:3000/api/districts');
+      const response = await fetch('http://192.168.18.9:3000/api/districts');
       const data = await response.json();
   
       if (data.success && data.districts) {
@@ -178,7 +187,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     try {
   
       // Enviar la solicitud al backend con isUnlocked a false
-      const response = await fetch(`http://192.168.1.49:3000/api/districts/unlock/${districtId}/1`, {
+      const response = await fetch(`http://192.168.18.9:3000/api/districts/unlock/${districtId}/1`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -293,32 +302,47 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         </View>
       ) : (
         <>
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude: 37.3754,
-                longitude: -5.9903,
-                latitudeDelta: 0.1,
-                longitudeDelta: 0.1,
-              }}
-              showsUserLocation={true}
-            >
-              {distritosBackend.map((distrito, index) => {
-                return (
-                  <Polygon
-                    key={index}
-                    coordinates={distrito.coordenadas}
-                    strokeColor={"#808080"}
-                    fillColor={distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
-                    strokeWidth={2}
-                  />
-                );
-              })}
-            </MapView>
-
-
-          
-          {/* Componente de logro */}
+          <Modal
+          visible={showForm}
+          transparent={true}
+          onRequestClose={() => setShowForm(false)}
+        >
+          <PuntoDeInteresForm
+            pointOfInterest={pointOfInterest}
+            setPointOfInterest={setPointOfInterest}
+            setShowForm={setShowForm}
+          />
+        </Modal>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: 37.3754,
+              longitude: -5.9903,
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,
+            }}
+            showsUserLocation={true}
+            onPress={(e) => {
+              const { nativeEvent } = e;
+              const { coordinate } = nativeEvent;
+              setPointOfInterest({ ...pointOfInterest, latitude: coordinate.latitude, longitude: coordinate.longitude });
+              setShowForm(true);
+            }}
+          >
+            {distritosBackend.map((distrito, index) => {
+              return (
+                <Polygon
+                  key={index}
+                  coordinates={distrito.coordenadas}
+                  strokeColor={"#808080"}
+                  fillColor={distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
+                  strokeWidth={2}
+                />
+              );
+            })}
+            
+            
+          </MapView>
           {distritoActual && <LogroComponent visible={mostrarLogro} distrito={distritoActual} />}
         </>
       )}
