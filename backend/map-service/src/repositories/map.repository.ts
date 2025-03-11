@@ -34,9 +34,25 @@ export default class MapRepository {
         if (!map) {
             throw new Error("Mapa no enviado correctamente");
         }
-        map.user_created.id = userId;
-        map.users_joined.push(map.user_created);
-        return await this.mapRepo.save(map);
+
+
+        const user = await this.userRepo.findOne({ where: { id: userId }, relations: ['maps_joined'] });
+        if (!user) {
+            throw new Error(`User with id ${userId} not found`);
+        }
+        map.user_created = user;
+        const lista_usuarios_unidos = []
+        lista_usuarios_unidos.push(user);
+        map.users_joined = lista_usuarios_unidos;
+         await this.mapRepo.save(map);
+
+        
+        const lista_mapas_unidos = []
+        lista_mapas_unidos.push(map);
+        user.maps_joined = lista_mapas_unidos;
+        await this.userRepo.save(user);
+        
+        return map
     }
 
 
