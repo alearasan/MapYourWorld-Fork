@@ -2,9 +2,25 @@
  * Configuración global para la aplicación móvil
  * Define variables globales y configuraciones del entorno
  */
+import Constants from "expo-constants";
+
+const getBackendUrl = () => {
+  const expoUrl = Constants.expoConfig?.hostUri || Constants.manifest?.hostUri;
+
+  if (!expoUrl) {
+    console.warn("No se pudo obtener la IP de Expo.");
+    return "http://localhost:3000"; // Fallback
+  }
+
+  // Extraer solo la IP desde "192.168.1.33:8081"
+  const ip = expoUrl.split(":")[0];
+
+  return `http://${ip}:3000`;
+};
 
 // Configuración de API
-export const API_URL = process.env.API_URL || 'http://localhost:3000';
+//export const API_URL = process.env.API_URL || `http://localhost:3000`;
+export const API_URL =getBackendUrl();
 export const API_TIMEOUT = 30000; // 30 segundos
 export const WS_URL = process.env.WS_URL || 'ws://localhost:3000';
 
@@ -38,3 +54,5 @@ export const ANALYTICS_SAMPLE_RATE = 0.5; // 50% de eventos capturados
 // Límites de la aplicación
 export const MAX_PHOTOS_PER_POI = 10;
 export const MAX_COMMENTS_PER_POST = 50; 
+
+
