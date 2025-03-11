@@ -83,6 +83,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     photos: [],
     latitude: 0,
     longitude: 0,
+    district: "",
   });
   // State para almacenar los POIs obtenidos del backend
   const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
@@ -146,7 +147,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://192.168.1.145:3000/api/districts");
+      const response = await fetch("http://192.168.1.49:3000/api/districts");
       const data = await response.json();
       if (data.success && data.districts) {
         const distritosMapeados = data.districts
@@ -184,7 +185,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
-      const response = await fetch("http://192.168.1.145:3000/api/poi/all");
+      const response = await fetch("http://192.168.1.49:3000/api/poi/all");
       const data = await response.json();
       if (data.pois) {  // Aquí se omite la validación de 'success'
         setPointsOfInterest(data.pois);
@@ -199,7 +200,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para desbloquear un distrito si el usuario se encuentra dentro de él
   const desbloquearDistrito = async (districtId: string) => {
     try {
-      const response = await fetch(`http://192.168.1.145:3000/api/districts/unlock/${districtId}/1`, {
+      const response = await fetch(`http://192.168.1.49:3000/api/districts/unlock/${districtId}/1`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isUnlocked: true }),
@@ -282,6 +283,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     }
   }, [location, distritosBackend]);
 
+  // Función para obtener el distritoId basado en las coordenadas
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -303,6 +306,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 // Convertir el POI recién creado al formato esperado
                 const poiConverted = {
                   ...newPOI,
+                  
                   location: {
                     type: "Point",
                     coordinates: [newPOI.longitude, newPOI.latitude],
@@ -323,10 +327,20 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
             showsUserLocation={true}
             onPress={(e) => {
               const { coordinate } = e.nativeEvent;
+              const { latitude, longitude } = coordinate;
+
+              let poiDistrict = null;
+              for (const distrito of distritosBackend) {
+                if (isPointInPolygon({ latitude, longitude }, distrito.coordenadas)) {
+                  poiDistrict = distrito; // Guardamos el ID del distrito
+                  break;
+                }
+              }
               setPointOfInterest({
                 ...pointOfInterest,
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude,
+                latitude,
+                longitude,
+                district: poiDistrict,
               });
               setShowForm(true);
             }}
@@ -339,7 +353,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 fillColor={
                   distrito.isUnlocked
                     ? "rgba(0, 255, 0, 0.3)"
-                    : "rgba(128, 128, 128, 0.3)"
+                    : "rgba(128, 128, 128, 0.7)"
                 }
                 strokeWidth={2}
               />
@@ -350,13 +364,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 latitude: poi.location.coordinates[1],
                 longitude: poi.location.coordinates[0],
               };
-              // Mostrar el marcador solo si el POI se encuentra dentro de un distrito desbloqueado
-              const isInUnlockedDistrict = distritosBackend.some(
-                (distrito) =>
-                  distrito.isUnlocked &&
-                  isPointInPolygon(poiCoordinates, distrito.coordenadas)
-              );
-              // if (!isInUnlockedDistrict) return null;
+              
               return (
                 <Marker
                   key={index}

@@ -60,15 +60,21 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    console.log("Punto de interés registrado:", pointOfInterest);
   
     try {
-      // Preparamos el objeto que se usará para mostrar el marcador en el mapa
+      
+      if (pointOfInterest.district === null ||!pointOfInterest.district.isUnlocked) {
+        Alert.alert('Selecciona un distrito válido', 'Este distrito está bloqueado. No se puede crear el punto de interés.');
+        return;
+      }
+
+      
       const poiForMarker = {
         name: pointOfInterest.name,
         description: pointOfInterest.description,
         latitude: pointOfInterest.latitude,
         longitude: pointOfInterest.longitude,
+        district: pointOfInterest.district,
       };
   
       // Convertir latitude/longitude a formato "location" para el backend
@@ -84,7 +90,7 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
       delete formattedPoint.latitude;
       delete formattedPoint.longitude;
   
-      const response = await fetch("http://192.168.1.145:3000/api/poi/sin-token", {
+      const response = await fetch("http://192.168.1.49:3000/api/poi/sin-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedPoint),
