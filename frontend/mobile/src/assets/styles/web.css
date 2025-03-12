@@ -83,5 +83,9 @@ body, html {
 }
 
 .secondary {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
+}
+
+.modo-prueba {
+    background-color: #f0f0f0;
 }

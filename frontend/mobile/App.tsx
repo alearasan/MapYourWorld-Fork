@@ -175,7 +175,7 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <MapScreen />
+      <AppContent />
     </AuthProvider>
   );
 };
