@@ -8,6 +8,7 @@ import db from '../../../database/db';
 import { Map } from '../models/map.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import MapRepository from '../repositories/map.repository';
+import { User } from '../../../auth-service/src/models/user.model';
 
 const repo = new MapRepository();
 
@@ -21,6 +22,7 @@ const repo = new MapRepository();
 
 export const createMap = async (
   MapData: Omit<Map, 'id'>,
+  userId: string
 ): Promise<Map> => {
 
   try {
@@ -29,7 +31,7 @@ export const createMap = async (
       throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
     }
 
-    const newMap = repo.createMap(MapData);
+    const newMap = repo.createMap(MapData, userId);
 
     // // 5. Publicar evento de mapa creado
     // await publishEvent('Map.created', {
@@ -52,6 +54,47 @@ export const createMap = async (
 };
 
 
+
+
+export const createColaborativeMap = async (
+  MapData: Omit<Map, 'id'>,
+  userId: string,
+  specificMapId?: string
+): Promise<Map> => {
+
+  try {
+
+    if (!MapData.name || !MapData.createdAt) {
+      throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
+    }
+
+    // Pasamos el ID específico si existe
+    const newMap = specificMapId 
+      ? repo.createMapColaborativoWithId(MapData, userId, specificMapId)
+      : repo.createMapColaborativo(MapData, userId);
+
+    // // 5. Publicar evento de mapa creado
+    // await publishEvent('Map.created', {
+    //   MapId: createdMap.id,
+    //   name: createdMap.name,
+    //   description: createdMap.description,
+    //   timestamp: new Date()
+    // });
+
+
+    console.log("mapa colaborativo creado correctamente:", newMap);
+    return newMap;
+
+  } catch (error) {
+    throw new Error("Error al crear el mapa colaborativo");
+  }
+
+
+
+};
+
+
+
  
 
 /**
@@ -72,6 +115,21 @@ export const getMapById = async (MapId: string): Promise<Map | null> => {
     return Map;
   }
 
+};
+
+
+
+export const getMapUsersById = async (MapId: string): Promise<User[]> => {
+  // TODO: Implementar la obtención de un mapa por ID
+  // 1. Buscar el mapa en la base de datos
+  const users = await repo.getUsersOnMapById(MapId);
+  // 2. Retornar null si no se encuentra
+  if (users === null) {
+    throw new Error(`mapa con ID ${MapId} sin usuarios asociados`);
+  }
+  else {
+    return users;
+  }
 };
 
 /**
@@ -131,5 +189,26 @@ export const deleteMap = async (MapId: string): Promise<{ success: boolean; mess
   } catch (error) {
     console.error("Error al eliminar el mapa:", error);
     return { success: false, message: 'Error al eliminar el mapa' };
+  }
+};
+
+/**
+ * Obtiene todos los mapas colaborativos en los que participa un usuario
+ * @param userId ID del usuario
+ */
+export const getCollaborativeMapsForUser = async (userId: string): Promise<Map[]> => {
+  try {
+    // Buscar mapas donde el usuario participa (está en users_joined)
+    const maps = await repo.getCollaborativeMapsForUser(userId);
+    
+    if (!maps || maps.length === 0) {
+      console.log(`No se encontraron mapas colaborativos para el usuario ${userId}`);
+      return [];
+    }
+    
+    return maps;
+  } catch (error) {
+    console.error(`Error al obtener mapas colaborativos para el usuario ${userId}:`, error);
+    throw error;
   }
 };

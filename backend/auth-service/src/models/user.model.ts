@@ -16,7 +16,7 @@ import {Friend} from "../../../social-service/src/models/friend.model"
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
 //TODO Aún está pendiente de hacer y corregir la importación
-//import { Map } from './Map';
+import { Map } from '../../../map-service/src/models/map.model';
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Plan } from './Plan';
 
@@ -71,8 +71,23 @@ export class User {
    * Relación 1:N con Map
    * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).
    */
-  // @OneToMany(() => Map, (map) => map.owner)
-  // maps!: Map[];
+  @ManyToMany(() => Map, (map) => map.users_joined, {eager: true})
+  @JoinTable({
+    name: 'user_maps_joined',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'map_id',
+      referencedColumnName: 'id',
+    },
+  })
+  maps_joined!: Map[];
+
+
+
+
 
   /**
    * Relación N:N (autorreferenciada) para "is friend of"

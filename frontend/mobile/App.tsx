@@ -13,7 +13,11 @@ import WelcomeScreen from './src/components/screens/WelcomeScreen';
 import LoginScreen from './src/components/screens/LoginScreen';
 import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
+import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
+import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
+import { RootStackParamList } from './src/navigation/types';
+import { AuthProvider } from './src/contexts/AuthContext';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -36,24 +40,23 @@ const ForgotPasswordScreen = () => (
   />
 );
 
-// Definimos los tipos para el navegador
-type RootStackParamList = {
-  Welcome: undefined;
-  Login: undefined;
-  Register: undefined;
-  Map: undefined;
-  ForgotPassword: undefined;
-};
-
+// Usamos la definición de tipos de navegación centralizada
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-
 
 // Definimos un wrapper para MapScreen que incluye los distritos de ejemplo
 const MapScreenWithDistritos = (props: any) => <MapScreen {...props} />;
 
+// Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
+const CollaborativeMapScreenWithParams = (props: any) => {
+  // Obtenemos el mapId y userId de los parámetros de navegación
+  const mapId = props.route?.params?.mapId || "map-123";
+  const userId = props.route?.params?.userId || "user-456";
+  
+  return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+};
 
-const App = () => {
+// Componente principal de la aplicación
+const AppContent = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -115,8 +118,64 @@ const App = () => {
             headerRight: () => <HamburgerMenu />,
           }} 
         />
+        <Stack.Screen 
+          name="CollaborativeMapListScreen" 
+          component={CollaborativeMapListScreen}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Mapas Colaborativos</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }} 
+        />
+        <Stack.Screen 
+          name="CollaborativeMapScreen" 
+          component={CollaborativeMapScreenWithParams}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Mapa Colaborativo</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }} 
+        />
+        <Stack.Screen 
+          name="ForgotPassword" 
+          component={ForgotPasswordScreen}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Recuperar Contraseña</StyledText>
+              </View>
+            ),
+          }} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
+  );
+};
+
+// Componente App que envuelve todo con el proveedor de autenticación
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated , Modal, TouchableOpacity, TextInput} from "react-native";
-import MapView, { Polygon } from "react-native-maps";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal } from "react-native";
+import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import { Marker } from 'react-native-maps';
 import PuntoDeInteresForm from "../POI/PoiForm";
+import { API_URL } from '../../constants/config';
 
-// Definir el tipo para los distritos
+// Tipos para distritos y POIs
 interface Distrito {
   id: string;
   nombre: string;
@@ -13,33 +13,39 @@ interface Distrito {
   isUnlocked: boolean;
 }
 
-// Definir el tipo para los distritos desde el backend
 interface DistritoBackend {
   id: string;
   name: string;
   description: string;
-  boundaries: any; // Usamos any para evitar problemas de tipado con GeoJSON
+  boundaries: any;
   isUnlocked: boolean;
 }
 
-interface MapScreenProps {
-  distritos?: Distrito[]; // Lista de distritos opcional
+interface POI {
+  id?: string;
+  name: string;
+  description: string;
+  location: {
+    type: string;
+    coordinates: number[]; // [longitude, latitude]
+  };
 }
 
-// Componente para mostrar el logro
-const LogroComponent = ({ visible, distrito }: { visible: boolean, distrito: string }) => {
+interface MapScreenProps {
+  distritos?: Distrito[];
+}
+
+// Componente para mostrar el logro al desbloquear un distrito
+const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: string }) => {
   const [opacityAnim] = useState(new Animated.Value(0));
-  
+
   useEffect(() => {
     if (visible) {
-      // Animar la entrada
       Animated.timing(opacityAnim, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
       }).start();
-      
-      // Configurar la salida después de 4 segundos
       const timer = setTimeout(() => {
         Animated.timing(opacityAnim, {
           toValue: 0,
@@ -47,13 +53,12 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean, distrito: str
           useNativeDriver: true,
         }).start();
       }, 4000);
-      
       return () => clearTimeout(timer);
     }
   }, [visible]);
-  
+
   if (!visible) return null;
-  
+
   return (
     <Animated.View style={[styles.logroContainer, { opacity: opacityAnim }]}>
       <Text style={styles.logroEmoji}>🏆</Text>
@@ -72,20 +77,27 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const [mostrarLogro, setMostrarLogro] = useState<boolean>(false);
   const [distritosVisitados, setDistritosVisitados] = useState<Set<string>>(new Set());
   const [showForm, setShowForm] = useState(false);
-  const [pointOfInterest, setPointOfInterest] = useState({
-    name: '',
-    description: '',
+  const [pointOfInterest, setPointOfInterest] = useState<any>({
+    name: "",
+    description: "",
+    category: "",
+    photos: [],
     latitude: 0,
     longitude: 0,
+    district: "",
   });
+  // State para almacenar los POIs obtenidos del backend
+  const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
 
-  // Función para verificar si el punto está dentro del polígono
-  const isPointInPolygon = (point: { latitude: number; longitude: number }, polygon: { latitude: number; longitude: number }[]) => {
+  // Función para verificar si un punto está dentro de un polígono (distrito)
+  const isPointInPolygon = (
+    point: { latitude: number; longitude: number },
+    polygon: { latitude: number; longitude: number }[]
+  ) => {
     let inside = false;
     const { latitude, longitude } = point;
     const len = polygon.length;
     let j = len - 1;
-
     for (let i = 0; i < len; i++) {
       const vertex1 = polygon[i];
       const vertex2 = polygon[j];
@@ -103,36 +115,28 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     return inside;
   };
 
-  // Función para convertir las coordenadas de GeoJSON al formato para react-native-maps
+  // Función para transformar coordenadas desde GeoJSON al formato de react-native-maps
   const transformarCoordenadasGeoJSON = (geoJson: any): { latitude: number; longitude: number }[] => {
     try {
       if (!geoJson || !geoJson.coordinates || !Array.isArray(geoJson.coordinates)) {
         return [];
       }
-      
       let coordenadas: { latitude: number; longitude: number }[] = [];
-      
-      // Función recursiva para procesar coordenadas a cualquier nivel de anidación
       const procesarCoordenadas = (coords: any[]): void => {
-        if (coords.length === 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
-          // Es un punto [longitud, latitud]
+        if (coords.length === 2 && typeof coords[0] === "number" && typeof coords[1] === "number") {
           coordenadas.push({
             latitude: coords[1],
-            longitude: coords[0]
+            longitude: coords[0],
           });
         } else if (Array.isArray(coords)) {
-          // Es un array de puntos o un array de arrays
-          coords.forEach(item => {
+          coords.forEach((item) => {
             if (Array.isArray(item)) {
               procesarCoordenadas(item);
             }
           });
         }
       };
-      
-      // Comenzar el procesamiento
       procesarCoordenadas(geoJson.coordinates);
-      
       return coordenadas;
     } catch (error) {
       console.error("Error transformando coordenadas:", error);
@@ -144,25 +148,22 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const fetchDistritos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.18.9:3000/api/districts');
+      const response = await fetch(`${API_URL}/api/districts`);
       const data = await response.json();
-  
       if (data.success && data.districts) {
         const distritosMapeados = data.districts
           .map((distrito: DistritoBackend) => {
             try {
               const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
-  
               if (coordenadasTransformadas.length < 3) {
                 console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                 return null;
               }
-  
               return {
                 id: distrito.id,
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked, // Agregar el atributo isUnlocked
+                isUnlocked: distrito.isUnlocked,
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -170,7 +171,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
             }
           })
           .filter((d: Distrito | null): d is Distrito => d !== null);
-  
         setDistritosBackend(distritosMapeados);
       } else {
         Alert.alert("Error", "No se pudieron cargar los distritos");
@@ -183,55 +183,54 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     }
   };
 
-  const desbloquearDistrito = async (districtId: string) => {
+  // Función para obtener todos los POIs desde el backend
+  const fetchPOIs = async () => {
     try {
-  
-      // Enviar la solicitud al backend con isUnlocked a false
-      const response = await fetch(`http://192.168.18.9:3000/api/districts/unlock/${districtId}/1`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isUnlocked: true,  // Aquí cambiamos el valor de isUnlocked
-        }),
-      });
-  
+      const response = await fetch(`${API_URL}/api/poi/all`);
       const data = await response.json();
-
-      if (data.success) {
-        console.log(`✅ Distrito ${districtId} desbloqueado exitosamente.`);
-  
-        // Actualizar el estado del frontend para reflejar el cambio
-        setDistritosBackend((prevDistritos) =>
-          prevDistritos.map((d) =>
-            d.id === districtId ? { ...d, isUnlocked: true } : d
-          )
-        );
+      if (data.pois) {  // Aquí se omite la validación de 'success'
+        setPointsOfInterest(data.pois);
       } else {
-        console.warn(`⚠️ No se pudo desbloquear el distrito ${districtId}`);
+        console.warn("No se pudieron obtener los puntos de interés");
       }
     } catch (error) {
-      console.error("❌ Error al desbloquear el distrito:", error);
+      console.error("Error al obtener los puntos de interés:", error);
     }
   };
-  
-  
-  
-  
 
+  // Función para desbloquear un distrito si el usuario se encuentra dentro de él
+  const desbloquearDistrito = async (districtId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isUnlocked: true }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log(`Distrito ${districtId} desbloqueado.`);
+        setDistritosBackend((prev) =>
+          prev.map((d) => (d.id === districtId ? { ...d, isUnlocked: true } : d))
+        );
+      } else {
+        console.warn(`No se pudo desbloquear el distrito ${districtId}`);
+      }
+    } catch (error) {
+      console.error("Error al desbloquear el distrito:", error);
+    }
+  };
+
+  // Al montar el componente se obtienen distritos, POIs y se comienza a observar la ubicación
   useEffect(() => {
-    // Cargar los distritos desde el backend cuando se monte el componente
     fetchDistritos();
-    
+    fetchPOIs();
     let locationSubscription: Location.LocationSubscription | null = null;
-    
-    // Configurar la ubicación
     const startWatchingLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa.");
         return;
       }
-
       locationSubscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
@@ -246,23 +245,19 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         }
       );
     };
-
     startWatchingLocation();
-
     return () => {
-      // Limpiar la suscripción al desmontar el componente
       if (locationSubscription) {
         locationSubscription.remove();
       }
     };
   }, []);
 
-  // Actualizar la verificación de si el usuario está dentro de algún distrito
+  // Verificar si el usuario se encuentra dentro de algún distrito y desbloquearlo si es necesario
   useEffect(() => {
     if (location && distritosBackend.length > 0) {
       let dentroDeAlguno = false;
       let distritoEncontrado: Distrito | null = null;
-  
       for (const distrito of distritosBackend) {
         if (isPointInPolygon(location, distrito.coordenadas)) {
           dentroDeAlguno = true;
@@ -270,18 +265,14 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
           break;
         }
       }
-  
       if (distritoEncontrado) {
         const { id, nombre, isUnlocked } = distritoEncontrado;
-  
         if (!isUnlocked) {
           desbloquearDistrito(id);
         }
-  
         if (!distritosVisitados.has(nombre)) {
           setDistritosVisitados(new Set(distritosVisitados).add(nombre));
           setDistritoActual(nombre);
-  
           setTimeout(() => {
             setMostrarLogro(true);
             setTimeout(() => setMostrarLogro(false), 6000);
@@ -292,7 +283,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
       }
     }
   }, [location, distritosBackend]);
-  
+
+  // Función para obtener el distritoId basado en las coordenadas
 
   return (
     <View style={styles.container}>
@@ -303,16 +295,28 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
       ) : (
         <>
           <Modal
-          visible={showForm}
-          transparent={true}
-          onRequestClose={() => setShowForm(false)}
-        >
-          <PuntoDeInteresForm
-            pointOfInterest={pointOfInterest}
-            setPointOfInterest={setPointOfInterest}
-            setShowForm={setShowForm}
-          />
-        </Modal>
+            visible={showForm}
+            transparent={true}
+            onRequestClose={() => setShowForm(false)}
+          >
+            <PuntoDeInteresForm
+              pointOfInterest={pointOfInterest}
+              setPointOfInterest={setPointOfInterest}
+              setShowForm={setShowForm}
+              onSave={(newPOI: any) => {
+                // Convertir el POI recién creado al formato esperado
+                const poiConverted = {
+                  ...newPOI,
+                  
+                  location: {
+                    type: "Point",
+                    coordinates: [newPOI.longitude, newPOI.latitude],
+                  },
+                };
+                setPointsOfInterest((prev) => [...prev, poiConverted]);
+              }}
+            />
+          </Modal>
           <MapView
             style={styles.map}
             initialRegion={{
@@ -323,25 +327,54 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
             }}
             showsUserLocation={true}
             onPress={(e) => {
-              const { nativeEvent } = e;
-              const { coordinate } = nativeEvent;
-              setPointOfInterest({ ...pointOfInterest, latitude: coordinate.latitude, longitude: coordinate.longitude });
+              const { coordinate } = e.nativeEvent;
+              const { latitude, longitude } = coordinate;
+
+              let poiDistrict = null;
+              for (const distrito of distritosBackend) {
+                if (isPointInPolygon({ latitude, longitude }, distrito.coordenadas)) {
+                  poiDistrict = distrito; // Guardamos el ID del distrito
+                  break;
+                }
+              }
+              setPointOfInterest({
+                ...pointOfInterest,
+                latitude,
+                longitude,
+                district: poiDistrict,
+              });
               setShowForm(true);
             }}
           >
-            {distritosBackend.map((distrito, index) => {
+            {distritosBackend.map((distrito, index) => (
+              <Polygon
+                key={index}
+                coordinates={distrito.coordenadas}
+                strokeColor={"#808080"}
+                fillColor={
+                  distrito.isUnlocked
+                    ? "rgba(0, 255, 0, 0.3)"
+                    : "rgba(128, 128, 128, 0.7)"
+                }
+                strokeWidth={2}
+              />
+            ))}
+            {pointsOfInterest.map((poi, index) => {
+              // Convertir las coordenadas del POI (se asume que vienen en formato [lng, lat])
+              const poiCoordinates = {
+                latitude: poi.location.coordinates[1],
+                longitude: poi.location.coordinates[0],
+              };
+              
               return (
-                <Polygon
+                <Marker
                   key={index}
-                  coordinates={distrito.coordenadas}
-                  strokeColor={"#808080"}
-                  fillColor={distrito.isUnlocked ? "rgba(0, 255, 0, 0.3)" : "rgba(128, 128, 128, 0.3)"}
-                  strokeWidth={2}
+                  coordinate={poiCoordinates}
+                  title={poi.name}
+                  description={poi.description}
                 />
               );
             })}
-            
-            
           </MapView>
           {distritoActual && <LogroComponent visible={mostrarLogro} distrito={distritoActual} />}
         </>
@@ -355,23 +388,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   logroContainer: {
-    position: 'absolute',
-    top: '40%',
-    left: '10%',
-    right: '10%',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    position: "absolute",
+    top: "40%",
+    left: "10%",
+    right: "10%",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     padding: 20,
     borderRadius: 15,
-    alignItems: 'center',
+    alignItems: "center",
     elevation: 5,
   },
   logroEmoji: {
@@ -380,19 +413,19 @@ const styles = StyleSheet.create({
   },
   logroTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
     marginBottom: 5,
   },
   logroSubtitle: {
     fontSize: 18,
-    color: 'white',
+    color: "white",
     marginBottom: 5,
   },
   logroDistrito: {
     fontSize: 16,
-    color: 'yellow',
-    fontWeight: 'bold',
+    color: "yellow",
+    fontWeight: "bold",
   },
 });
 

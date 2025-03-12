@@ -193,3 +193,44 @@ export const findNearbyPOIs = async (req: AuthenticatedRequest, res: Response): 
     });
   }
 };
+/**
+ * Obtiene todos los puntos de interés
+ */
+export const getAllPOIs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const pois = await POIService.getAllPOIs();
+    res.status(200).json({ success: true, pois });
+  } catch (error) {
+    console.error('Error al obtener todos los POIs:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Error al obtener los POIs' 
+    });
+  }
+};
+
+/**
+ * Obtiene todos los puntos de interés de un mapa específico
+ */
+export const getPOIsByMapId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const mapId = req.params.mapId;
+    console.log(`Controlador POI: Obteniendo POIs para el mapa ${mapId}`);
+
+    if (!mapId) {
+      res.status(400).json({ success: false, message: 'Falta el ID del mapa' });
+      return;
+    }
+
+    // Por simplicidad, devolvemos una lista vacía por ahora
+    // En una implementación real, buscaríamos los POIs en la base de datos
+    console.log(`Controlador POI: No hay POIs para el mapa ${mapId}, devolviendo lista vacía`);
+    
+    res.status(200).json({ 
+      success: true, 
+      pois: [] 
+    });
+  } catch (error) {
+    console.error('Error al obtener POIs por mapa:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener POIs por mapa' });
+  }
+};

@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 import { Geometry } from 'geojson';
+import { Map } from './map.model';
+import { User } from '../../../auth-service/src/models/user.model';
 
 @Entity('districts')
 export class District {
@@ -17,6 +19,12 @@ export class District {
 
     @Column({ type: 'boolean', default: false })
     isUnlocked!: boolean;
+
+    @ManyToOne(() => Map, (map) => map.id)
+    map!: Map;
+
+    @ManyToOne(() => User, (user) => user.id)
+    user!: User;
 }
 
 
