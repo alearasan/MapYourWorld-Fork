@@ -42,12 +42,7 @@ const MapScreen = () => {
   const [location, setLocation] = useState<[number,number]>([40.416775,-3.703790]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [distritosS, setDistritos] = useState<DistritoLeaflet[]>([])
-  let distritos : DistritoLeaflet[] = []
-  let unlocked : any = []
-  let locked : any = []
-  //let unlocked : [LatLngExpression[]][] = []
-  //let locked : [LatLngExpression[]][] = []
+  const [distritos, setDistritos] = useState<DistritoLeaflet[]>([])
 
   useEffect(() => {
     fetchDistritos();
@@ -151,22 +146,12 @@ const MapScreen = () => {
                   console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                   return null;
                 }
-
-                const d : DistritoLeaflet =  {
+                return {
                   id: distrito.id,
                   nombre: distrito.name,
                   coordenadas: coordenadasTransformadas,
                   isUnlocked: distrito.isUnlocked,
-                }
-                distritos.push(d)
-                if (distrito.isUnlocked) {
-                  console.log('unlocked')
-                  unlocked.push(coordenadasTransformadas)
-                } else {
-                  console.log('locked')
-                  locked.push(coordenadasTransformadas)
-                }
-                return d;
+                };
               } catch (error) {
                 console.error(`Error procesando distrito ${distrito.name}:`, error);
                 return null;
@@ -181,56 +166,31 @@ const MapScreen = () => {
         console.error("Error al obtener los distritos:", error);
         Alert.alert("Error", "Ocurrió un error al cargar los distritos");
       } finally {
-        //console.log('Distritos por push', distritos)
-        //console.log('Distritos por setDistritos', distritosS)
         setLoading(false);
       }
-    };
-
-    
-  const polygon = [
-    L.latLng(37.373062783,-5.948116354),
-    L.latLng(37.373062783,-5.948116354),
-    L.latLng(37.373062783,-5.948116354),
-    L.latLng(37.373062783,-5.9314327),
-    L.latLng(37.380230444,-5.9314327),
-    L.latLng(37.380230444,-5.948116354),
-    L.latLng(37.373062783,-5.948116354)
-  ]
-  console.log('ej',polygon)
-  console.log('unlocked', unlocked)
-  console.log('locked',locked)
+  };
 
   return (
-      <View style={styles.container}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        ) : (
-          <>
-            <MapContainer center={location} 
-                          zoom={13} ref={null} 
-                          style={{height: "100vh", width: "100vw"}}>
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {distritos.map((distrito, index) => {
-                      return (
-                        <Polygon
-                          key={distrito.id}
-                          positions={distrito.coordenadas}
-                          fillColor={distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)"}
-                        />)
-                })}
-                <Polygon positions={unlocked} fillColor={"rgb(0, 255, 0)"} />
-                <Polygon positions={locked} fillColor={"rgb(128, 128, 128)"} />
-                <Polygon positions={polygon} fillColor={"blue"} />
-            </MapContainer>
-          </>
-        )}
-      </View>
+    <MapContainer 
+      center={L.latLng(37.373062783,-5.948116354)} 
+      zoom={13} ref={null} 
+      style={{height: "100vh", width: "100vw"}}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {distritos.map((distrito, index) => {
+        return (
+          <Polygon
+            key={distrito.id}
+            positions={distrito.coordenadas}
+            fillColor={distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)"}
+            color={distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)"}
+            fillOpacity={0.4}
+          />)
+      })}
+    </MapContainer>
     );
 
   
