@@ -116,7 +116,7 @@ A la mitad del sprint se hizo una primera retrospectiva que ha sido ampliada al 
 
 **PROBLEMAS**
 
-| Problema | Previsto | Acción Correctiva | Solucionado? |
+| Problema | Previsto | Solución | Solucionado? |
 |---------|-----------|--------------------------|--------------------|
 |Perdida de información en las comunicaciones al no usar Teams | No | Implementar un sistema de confirmación de lectura | Sí |
 |Desorden en la gestión del código | No | Actualizar y endurecer las políticas de gestión del código | Sí |
@@ -127,5 +127,5 @@ A la mitad del sprint se hizo una primera retrospectiva que ha sido ampliada al 
 |Poco margen de tiempo para que el equipo de frontend conecte el backend | No | Poner fechas límite más tempranas al equipo de backend | - |
 |Tiempo excesivo en tareas correctivas | No | Penalizar en la valoración de rendimiento a los miembros que han generado una carga de trabajo adicional en el resto de compañeros | - |
 |Problemas técnicos con la arquitectura de microservicios | No | No usar microservicios para el S1 e implementarlos en el S2  | - |
-|Falta de una visión unificada de lops requisitos del sistema y sus casos de uso  | No | Realizar una revisión de los requisitos, definiéndolos con un nivel de detalle superior y actualizando el código para satisfacerlos  | - |
+|Falta de una visión unificada de los requisitos del sistema y sus casos de uso  | No | Realizar una revisión de los requisitos, definiéndolos con un nivel de detalle superior y actualizando el código para satisfacerlos  | - |
 |Dependencia excesiva de los miembros con mayor nivel técnico  | No | Generar documentación sobre el proyecto, resolver dudas comunes, crear tutoriales y scripts  | - |
