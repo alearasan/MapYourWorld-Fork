@@ -38,7 +38,7 @@ export const registerUser = async (userData: any): Promise<User> => {
   // Creamos el usuario con las propiedades adecuadas según el modelo
   const newUser = new User();
   newUser.email = userData.email;
-  newUser.role = Role.USER;
+  newUser.role = userData.role;
   newUser.password = hashedPassword;
   newUser.is_active = false;
   const verificationToken = crypto.randomBytes(32).toString('hex');
