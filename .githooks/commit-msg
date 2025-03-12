@@ -5,12 +5,12 @@ COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 
 # Regex pattern to match allowed commit message prefixes
-PATTERN="^(feat|fix|chore|hotfix|build)(\(.+\))?:"
+PATTERN="^(feat|fix|chore|hotfix|build|doc)(\(.+\))?:"
 
 # Check if commit message matches the pattern
 if ! [[ $COMMIT_MSG =~ $PATTERN ]]; then
     echo "ERROR: Invalid commit message format."
-    echo "❌ Commit messages must start with one of: feat, fix, chore, hotfix, build"
+    echo "❌ Commit messages must start with one of: feat, fix, chore, hotfix, build, doc"
     exit 1
 else
     echo "✅ Commit message is valid."
