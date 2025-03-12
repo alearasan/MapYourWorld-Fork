@@ -11,7 +11,7 @@ import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import { initializeDatabase } from './database/appDataSource';
-import { createAllDistricts } from './map-service/src/mocks/district_create';
+import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
 
 dotenv.config();
 
@@ -64,6 +64,8 @@ const startServer = async () => {
 
     // Poblar la base de datos con distritos
     await createAllDistricts();
+
+    await createUsers();
 
     // Iniciar servidor
     app.listen(PORT, () => {
