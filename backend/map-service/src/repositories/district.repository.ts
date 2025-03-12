@@ -55,4 +55,14 @@ export default class DistrictRepository {
 
         return result;
     }
+
+    async getDistrictsByMapId(mapId: string): Promise<District[]> {
+        console.log(`Buscando distritos para el mapa con ID ${mapId}`);
+        const districts = await this.districtRepo.find({
+            where: { map: { id: mapId } },
+            relations: ['user', 'map']
+        });
+        console.log(`Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
+        return districts;
+    }
 }

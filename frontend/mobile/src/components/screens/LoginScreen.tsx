@@ -1,30 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, StyleSheet, Image } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, StyleSheet, Image, Alert } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '@components/UI/Button';
 import TextInput from '@components/UI/TextInput';
 import {styles} from '@assets/styles/styles';
-
+import { useAuth } from '../../contexts/AuthContext';
+import { RootStackParamList } from '../../navigation/types';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
 
-// Definir el tipo para la navegación
-type RootStackParamList = {
-  Welcome: undefined;
-  Login: undefined;
-  Register: undefined;
-  Map: undefined;
-  ForgotPassword: undefined;
-};
-
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { signIn, testModeSignIn } = useAuth();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -70,17 +64,31 @@ const LoginScreen = () => {
     setIsLoading(true);
     
     try {
-      // Aquí iría la lógica real de inicio de sesión
-      // await authService.login(formData);
+      // Usar el contexto de autenticación para iniciar sesión
+      const success = await signIn(formData.email, formData.password);
       
-      // Simulamos un delay para mostrar el spinner
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Navegar a la pantalla principal después del login exitoso
-      navigation.navigate('Map');
+      if (success) {
+        // Si el inicio de sesión fue exitoso, navegar a la pantalla principal
+        navigation.navigate('Map');
+      } else {
+        Alert.alert('Error', 'No se pudo iniciar sesión. Verifica tus credenciales.');
+      }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      // Manejar errores
+      Alert.alert('Error', 'Ocurrió un error al intentar iniciar sesión.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTestMode = async () => {
+    setIsLoading(true);
+    try {
+      // Utilizar el modo de prueba
+      await testModeSignIn();
+      navigation.navigate('Map');
+    } catch (error) {
+      console.error('Error al activar modo de prueba:', error);
     } finally {
       setIsLoading(false);
     }
@@ -151,6 +159,14 @@ const LoginScreen = () => {
               className="mb-3"
             />
             
+            <Button 
+              title="Entrar en Modo Prueba" 
+              onPress={handleTestMode}
+              variant="outline"
+              fullWidth
+              className="mb-3"
+            />
+            
             <StyledView className="flex-row justify-center mt-4">
               <StyledText className="text-gray-600">
                 ¿No tienes una cuenta?{' '}
@@ -168,7 +184,5 @@ const LoginScreen = () => {
     </ImageBackground>
   );
 };
-
-
 
 export default LoginScreen; 

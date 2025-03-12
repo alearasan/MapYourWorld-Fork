@@ -190,4 +190,79 @@ export const findDistrictContainingLocation = async (
 ): Promise<District | null> => {
   const situation = await repo.findDistrictContainingLocation(latitude, longitude);
   return situation;
+};
+
+/**
+ * Obtiene los distritos asociados a un mapa específico
+ * @param mapId ID del mapa
+ */
+export const getDistrictsByMapId = async (mapId: string): Promise<any[]> => {
+  try {
+    console.log(`Buscando distritos para el mapa ${mapId}`);
+    const districts = await repo.getDistrictsByMapId(mapId);
+    console.log(`Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
+    return districts;
+  } catch (error) {
+    console.error(`Error al obtener distritos para el mapa ${mapId}:`, error);
+    throw new Error(`Error al obtener distritos para el mapa ${mapId}`);
+  }
+};
+
+/**
+ * Desbloquea un distrito en un mapa colaborativo para un usuario específico
+ * @param districtId ID del distrito a desbloquear
+ * @param userId ID del usuario que desbloquea el distrito
+ * @param mapId ID del mapa colaborativo
+ */
+export const unlockCollaborativeDistrict = async (
+  districtId: string,
+  userId: string,
+  mapId: string
+): Promise<{ success: boolean; message: string; district?: any }> => {
+  try {
+    // 1. Verificar que el distrito existe y pertenece al mapa indicado
+    const district = await repo.getDistrictById(districtId);
+    if (!district) {
+      return { success: false, message: `Distrito con ID ${districtId} no encontrado` };
+    }
+    
+    // 2. Verificar que el distrito pertenece al mapa indicado
+    if (district.map?.id !== mapId) {
+      return { success: false, message: `El distrito no pertenece al mapa indicado` };
+    }
+    
+    // 3. Verificar si el distrito ya está desbloqueado
+    if (district.isUnlocked) {
+      return { success: false, message: `El distrito ya está desbloqueado por otro usuario` };
+    }
+    
+    // 4. Verificar que el usuario existe
+    const user = await userRepo.findById(userId);
+    if (!user) {
+      return { success: false, message: `Usuario con ID ${userId} no encontrado` };
+    }
+    
+    // 5. Verificar que el usuario pertenece al mapa colaborativo
+    const map = await mapRepo.getMapById(mapId);
+    const userBelongsToMap = map.users_joined.some((u: any) => u.id === userId);
+    if (!userBelongsToMap) {
+      return { success: false, message: `El usuario no pertenece al mapa colaborativo` };
+    }
+    
+    // 6. Desbloquear el distrito y asignar el usuario
+    district.isUnlocked = true;
+    district.user = user;
+    await repo.updateDistrict(districtId, district);
+    
+    console.log(`Distrito ${districtId} desbloqueado por usuario ${userId} en mapa ${mapId}`);
+    
+    return { 
+      success: true, 
+      message: `Distrito desbloqueado correctamente por el usuario ${userId}`,
+      district
+    };
+  } catch (error) {
+    console.error(`Error al desbloquear distrito ${districtId} en mapa colaborativo:`, error);
+    return { success: false, message: `Error al desbloquear distrito: ${error instanceof Error ? error.message : 'Error desconocido'}` };
+  }
 }; 

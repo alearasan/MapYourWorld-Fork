@@ -58,7 +58,8 @@ export const createMap = async (
 
 export const createColaborativeMap = async (
   MapData: Omit<Map, 'id'>,
-  userId: string
+  userId: string,
+  specificMapId?: string
 ): Promise<Map> => {
 
   try {
@@ -67,8 +68,10 @@ export const createColaborativeMap = async (
       throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
     }
 
-
-    const newMap = repo.createMapColaborativo(MapData, userId);
+    // Pasamos el ID específico si existe
+    const newMap = specificMapId 
+      ? repo.createMapColaborativoWithId(MapData, userId, specificMapId)
+      : repo.createMapColaborativo(MapData, userId);
 
     // // 5. Publicar evento de mapa creado
     // await publishEvent('Map.created', {
@@ -186,5 +189,26 @@ export const deleteMap = async (MapId: string): Promise<{ success: boolean; mess
   } catch (error) {
     console.error("Error al eliminar el mapa:", error);
     return { success: false, message: 'Error al eliminar el mapa' };
+  }
+};
+
+/**
+ * Obtiene todos los mapas colaborativos en los que participa un usuario
+ * @param userId ID del usuario
+ */
+export const getCollaborativeMapsForUser = async (userId: string): Promise<Map[]> => {
+  try {
+    // Buscar mapas donde el usuario participa (está en users_joined)
+    const maps = await repo.getCollaborativeMapsForUser(userId);
+    
+    if (!maps || maps.length === 0) {
+      console.log(`No se encontraron mapas colaborativos para el usuario ${userId}`);
+      return [];
+    }
+    
+    return maps;
+  } catch (error) {
+    console.error(`Error al obtener mapas colaborativos para el usuario ${userId}:`, error);
+    throw error;
   }
 };

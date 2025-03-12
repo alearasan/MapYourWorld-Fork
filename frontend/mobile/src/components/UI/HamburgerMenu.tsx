@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, Modal, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/types';
 
 const HamburgerMenu = () => {
   const [menuVisible, setMenuVisible] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const handleNavigate = (route: string) => {
+  // Función simplificada para navegar
+  const handleNavigate = (screen: keyof RootStackParamList, params?: object) => {
     setMenuVisible(false);
-    navigation.navigate(route as never);
+    // @ts-ignore - Usamos ts-ignore ya que es difícil tipificar correctamente la navegación
+    navigation.navigate(screen, params);
   };
 
   return (
@@ -28,8 +31,19 @@ const HamburgerMenu = () => {
           activeOpacity={1}
         >
           <View style={styles.menuContainer}>
-            <TouchableOpacity onPress={() => handleNavigate('CollaborativeMaps')} style={styles.menuItem}>
+            <TouchableOpacity onPress={() => handleNavigate('Map')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Mapa Individual</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => handleNavigate('CollaborativeMapListScreen')} 
+              style={styles.menuItem}
+            >
               <Text style={styles.menuItemText}>Mapas Colaborativos</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Inicio</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
