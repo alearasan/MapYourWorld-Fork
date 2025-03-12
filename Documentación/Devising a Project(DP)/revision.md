@@ -22,15 +22,9 @@
 
 ### 1.2. No Matchmaking
 
-- **Registro del Consumidor**:  
+- **EJEMPLO Registro del Consumidor**:  
   Un consumidor se registra en el sistema.  
   *(Mockup/botón ficticio en #S1)*
-- **Pagar por el Servicio**:  
-  Un consumidor paga por el servicio.  
-  *(Mockup/botón ficticio en #S1)*
-- **Consumir el Servicio**:  
-  Un consumidor consume el servicio.  
-  *(UC implementado en #S1)*
 
 ---
 
