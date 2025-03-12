@@ -8,7 +8,9 @@ import {
   Modal, 
   TextInput, 
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Pressable,
+  Keyboard
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -432,6 +434,7 @@ const CollaborativeMapListScreen: React.FC = () => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
+          <Pressable  onPress={Keyboard.dismiss}>
           <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
           
           <Text style={styles.inputLabel}>Nombre del mapa*</Text>
@@ -519,6 +522,7 @@ const CollaborativeMapListScreen: React.FC = () => {
               <Text style={styles.buttonText}>Crear</Text>
             </TouchableOpacity>
           </View>
+          </Pressable>
         </View>
       </View>
     </Modal>
