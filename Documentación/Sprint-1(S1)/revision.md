@@ -1,5 +1,10 @@
 ![Login](./Images/portada.png)
-# Revisión de MapYourWorld  
+
+**CONTROL DE VERSIONES**
+
+| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
+|---------|-----------|--------------------------|--------------------|
+| V1      | 12/03/2025| Primera versión          | Jaime Gómez, Ángel Neria y José María Baquero    |
 
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
 
