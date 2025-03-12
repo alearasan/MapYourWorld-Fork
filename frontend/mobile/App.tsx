@@ -13,8 +13,8 @@ import WelcomeScreen from './src/components/screens/WelcomeScreen';
 import LoginScreen from './src/components/screens/LoginScreen';
 import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
-import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
-import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
+//import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
+//import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
@@ -52,7 +52,7 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   const mapId = props.route?.params?.mapId || "map-123";
   const userId = props.route?.params?.userId || "user-456";
   
-  return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  //return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
 };
 
 // Componente principal de la aplicación
@@ -118,7 +118,7 @@ const AppContent = () => {
             headerRight: () => <HamburgerMenu />,
           }} 
         />
-        <Stack.Screen 
+        {/*<Stack.Screen 
           name="CollaborativeMapListScreen" 
           component={CollaborativeMapListScreen}
           options={{
@@ -149,7 +149,7 @@ const AppContent = () => {
             ),
             headerRight: () => <HamburgerMenu />,
           }} 
-        />
+        />*/}
         <Stack.Screen 
           name="ForgotPassword" 
           component={ForgotPasswordScreen}
@@ -171,10 +171,11 @@ const AppContent = () => {
 };
 
 // Componente App que envuelve todo con el proveedor de autenticación
+// TODO: VOLVER A CAMBIAR
 const App = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <MapScreen />
     </AuthProvider>
   );
 };
