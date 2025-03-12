@@ -4,19 +4,19 @@
 
 ### 1.1. Matchmaking
 
-- **Visualización del mapa personal interactivo**:  
+- **Visualización del mapa personal interactivo:**  
   El usuario entra en el mapa y la zona en la que se encuentra se muestra de un color distinto a los demás distritos que deben estar bloqueados.
   *(UC implementado en #S1)*
-- **Exploración de zonas no descubiertas:**:  
+- **Exploración de zonas no descubiertas:**
   El usuario entra en una zona no descubierta y esta se ilumina automaticamente al cruzar el limite de esta.
   *(UC implementado en #S1)*
-- **Creación de mapas colaborativos**:  
+- **Creación de mapas colaborativos:**
   El consumidor/proveedor selecciona la oferta o solicitud que coincide con sus necesidades.  
   *(UC implementado en #S1)*
-- **Creación de puntos de interés**:  
+- **Creación de puntos de interés:**
   El usuario toca cualquier parte de las zonas que estén descubiertas y automáticamente se abre el formulario que le permite registrar un punto de interés.
   *(UC implementado en #S1)*
-- **Visualización de puntos de interés**:  
+- **Visualización de puntos de interés:**
   El usuario puede ver todos los puntos de interés registrados en su mapa personal.
   *(UC implementado en #S1)*
 
