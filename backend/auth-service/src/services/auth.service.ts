@@ -6,11 +6,15 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
-import { sendVerificationEmail,sendPasswordResetEmail } from '../services/email.service';
-import { generateToken,verifyToken} from '../../../../shared/config/jwt.config';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
+import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
 import { AuthRepository } from '../repositories/auth.repository';
 
 const repo = new AuthRepository();
+
+export const getUserById = async (userId: string): Promise<User | null> => {
+  return await repo.findById(userId);
+};
 
 /**
  * Registra un nuevo usuario en el sistema
@@ -30,13 +34,13 @@ export const registerUser = async (userData: any): Promise<User> => {
 
   // 3. Crear el usuario en la base de datos
   const hashedPassword = await bcrypt.hash(userData.password, 10);
-  
+
   // Creamos el usuario con las propiedades adecuadas según el modelo
   const newUser = new User();
   newUser.email = userData.email;
   newUser.role = Role.USER;
   newUser.password = hashedPassword;
-  newUser.active = false;
+  newUser.is_active = false;
   const verificationToken = crypto.randomBytes(32).toString('hex');
   newUser.token_data = JSON.stringify({
     verificationType: 'email',
@@ -45,8 +49,8 @@ export const registerUser = async (userData: any): Promise<User> => {
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
   });
   newUser.profile = userData.profile;
-    
-  await repo.save(newUser); 
+
+  await repo.save(newUser);
   await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
 
   return newUser;
@@ -57,10 +61,10 @@ export const registerUser = async (userData: any): Promise<User> => {
  * @param email Email del usuario
  * @param password Contraseña del usuario
  */
-export const loginUser = async (email: string, password: string): Promise<{user: User, token: string}> => {
+export const loginUser = async (email: string, password: string): Promise<{ user: User, token: string }> => {
   // 1. Buscar usuario por email
   const user = await repo.findWithPassword(email);
-  
+
   if (!user) {
     throw new Error('Usuario no encontrado');
   }
@@ -99,20 +103,19 @@ export const verifyUserToken = async (token: string): Promise<{
 }> => {
   // 1. Verificar firma y expiración del token
   const decoded = verifyToken(token);
-  if(!decoded) {
+  if (!decoded) {
     throw new Error('Token inválido o expirado');
-  } 
+  }
   // 2. Obtener información actualizada del usuario
   const user = await repo.findById(decoded.userId);
-  
+
   if (!user) {
     throw new Error('Usuario no encontrado');
   }
   // 3. Verificar que el token está en token_data     
-    let tokenData;
-    if (user.token_data !== token) {
-      throw new Error('Sesión inválida. Por favor, inicie sesión nuevamente');
-    }
+  if (user.token_data !== token) {
+    throw new Error('Sesión inválida. Por favor, inicie sesión nuevamente');
+  }
   return {
     userId: user.id.toString(),
     email: user.email,
@@ -133,7 +136,7 @@ export const changePassword = async (userId: string, currentPassword: string, ne
     throw new Error('Usuario no encontrado');
   }
   // 2. Verificar contraseña actual
-  const correctPassword= await bcrypt.compare(currentPassword, user.password);
+  const correctPassword = await bcrypt.compare(currentPassword, user.password);
   if (!correctPassword) {
     throw new Error('Credenciales incorrectas');
   }
@@ -148,9 +151,9 @@ export const changePassword = async (userId: string, currentPassword: string, ne
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   await repo.updatePassword(user.id, hashedPassword);
   // 6. Invalidar todas las sesiones existentes por seguridad
-  user.token_data = null;
+  user.token_data = "";
   await repo.save(user);
-  
+
   return true;
 };
 
@@ -170,32 +173,32 @@ export const requestPasswordReset = async (email: string): Promise<boolean> => {
   try {
     // Intentar parsear token_data existente
     const tokenData = JSON.parse(user.token_data || '{}');
-    
+
     // Añadir información del token de restablecimiento
     tokenData.resetPassword = {
       token: resetToken,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString() // 1 hora de validez
     };
-    
+
     user.token_data = JSON.stringify(tokenData);
     await repo.save(user);
-    
+
     // 4. Enviar email con instrucciones
     await sendPasswordResetEmail(user.email, user.profile?.username || '', resetToken);
-    
+
     return true;
   } catch (error) {
     console.error('Error al guardar token de recuperación:', error);
     throw new Error('Error al procesar la solicitud de recuperación de contraseña');
   }
-  
+
   // 4. Enviar email con instrucciones
   // Pasamos el usuario
-  await sendPasswordResetEmail(user.email, user.profile?.username || '', token);
-  
-  return true;
-}; 
+  // await sendPasswordResetEmail(user.email, user.profile?.username || '', token);
+
+  // return true;
+};
 
 /**
  * Restablece la contraseña usando un token
@@ -215,13 +218,13 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
     throw new Error('La nueva contraseña debe contener al menos una mayúscula y un número');
   }
-  
+
   // Buscar usuario por token (buscar entre todos los usuarios para encontrar el que coincide)
-  const users = await repo.findAll(); 
-  
+  const users = await repo.findAll();
+
   // La verificación depende de cómo almacenaste el token en requestPasswordReset
   let matchedUser: User | null = null;
-  
+
   for (const user of users) {
     // Intentar verificar si este usuario corresponde al token
     try {
@@ -234,7 +237,7 @@ export const resetPassword = async (token: string, newPassword: string): Promise
       continue;
     }
   }
-  
+
   if (!matchedUser) {
     throw new Error('Token inválido o expirado');
   }
@@ -243,9 +246,9 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   await repo.updatePassword(matchedUser.id, hashedPassword);
 
   // 4. Limpiar el token de reseteo
-  matchedUser.token_data = null;
+  matchedUser.token_data = "";
   await repo.save(matchedUser);
- 
+
   return true;
 };
 
@@ -262,16 +265,16 @@ export const logout = async (userId: string, token?: string): Promise<boolean> =
     if (!user) {
       throw new Error('Usuario no encontrado');
     }
-    
+
     // 2. Verificar que el token coincide con el almacenado (opcional)
     if (token && user.token_data !== token) {
       return false;
     }
-    
+
     // 3. Limpiar el token_data para invalidar la sesión
-    user.token_data = null;
+    user.token_data = "";
     await repo.save(user);
-    
+
     return true;
 
   } catch (error) {

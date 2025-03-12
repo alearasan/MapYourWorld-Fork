@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import * as POIService from '../services/poi.service';
 import { AuthenticatedRequest } from '../../../../backend/api-gateway/src/types';
+import * as AuthService from '../../../auth-service/src/services/auth.service';
 
 /**
  * Crea un nuevo punto de interés
@@ -13,19 +14,31 @@ import { AuthenticatedRequest } from '../../../../backend/api-gateway/src/types'
 export const createPOI = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const poiData = req.body;
-    const userId = req.user?.userId;
-    
-    if (!userId) {
-      res.status(401).json({ error: 'Usuario no autenticado' });
+
+    // Obtener token desde los headers
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: 'Usuario no autenticado - Token no proporcionado' });
       return;
     }
-    
-    const newPOI = await POIService.createPOI(poiData, userId);
+
+    // Extraer el token después de "Bearer "
+    const token = authHeader.split(" ")[1];
+
+    // Verificar el token
+    const verifiedUser = await AuthService.verifyUserToken(token);
+
+    if (!verifiedUser) {
+      res.status(401).json({ error: 'Token inválido o expirado' });
+      return;
+    }
+    const newPOI = await POIService.createPOI(poiData, verifiedUser.userId);
     res.status(201).json(newPOI);
   } catch (error) {
     console.error('Error al crear el punto de interés:', error);
-    res.status(400).json({ 
-      error: error instanceof Error ? error.message : 'Error al crear el punto de interés' 
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Error al crear el punto de interés'
     });
   }
 };
@@ -48,12 +61,12 @@ export const createPOISinToken = async (req: AuthenticatedRequest, res: Response
 
     // Llamar al servicio para crear el nuevo POI
     const newPOI = await POIService.createPOISinToken(updatedPOIData);
-    
+
     res.status(201).json(newPOI);
   } catch (error) {
     console.error('Error al crear el punto de interés:', error);
-    res.status(400).json({ 
-      error: error instanceof Error ? error.message : 'Error al crear el punto de interés' 
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Error al crear el punto de interés'
     });
   }
 };
@@ -65,24 +78,24 @@ export const createPOISinToken = async (req: AuthenticatedRequest, res: Response
 export const getPOIById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const poiId = req.params.id;
-    
+
     if (!poiId) {
       res.status(400).json({ error: 'ID del punto de interés no proporcionado' });
       return;
     }
-    
+
     const poi = await POIService.getPOIById(poiId);
-    
+
     if (!poi) {
       res.status(404).json({ error: 'Punto de interés no encontrado' });
       return;
     }
-    
+
     res.status(200).json(poi);
   } catch (error) {
     console.error('Error al obtener el punto de interés:', error);
-    res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'Error al obtener el punto de interés' 
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Error al obtener el punto de interés'
     });
   }
 };
@@ -95,29 +108,29 @@ export const updatePOI = async (req: AuthenticatedRequest, res: Response): Promi
     const poiId = req.params.id;
     const updateData = req.body;
     const userId = req.user?.userId;
-    
+
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
       return;
     }
-    
+
     if (!poiId) {
       res.status(400).json({ error: 'ID del punto de interés no proporcionado' });
       return;
     }
-    
+
     const updatedPOI = await POIService.updatePOI(poiId, updateData, userId);
-    
+
     if (!updatedPOI) {
       res.status(404).json({ error: 'Punto de interés no encontrado' });
       return;
     }
-    
+
     res.status(200).json(updatedPOI);
   } catch (error) {
     console.error('Error al actualizar el punto de interés:', error);
-    res.status(error instanceof Error && error.message.includes('permisos') ? 403 : 400).json({ 
-      error: error instanceof Error ? error.message : 'Error al actualizar el punto de interés' 
+    res.status(error instanceof Error && error.message.includes('permisos') ? 403 : 400).json({
+      error: error instanceof Error ? error.message : 'Error al actualizar el punto de interés'
     });
   }
 };
@@ -129,29 +142,29 @@ export const deletePOI = async (req: AuthenticatedRequest, res: Response): Promi
   try {
     const poiId = req.params.id;
     const userId = req.user?.userId;
-    
+
     if (!userId) {
       res.status(401).json({ error: 'Usuario no autenticado' });
       return;
     }
-    
+
     if (!poiId) {
       res.status(400).json({ error: 'ID del punto de interés no proporcionado' });
       return;
     }
-    
+
     const deleted = await POIService.deletePOI(poiId, userId);
-    
+
     if (!deleted) {
       res.status(404).json({ error: 'Punto de interés no encontrado' });
       return;
     }
-    
+
     res.status(204).send();
   } catch (error) {
     console.error('Error al eliminar el punto de interés:', error);
-    res.status(error instanceof Error && error.message.includes('permisos') ? 403 : 500).json({ 
-      error: error instanceof Error ? error.message : 'Error al eliminar el punto de interés' 
+    res.status(error instanceof Error && error.message.includes('permisos') ? 403 : 500).json({
+      error: error instanceof Error ? error.message : 'Error al eliminar el punto de interés'
     });
   }
 };
@@ -162,34 +175,34 @@ export const deletePOI = async (req: AuthenticatedRequest, res: Response): Promi
 export const findNearbyPOIs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { latitude, longitude, radius, category } = req.query;
-    
+
     if (!latitude || !longitude || !radius) {
-      res.status(400).json({ 
-        error: 'Latitud, longitud y radio son parámetros obligatorios' 
+      res.status(400).json({
+        error: 'Latitud, longitud y radio son parámetros obligatorios'
       });
       return;
     }
-    
+
     const lat = parseFloat(latitude as string);
     const lng = parseFloat(longitude as string);
     const radiusKm = parseFloat(radius as string);
-    
+
     if (isNaN(lat) || isNaN(lng) || isNaN(radiusKm)) {
-      res.status(400).json({ 
-        error: 'Latitud, longitud y radio deben ser valores numéricos válidos' 
+      res.status(400).json({
+        error: 'Latitud, longitud y radio deben ser valores numéricos válidos'
       });
       return;
     }
-    
+
     // Aplicar filtros adicionales si existen
     const filters = category ? { category: category as string } : undefined;
-    
+
     const pois = await POIService.findNearbyPOIs(lat, lng, radiusKm, filters);
     res.status(200).json(pois);
   } catch (error) {
     console.error('Error al buscar puntos de interés cercanos:', error);
-    res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'Error al buscar puntos de interés cercanos' 
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Error al buscar puntos de interés cercanos'
     });
   }
 };

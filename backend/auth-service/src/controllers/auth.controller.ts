@@ -9,6 +9,7 @@ import { generateToken, verifyToken } from '../../../../shared/config/jwt.config
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
+import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario
@@ -166,10 +167,34 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const authReq = req as AuthenticatedRequest;
-    const userId = authReq.user?.id;
+    const { userId, newPassword } = req.body;
     
     if (!userId) {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
+      return;
+    }
+    const user = await authService.getUserById(userId);
+    if (!user) {
+      res.status(404).json({ 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
+      return;
+    }
+
+    if (!user.token_data) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Token no proporcionado' 
+      });
+      return;
+    }
+
+    const verifiedUser = await authService.verifyUserToken(user.token_data);
+    if (!verifiedUser) {
       res.status(401).json({ 
         success: false, 
         message: 'Usuario no autenticado' 
@@ -177,13 +202,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { currentPassword, newPassword } = req.body;
+    const currentPassword = user.password;
+
+   
     
     // Cambiar contraseña 
-    await authService.changePassword(userId, currentPassword, newPassword);
+    await authService.changePassword(verifiedUser.userId, currentPassword, newPassword);
 
     try {
-      await sendPasswordChangeNotification(authReq.user.email, authReq.user.firstName || '');
+      await sendPasswordChangeNotification(verifiedUser.email, user.profile.username || '');
     } catch (emailError) {
       console.error('Error al enviar notificación de cambio de contraseña:', emailError);
     }
@@ -298,8 +325,8 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
     // Intentar obtener datos de usuario autenticado (si existe)
     const authReq = req as AuthenticatedRequest;
-    if (authReq.user?.id) {
-      userId = authReq.user.id;
+    if (authReq.user?.userId) {
+      userId = authReq.user.userId;
       token = authReq.token;
     }
 

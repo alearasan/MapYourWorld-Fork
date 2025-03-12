@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { register, login, forgotPassword, resetPassword, verifyToken, changePassword, logout } from '../controllers/auth.controller';
+import { register, login, forgotPassword, resetPassword, verify, changePassword, logout } from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { requireAdmin, isAuthenticated } from '../middleware/auth.middleware';
 import adminRoutes from './admin.routes';

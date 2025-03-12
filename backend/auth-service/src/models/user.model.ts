@@ -50,8 +50,8 @@ export class User {
   @Column({ type: 'boolean', default: false })
   is_active!: boolean;
 
-  @Column({ type: 'varchar', length: 700 })
-  token_data!: string;
+  @Column({ type: 'varchar', length: 700, nullable: true })
+  token_data?: string;
   /**
    * Relación inversa de 1:1 con UserProfile.
    * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.

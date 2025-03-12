@@ -46,6 +46,7 @@ export const createPOI = async (
     where: {
       name: poiData.name,
       location: { 
+        type: 'Point',
         coordinates: [longitude, latitude] 
       } as any
     }
