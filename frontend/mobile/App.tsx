@@ -13,8 +13,9 @@ import WelcomeScreen from './src/components/screens/WelcomeScreen';
 import LoginScreen from './src/components/screens/LoginScreen';
 import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
-//import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
-//import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
+import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
+import CollaborativeMapScreenWeb from './src/components/Map/CollaborativeMapScreen.web';
+import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
@@ -52,7 +53,12 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   const mapId = props.route?.params?.mapId || "map-123";
   const userId = props.route?.params?.userId || "user-456";
   
-  //return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
+  } else {
+    return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  }
 };
 
 // Componente principal de la aplicación
@@ -118,7 +124,7 @@ const AppContent = () => {
             headerRight: () => <HamburgerMenu />,
           }} 
         />
-        {/*<Stack.Screen 
+        <Stack.Screen 
           name="CollaborativeMapListScreen" 
           component={CollaborativeMapListScreen}
           options={{
@@ -149,7 +155,7 @@ const AppContent = () => {
             ),
             headerRight: () => <HamburgerMenu />,
           }} 
-        />*/}
+        />
         <Stack.Screen 
           name="ForgotPassword" 
           component={ForgotPasswordScreen}
@@ -183,4 +189,4 @@ const App = () => {
 // Registramos directamente el componente App como componente raíz de la aplicación
 registerRootComponent(App);
 
-export default App; 
+export default App;
