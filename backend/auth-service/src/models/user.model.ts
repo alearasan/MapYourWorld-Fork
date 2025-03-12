@@ -46,15 +46,19 @@ export class User {
 
   @Column({ type: 'varchar', length: 255 })
   password!: string;
-  
+
+  @Column({ type: 'boolean', default: false })
+  is_active!: boolean;
+
+  @Column({ type: 'varchar', length: 700, nullable: true })
+  token_data?: string;
   /**
    * Relación inversa de 1:1 con UserProfile.
    * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
    */
   
   @OneToOne(() => UserProfile, (profile) => profile.id)
-
-  profile?: UserProfile;
+  profile!: UserProfile;
 
   /**
    * Relación 1:N con solicitudes de amistad enviadas.

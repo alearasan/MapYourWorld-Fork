@@ -9,6 +9,7 @@ import { generateToken, verifyToken } from '../../../../shared/config/jwt.config
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
+import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario
@@ -96,8 +97,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 /**
  * Verifica un token JWT y devuelve los datos del usuario
  */
-
-/*
 export const verify = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
@@ -110,54 +109,55 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Verificar token
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Token inválido o expirado' 
-      });
-      return;
-    }
-
-    // Buscar usuario por ID
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'Usuario no encontrado'
-      });
-      return;
-    }
-
+    // Usar el servicio para verificar el token con token_data
+    const userData = await authService.verifyUserToken(token);
+    
     // Responder con éxito
     res.status(200).json({
       success: true,
       message: 'Token válido',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      }
+      user: userData
     });
     
   } catch (error) {
     console.error('Error en verificación:', error);
+    
+    // Manejamos errores específicos con códigos de estado apropiados
+    if (error instanceof Error) {
+      if (error.message === 'Token inválido o expirado') {
+        res.status(401).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      } 
+      else if (error.message === 'Usuario no encontrado') {
+        res.status(404).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      }
+      else if (error.message === 'Sesión inválida. Por favor, inicie sesión nuevamente') {
+        res.status(401).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      }
+    }
+    // Error genérico
     res.status(500).json({ 
       success: false, 
       message: 'Error al verificar token',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
-   
   }
 };
-*/
 
 /**
  * Cambia la contraseña de un usuario autenticado
  */
-
-/*
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
   try {
     // Validar entrada
@@ -167,10 +167,34 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const authReq = req as AuthenticatedRequest;
-    const userId = authReq.user?.userId;
+    const { userId, newPassword } = req.body;
     
     if (!userId) {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
+      return;
+    }
+    const user = await authService.getUserById(userId);
+    if (!user) {
+      res.status(404).json({ 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
+      return;
+    }
+
+    if (!user.token_data) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Token no proporcionado' 
+      });
+      return;
+    }
+
+    const verifiedUser = await authService.verifyUserToken(user.token_data);
+    if (!verifiedUser) {
       res.status(401).json({ 
         success: false, 
         message: 'Usuario no autenticado' 
@@ -178,12 +202,15 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { currentPassword, newPassword } = req.body;
+    const currentPassword = user.password;
+
+   
     
-    await authService.changePassword(userId, currentPassword, newPassword);
+    // Cambiar contraseña 
+    await authService.changePassword(verifiedUser.userId, currentPassword, newPassword);
 
     try {
-      await sendPasswordChangeNotification(authReq.user.email, authReq.user.firstName || '');
+      await sendPasswordChangeNotification(verifiedUser.email, user.profile.username || '');
     } catch (emailError) {
       console.error('Error al enviar notificación de cambio de contraseña:', emailError);
     }
@@ -195,12 +222,31 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     
   } catch (error) {
     console.error('Error al cambiar contraseña:', error);
+    
+    // Manejamos errores específicos
+    if (error instanceof Error) {
+      if (error.message === 'Credenciales incorrectas') {
+        res.status(401).json({ 
+          success: false, 
+          message: error.message
+        });
+        return;
+      }
+      else if (error.message === 'Usuario no encontrado') {
+        res.status(404).json({ 
+          success: false, 
+          message: error.message 
+        });
+        return;
+      }
+    }
+    
+    // Error genérico
     res.status(500).json({ 
       success: false, 
       message: 'Error al cambiar contraseña',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
-    
   }
 };
 
@@ -266,5 +312,61 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
     
+  }
+};
+
+/**
+ * Cierra la sesión de un usuario
+ */
+export const logout = async (req: Request, res: Response): Promise<void> => {
+  try {
+    let userId = null;
+    let token = null;
+
+    // Intentar obtener datos de usuario autenticado (si existe)
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user?.userId) {
+      userId = authReq.user.userId;
+      token = authReq.token;
+    }
+
+    // Si no hay usuario autenticado, intentar obtener userId y token del cuerpo
+    if (!userId) {
+      userId = req.body.userId;
+      token = req.body.token;
+    }
+
+    // Verificar que tenemos al menos el ID del usuario
+    if (!userId) {
+      res.status(400).json({
+        success: false,
+        message: 'Se requiere el ID de usuario'
+      });
+      return;
+    }
+
+    // Llamar al servicio para cerrar sesión
+    const result = await authService.logout(userId, token);
+
+    if (result) {
+      res.status(200).json({
+        success: true,
+        message: 'Sesión cerrada correctamente'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'No se pudo cerrar la sesión'
+      });
+    }
+  } catch (error) {
+    console.error('Error en logout:', error);
+    
+    // Error genérico
+    res.status(500).json({
+      success: false,
+      message: 'Error al cerrar sesión',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
   }
 };
