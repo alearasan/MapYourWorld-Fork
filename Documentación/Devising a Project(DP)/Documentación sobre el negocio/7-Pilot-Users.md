@@ -65,21 +65,23 @@ Este enfoque permitirá recopilar distintas perspectivas y detectar posibles ár
 
 ## 2. Canales de comunicación
 
-Se solicitará un correo que será la herramienta principal de comunicación.
+Se solicitará un correo que será la herramienta principal de comunicación. Para los usuarios de la us, se usara el correo que tengan asignado en enseñanza virtual. Si ellos notifican problemas como que los correos no les llegan por no ser del dominio de la us el correo usado para la distribucion de informacion, se podra usar otro correo como los del dominio de "@gmail.com"
 
 ## 3. Proceso
 
-Se le pedirá inicialmente un correo de contacto a los usuarios pilotos, y cuando tengamos a nuestra disposición la lista definitiva se enviará un correo para explicar todo el procedimiento. En cada una de las fechas indicadas se enviará a los usuarios un correo con instrucciones de qué queremos que prueben, así como un formulario para que puedan dar sus respuestas.
+Se le pedirá inicialmente un correo de contacto a los usuarios pilotos, y cuando tengamos a nuestra disposición la lista definitiva se enviará un correo para explicar todo el procedimiento, donde se indicaran todas las fechas clave. En cada una de las fechas indicadas se enviará a los usuarios un correo con instrucciones que deben seguir sobre lo qué queremos que prueben, así como un formulario para que puedan dar sus respuestas.
+
+Por causas excepcionales, como requisitos nuevos o cambios de fecha, se enviaran correos extra para informar de nuevo a todos los usuarios de los cambios pertinentes.
 
 ## 4. Uso del feedback
 
-Con esta información haremos un proceso de mejora donde tendremos en cuenta el feedback recibido respecto al dominio de las instrucciones proporcionadas, que siempre irán de la mano principalmente con la experiencia de usuario y cómo podríamos mejorarla. Si hiciera falta, se harán estudios estadísticos de la información para usarlo como justificante de algunas de las decisiones de mejora.
+Con esta información haremos un proceso de mejora donde tendremos en cuenta el feedback recibido respecto al dominio de las instrucciones proporcionadas, que siempre irán de la mano principalmente con la experiencia de usuario y cómo podríamos mejorarla. Si hiciera falta, se harán estudios estadísticos de la información para usarlo como justificante de algunas de las decisiones de mejora, y para poder mostrar los resultados del proceso de gestion de los usuarios piloto.
 
 ## 5. Compromisos
 
-Por parte del grupo 7, nos comprometemos a ser puntuales a la hora de enviar los correos, que se enviarán el día fijado a las 12:00 AM. Esto no se aplica a la primera fecha ya que no sabemos exactamente cuándo recibiremos la lista de usuarios piloto. También nos comprometemos, como usuarios del servicio que vamos a establecer, a mantener rigurosa confidencialidad con los datos derivados tanto de las encuestas como del uso de la aplicación.
+Por parte del grupo 7, nos comprometemos a ser puntuales a la hora de enviar los correos, que se enviarán el día fijado a las 12:00 AM. También nos comprometemos, como usuarios del servicio que vamos a establecer, a mantener rigurosa confidencialidad con los datos derivados del uso de la aplicación, que se borraran una vez finalizado el periodo de prueba y evaluacion, para facilitar asi el tratamiento de los datos. Ademas, nos comprometemos a evaluar de forma justa a los usuarios piloto segun los criterios que se establezcan siguiendo la rubica.
 
-Por parte de los usuarios piloto, esperamos recibir la respuesta en menos de 6 días, y que al realizar las tareas probando la aplicación se tarde entre 30 min y 1 hora, con el fin de garantizar en este proceso que la calidad del feedback sea buena. Esta última cláusula no se aplica a la primera fecha prevista. Si para probar algo de la aplicación hace falta salir y moverse debido a que usamos funciones de geolocalización, los usuarios piloto deberían hacerlo.
+Por parte de los usuarios piloto, esperamos recibir la respuesta en menos de 6 días de que reciba un correo con encuesta, y que al realizar las tareas probando la aplicación se tarde entre 30 min y 1 hora o el tiempo que se especifique, con el fin de garantizar en este proceso que la calidad del feedback sea buena. Deberan llevar un registro del tiempo que tardan en entradas con el formato: "dd/mm: [lista de cosas que probe], duracion hh:mm" que luego deberan proporcionar en el formulario.  Esta última cláusula no se aplica a la primera fecha prevista. Si para probar algo de la aplicación hace falta salir y moverse debido a que usamos funciones de geolocalización, los usuarios piloto deberían hacerlo.  Por ultimo, si soy un usario piloto de la asignatura, aceptare la rubrica de evaluación y firmare un commitment agreement.
 
 ## 6. Fechas clave
 
