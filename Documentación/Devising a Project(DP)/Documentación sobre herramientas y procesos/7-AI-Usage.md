@@ -51,6 +51,7 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 - **Manuel Vélez López, 14/02/2025:** Usé *ChatGPT* para encontrar información sobre algunos competidores de MapYourWorld.
 - **Jaime Gómez Marín, 17/02/2025:** Usé *lovable* para generar una plantilla para la landing page.
 - **Manuel Vélez López, 01/03/2025:** Usé *ChatGPT* para dividir los distritos en partes más pequeñas.
+- **Jaime Gómez Marín, 12/03/2025:** Useé *ChatGPT* para crear una plantilla para revision.md
 
 # Referencias
 
