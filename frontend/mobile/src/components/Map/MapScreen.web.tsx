@@ -1,120 +1,196 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, Alert, ActivityIndicator, StyleSheet } from "react-native";
 import { styled } from 'nativewind';
 import { API_URL } from "@/constants/config";
 
-import { MapContainer, Marker, TileLayer, Polygon } from 'react-leaflet'
-import L, { LatLngExpression } from 'leaflet';
-import "leaflet/dist/leaflet.css";
+// Agregar logs para depuración
+console.log("Cargando MapScreen.web.tsx");
+console.log("API_URL:", API_URL);
 
+// Definición de tipos para los componentes de Leaflet
+type LeafletComponent = any;
+type LeafletLibrary = any;
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
+// Variables para almacenar los componentes de Leaflet
+let leafletLoaded = false;
+let MapContainer: LeafletComponent = null;
+let TileLayer: LeafletComponent = null;
+let Polygon: LeafletComponent = null;
+let Marker: LeafletComponent = null;
+let L: LeafletLibrary = null;
 
-// Tipos para distritos y POIs
-interface DistritoBackend {
-  id: string;
-  name: string;
-  description: string;
-  boundaries: any;
-  isUnlocked: boolean;
-}
+// Componente de mapa real que se renderizará
+const LeafletMap = ({ location, distritos }: any) => {
+  console.log("Renderizando LeafletMap interno");
+  
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const [mapReady, setMapReady] = useState(false);
+  
+  // Efecto para inicializar el mapa
+  useEffect(() => {
+    if (!mapContainerRef.current || !L) return;
+    
+    console.log("Inicializando mapa Leaflet manualmente");
+    
+    // Crear instancia del mapa
+    const map = L.map(mapContainerRef.current).setView(location, 13);
+    
+    // Agregar capa de mosaicos
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Añadir distritos al mapa
+    distritos.forEach((distrito: any, index: number) => {
+      console.log(`Renderizando distrito ${index}: ${distrito.nombre}`);
+      const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
+      
+      L.polygon(distrito.coordenadas, {
+        fillColor: color,
+        color: color,
+        fillOpacity: 0.4
+      }).addTo(map);
+    });
+    
+    // Guardar referencia al mapa
+    mapInstanceRef.current = map;
+    setMapReady(true);
+    
+    // Limpieza al desmontar
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [location, distritos]);
+  
+  return (
+    <div style={{height: "100vh", width: "100vw"}}>
+      <div ref={mapContainerRef} style={{height: "100%", width: "100%"}} />
+    </div>
+  );
+};
 
-interface DistritoLeaflet {
-  id: string;
-  nombre: string;
-  coordenadas: LatLngExpression[];
-  isUnlocked: boolean;
-}
-
-interface POI {
-  id?: string;
-  name: string;
-  description: string;
-  location: {
-    type: string;
-    coordinates: number[]; // [longitude, latitude]
-  };
-}
-
-// Componente para versión web que usa un mapa simple basado en iframe para evitar conflictos
+// Componente para versión web que usa react-leaflet
 const MapScreen = () => {
+  console.log("Renderizando MapScreen web");
   const [location, setLocation] = useState<[number,number]>([40.416775,-3.703790]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [distritos, setDistritos] = useState<DistritoLeaflet[]>([])
-
+  const [distritos, setDistritos] = useState<any[]>([]);
+  const mapRef = useRef(null);
+  const [leafletReady, setLeafletReady] = useState(false);
+  
+  // Cargar Leaflet solo una vez al inicio
   useEffect(() => {
-    fetchDistritos();
-
-    // En web usamos la API de geolocalización del navegador
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation([
-            position.coords.latitude,
-            position.coords.longitude
-          ]);
-          setLoading(false);
-        },
-        (err) => {
-          console.error("Error al obtener la ubicación:", err);
-          setError("No se pudo acceder a tu ubicación. Mostrando una ubicación predeterminada.");
-          // Ubicación por defecto (Madrid)
-          setLocation([
-            40.416775,
-            -3.703790
-          ]);
+    console.log("Cargando módulos de Leaflet...");
+    
+    // Función para cargar Leaflet de manera segura
+    const loadLeaflet = async () => {
+      // Solo cargamos Leaflet si estamos en un entorno web y aún no se ha cargado
+      if (typeof window !== 'undefined' && typeof document !== 'undefined' && !leafletLoaded) {
+        try {
+          console.log("Intentando cargar módulos para web");
+          
+          // Primero cargamos Leaflet
+          const leafletModule = await import('leaflet');
+          L = leafletModule.default || leafletModule;
+          
+          // Importamos el CSS - El linter TypeScript puede quejarse, pero esto funciona en entorno web
+          if (typeof document !== 'undefined') {
+            // Creamos una etiqueta link en el head para cargar el CSS
+            const linkElement = document.createElement('link');
+            linkElement.rel = 'stylesheet';
+            linkElement.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            linkElement.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+            linkElement.crossOrigin = '';
+            document.head.appendChild(linkElement);
+            console.log("CSS de Leaflet cargado manualmente");
+          }
+          
+          // Configurar los iconos de Leaflet
+          delete (L.Icon.Default.prototype as any)._getIconUrl;
+          L.Icon.Default.mergeOptions({
+            iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+            iconUrl: require('leaflet/dist/images/marker-icon.png'),
+            shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+          });
+          
+          // Guardar referencia global a L
+          window.L = L;
+          
+          console.log("Leaflet configurado correctamente");
+          leafletLoaded = true;
+          setLeafletReady(true);
+        } catch (error) {
+          console.error("Error al cargar los módulos de Leaflet:", error);
+          setError("No se pudo cargar el mapa. Error al cargar las dependencias.");
           setLoading(false);
         }
-      );
-
-      // Seguimiento en tiempo real
-      const watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          setLocation([
-            position.coords.latitude,
-            position.coords.longitude
-          ]);
-        },
-        () => {
-          // Ignoramos errores en el seguimiento
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000
-        }
-      );
-
-      return () => {
-        navigator.geolocation.clearWatch(watchId);
-      };
-    } else {
-      setError("Tu navegador no soporta geolocalización.");
-      // Ubicación por defecto
-      setLocation([
-        40.416775,
-        -3.703790
-      ]);
-      setLoading(false);
-    }
-
+      } else if (!leafletLoaded) {
+        console.log("No se puede cargar Leaflet en este entorno");
+        setError("El mapa no puede cargarse en este entorno. Por favor, accede desde un navegador web compatible.");
+        setLoading(false);
+      } else {
+        console.log("Leaflet ya está cargado");
+        setLeafletReady(true);
+      }
+    };
+    
+    loadLeaflet();
   }, []);
 
+  // Efectos para cargar datos y ubicación
+  useEffect(() => {
+    console.log("MapScreen.web useEffect");
+    
+    // Solo procedemos si Leaflet está cargado o tenemos un error
+    if (leafletReady || error) {
+      fetchDistritos();
+
+      // En web usamos la API de geolocalización del navegador
+      if (typeof navigator !== 'undefined' && navigator.geolocation) {
+        console.log("Obteniendo geolocalización...");
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log("Posición obtenida:", position.coords);
+            setLocation([
+              position.coords.latitude,
+              position.coords.longitude
+            ]);
+            setLoading(false);
+          },
+          (err) => {
+            console.error("Error al obtener la ubicación:", err);
+            setError("No se pudo acceder a tu ubicación. Mostrando una ubicación predeterminada.");
+            // Ubicación por defecto (Madrid)
+            setLocation([40.416775, -3.703790]);
+            setLoading(false);
+          },
+          { timeout: 10000, enableHighAccuracy: true }
+        );
+      } else {
+        console.log("Geolocalización no disponible");
+        setError("Tu navegador no soporta geolocalización.");
+        // Ubicación por defecto
+        setLocation([40.416775, -3.703790]);
+        setLoading(false);
+      }
+    }
+  }, [leafletReady, error]);
+
   // Función para transformar coordenadas desde GeoJSON al formato de react-native-maps
-  const transformarCoordenadasGeoJSON = (geoJson: any): LatLngExpression[] => {
+  const transformarCoordenadasGeoJSON = (geoJson: any): any => {
     try {
       if (!geoJson || !geoJson.coordinates || !Array.isArray(geoJson.coordinates)) {
         return [];
       }
-      let coordenadas : LatLngExpression[] = [];
+      let coordenadas: any[] = [];
       const procesarCoordenadas = (coords: any[]): void => {
         if (coords.length === 2 && typeof coords[0] === "number" && typeof coords[1] === "number") {
-          coordenadas.push(L.latLng(
-             coords[1],
-             coords[0]
-          ));
+          coordenadas.push([coords[1], coords[0]]);
         } else if (Array.isArray(coords)) {
           coords.forEach((item) => {
             if (Array.isArray(item)) {
@@ -133,68 +209,96 @@ const MapScreen = () => {
 
   // Función para obtener los distritos desde el backend
   const fetchDistritos = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/api/districts`);
-        const data = await response.json();
-        if (data.success && data.districts) {
-          const distritosMapeados = data.districts
-            .map((distrito: DistritoBackend) => {
-              try {
-                const coordenadasTransformadas : LatLngExpression[] = transformarCoordenadasGeoJSON(distrito.boundaries);
-                if (coordenadasTransformadas.length < 3) {
-                  console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
-                  return null;
-                }
-                return {
-                  id: distrito.id,
-                  nombre: distrito.name,
-                  coordenadas: coordenadasTransformadas,
-                  isUnlocked: distrito.isUnlocked,
-                };
-              } catch (error) {
-                console.error(`Error procesando distrito ${distrito.name}:`, error);
+    try {
+      console.log("Obteniendo distritos...");
+      setLoading(true);
+      console.log("Fetching from:", `${API_URL}/api/districts`);
+      const response = await fetch(`${API_URL}/api/districts`);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log("Respuesta de distritos:", data.success, data.districts?.length);
+      if (data.success && data.districts) {
+        const distritosMapeados = data.districts
+          .map((distrito: any) => {
+            try {
+              const coordenadasTransformadas = transformarCoordenadasGeoJSON(distrito.boundaries);
+              if (coordenadasTransformadas.length < 3) {
+                console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                 return null;
               }
-            })
-            .filter((d: DistritoLeaflet | null): d is DistritoLeaflet => d !== null);
-          setDistritos(distritosMapeados);
-        } else {
-          Alert.alert("Error", "No se pudieron cargar los distritos");
-        }
-      } catch (error) {
-        console.error("Error al obtener los distritos:", error);
-        Alert.alert("Error", "Ocurrió un error al cargar los distritos");
-      } finally {
+              return {
+                id: distrito.id,
+                nombre: distrito.name,
+                coordenadas: coordenadasTransformadas,
+                isUnlocked: distrito.isUnlocked,
+              };
+            } catch (error) {
+              console.error(`Error procesando distrito ${distrito.name}:`, error);
+              return null;
+            }
+          })
+          .filter((d: any) => d !== null);
+        console.log("Distritos mapeados:", distritosMapeados.length);
+        setDistritos(distritosMapeados);
+        setLoading(false);
+      } else {
+        console.error("No se pudieron cargar los distritos:", data);
+        setError("No se pudieron cargar los distritos");
         setLoading(false);
       }
+    } catch (error) {
+      console.error("Error al obtener los distritos:", error);
+      setError(`Error al cargar los distritos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setLoading(false);
+    }
   };
 
-  return (
-    <MapContainer 
-      center={L.latLng(37.373062783,-5.948116354)} 
-      zoom={13} ref={null} 
-      style={{height: "100vh", width: "100vw"}}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {distritos.map((distrito, index) => {
-        return (
-          <Polygon
-            key={distrito.id}
-            positions={distrito.coordenadas}
-            fillColor={distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)"}
-            color={distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)"}
-            fillOpacity={0.4}
-          />)
-      })}
-    </MapContainer>
+  // Renderizado condicional para mostrar pantalla de carga
+  if (loading) {
+    console.log("Renderizando pantalla de carga");
+    return (
+      <StyledView className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+        {error && <StyledText className="mt-4 text-red-500">{error}</StyledText>}
+      </StyledView>
     );
+  }
 
-  
+  // Renderizado condicional para mostrar error
+  if (error) {
+    console.log("Renderizando pantalla de error:", error);
+    return (
+      <StyledView className="flex-1 justify-center items-center p-4">
+        <StyledText className="text-lg text-red-500 mb-4">
+          {error}
+        </StyledText>
+        <StyledText className="text-base text-gray-700">
+          API_URL: {API_URL}
+        </StyledText>
+      </StyledView>
+    );
+  }
+
+  // Renderizado condicional si leaflet no está listo
+  if (!leafletReady) {
+    console.log("Esperando a que Leaflet esté listo");
+    return (
+      <StyledView className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+        <StyledText className="mt-4">Cargando el mapa...</StyledText>
+      </StyledView>
+    );
+  }
+
+  // Renderización del mapa usando un enfoque más seguro
+  console.log("Renderizando mapa con MapContainer");
+  return <LeafletMap location={location} distritos={distritos} />;
 };
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
 
 const styles = StyleSheet.create({
   container: {
@@ -242,4 +346,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MapScreen; 
+export default MapScreen;

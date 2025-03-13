@@ -14,7 +14,6 @@ import LoginScreen from './src/components/screens/LoginScreen';
 import RegisterScreen from './src/components/screens/RegisterScreen';
 import MapScreen from './src/components/Map/MapScreen';
 import CollaborativeMapScreen from './src/components/Map/CollaborativeMapScreen';
-import CollaborativeMapScreenWeb from './src/components/Map/CollaborativeMapScreen.web';
 import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapListScreen';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
@@ -45,7 +44,27 @@ const ForgotPasswordScreen = () => (
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Definimos un wrapper para MapScreen que incluye los distritos de ejemplo
-const MapScreenWithDistritos = (props: any) => <MapScreen {...props} />;
+const MapScreenWithDistritos = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    try {
+      // Importación dinámica del componente web
+      const MapScreenWeb = require('./src/components/Map/MapScreen.web').default;
+      return <MapScreenWeb {...props} />;
+    } catch (error) {
+      console.error("Error cargando MapScreen.web:", error);
+      return (
+        <StyledView className="flex-1 justify-center items-center p-4">
+          <StyledText className="text-lg text-red-500">
+            Error al cargar el mapa web. Por favor, intenta de nuevo.
+          </StyledText>
+        </StyledView>
+      );
+    }
+  } else {
+    return <MapScreen {...props} />;
+  }
+};
 
 // Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
 const CollaborativeMapScreenWithParams = (props: any) => {
@@ -55,7 +74,20 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   
   // Usar la versión web cuando estamos en navegador
   if (Platform.OS === 'web') {
-    return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
+    try {
+      // Importación dinámica del componente web
+      const CollaborativeMapScreenWeb = require('./src/components/Map/CollaborativeMapScreen.web').default;
+      return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
+    } catch (error) {
+      console.error("Error cargando CollaborativeMapScreen.web:", error);
+      return (
+        <StyledView className="flex-1 justify-center items-center p-4">
+          <StyledText className="text-lg text-red-500">
+            Error al cargar el mapa colaborativo web. Por favor, intenta de nuevo.
+          </StyledText>
+        </StyledView>
+      );
+    }
   } else {
     return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
   }
