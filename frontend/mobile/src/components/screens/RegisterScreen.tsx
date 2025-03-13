@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { styled } from 'nativewind';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Button from '@components/UI/Button';
-import TextInput from '@components/UI/TextInput';
-import {styles} from '@assets/styles/styles';
+import Button from '../UI/Button';
+import TextInput from '../UI/TextInput';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -100,19 +99,17 @@ const RegisterScreen = () => {
   };
 
   return (
-  <ImageBackground
-          source={require("../../assets/images/login_background.webp")} 
-          style={styles.background_image}
-          resizeMode="cover"
-  >
-      <View style={styles.semi_transparent_overlay} />
+    <StyledView className="flex-1 bg-gray-100">
       <StyledScrollView className="flex-1">
-        <StyledView className="flex-1 p-6 justify-start min-h-screen mt-20">
-          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
+        <StyledView className="flex-1 p-6 justify-center min-h-screen">
+          {/* Header */}
           <StyledView className="flex-row items-center justify-center mb-6">
-            <Image source={require('../../assets/images/logo.png')} style={{ width: 35, height: 35 }} />
+            <StyledView className="w-12 h-12 bg-teal-500 rounded-md"></StyledView>
             <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
           </StyledView>
+          
+          {/* Formulario */}
+          <StyledView className="bg-white p-6 rounded-lg w-full shadow-md">
             <StyledText className="text-2xl font-bold text-center mb-2">
               Crea tu cuenta
             </StyledText>
@@ -172,7 +169,7 @@ const RegisterScreen = () => {
           </StyledView>
         </StyledView>
       </StyledScrollView>
-  </ImageBackground>
+    </StyledView>
   );
 };
 

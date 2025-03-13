@@ -2,7 +2,7 @@
  * App principal de MapYourWorld Mobile
  */
 import React, { useState } from 'react';
-import { SafeAreaView, StatusBar, View, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StatusBar, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,6 +18,8 @@ import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapLis
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
+import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
+import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -32,19 +34,31 @@ const FallbackScreen = ({ title, message }: { title: string, message: string }) 
   </StyledView>
 );
 
-// Pantalla temporal para recuperar contraseña
-const ForgotPasswordScreen = () => (
-  <FallbackScreen 
-    title="Recuperar Contraseña" 
-    message="Esta funcionalidad está en desarrollo" 
-  />
-);
-
 // Usamos la definición de tipos de navegación centralizada
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Definimos un wrapper para MapScreen que incluye los distritos de ejemplo
-const MapScreenWithDistritos = (props: any) => <MapScreen {...props} />;
+const MapScreenWithDistritos = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    try {
+      // Importación dinámica del componente web
+      const MapScreenWeb = require('./src/components/Map/MapScreen.web').default;
+      return <MapScreenWeb {...props} />;
+    } catch (error) {
+      console.error("Error cargando MapScreen.web:", error);
+      return (
+        <StyledView className="flex-1 justify-center items-center p-4">
+          <StyledText className="text-lg text-red-500">
+            Error al cargar el mapa web. Por favor, intenta de nuevo.
+          </StyledText>
+        </StyledView>
+      );
+    }
+  } else {
+    return <MapScreen {...props} />;
+  }
+};
 
 // Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
 const CollaborativeMapScreenWithParams = (props: any) => {
@@ -52,7 +66,35 @@ const CollaborativeMapScreenWithParams = (props: any) => {
   const mapId = props.route?.params?.mapId || "map-123";
   const userId = props.route?.params?.userId || "user-456";
   
-  return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    try {
+      // Importación dinámica del componente web
+      const CollaborativeMapScreenWeb = require('./src/components/Map/CollaborativeMapScreen.web').default;
+      return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
+    } catch (error) {
+      console.error("Error cargando CollaborativeMapScreen.web:", error);
+      return (
+        <StyledView className="flex-1 justify-center items-center p-4">
+          <StyledText className="text-lg text-red-500">
+            Error al cargar el mapa colaborativo web. Por favor, intenta de nuevo.
+          </StyledText>
+        </StyledView>
+      );
+    }
+  } else {
+    return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  }
+};
+
+// Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
+const ForgotPasswordScreenWrapper = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    return <ForgotPasswordScreenWeb {...props} />;
+  } else {
+    return <ForgotPasswordScreenMobile {...props} />;
+  }
 };
 
 // Componente principal de la aplicación
@@ -152,7 +194,7 @@ const AppContent = () => {
         />
         <Stack.Screen 
           name="ForgotPassword" 
-          component={ForgotPasswordScreen}
+          component={ForgotPasswordScreenWrapper}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -171,6 +213,7 @@ const AppContent = () => {
 };
 
 // Componente App que envuelve todo con el proveedor de autenticación
+// TODO: VOLVER A CAMBIAR
 const App = () => {
   return (
     <AuthProvider>
@@ -182,4 +225,4 @@ const App = () => {
 // Registramos directamente el componente App como componente raíz de la aplicación
 registerRootComponent(App);
 
-export default App; 
+export default App;
