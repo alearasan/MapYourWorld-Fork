@@ -3,31 +3,12 @@
  * Gestiona la creación, consulta, actualización y eliminación de puntos de interés
  */
 
-import { publishEvent } from '@shared/libs/rabbitmq';
+import { AppDataSource } from '../../../database/appDataSource';
+import { PointOfInterest } from '../models/poi.model';
+import { Between, Repository, IsNull, Not } from 'typeorm';
 
-/**
- * Tipo para representar un punto de interés
- */
-export interface PointOfInterest {
-  id: string;
-  name: string;
-  description: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  type: string;
-  category: string;
-  tags: string[];
-  images: string[];
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-  visitCount: number;
-  rating: number;
-  isActive: boolean;
-  districtId: string;
-}
+// Initialize repository
+const poiRepository: Repository<PointOfInterest> = AppDataSource.getRepository(PointOfInterest);
 
 /**
  * Crea un nuevo punto de interés
@@ -35,7 +16,7 @@ export interface PointOfInterest {
  * @param userId ID del usuario que crea el punto de interés
  */
 export const createPOI = async (
-  poiData: Omit<PointOfInterest, 'id' | 'createdAt' | 'updatedAt' | 'visitCount' | 'rating'>,
+  poiData: Omit<PointOfInterest, 'id'>,
   userId: string
 ): Promise<PointOfInterest> => {
   // TODO: Implementar la creación de un punto de interés
@@ -43,10 +24,111 @@ export const createPOI = async (
   // 2. Verificar que las coordenadas sean válidas
   // 3. Comprobar si ya existe un POI similar en la ubicación
   // 4. Guardar el POI en la base de datos
-  // 5. Publicar evento de POI creado
+
+  // 1. Validar los datos del punto de interés
+  if (!poiData.name || !poiData.location || !poiData.category) {
+    throw new Error('Nombre, ubicación y categoría son campos obligatorios');
+  }
   
-  throw new Error('Método no implementado');
+  // 2. Verificar que las coordenadas sean válidas
+  const location = poiData.location;
+  if (!location || 
+      !location.type || 
+      location.type !== 'Point' || 
+      !location.coordinates || 
+      location.coordinates.length !== 2) {
+    throw new Error('Las coordenadas de ubicación son inválidas');
+  }
+  
+  // 3. Comprobar si ya existe un POI similar en la ubicación
+  const [longitude, latitude] = location.coordinates;
+  const existingPOI = await poiRepository.findOne({
+    where: {
+      name: poiData.name,
+      location: { 
+        type: 'Point',
+        coordinates: [longitude, latitude] 
+      } as any
+    }
+  });
+  
+  if (existingPOI) {
+    throw new Error('Ya existe un punto de interés similar en esta ubicación');
+  }
+  
+  // 4. Guardar el POI en la base de datos
+  const newPOI = poiRepository.create({
+    ...poiData,
+    createdAt: new Date(),
+    user: { id: userId } as any
+  });
+  
+  return await poiRepository.save(newPOI);
 };
+
+
+
+
+
+
+
+export const createPOISinToken = async (
+  poiData: Omit<PointOfInterest, 'id'>,
+): Promise<PointOfInterest> => {
+  // TODO: Implementar la creación de un punto de interés
+  // 1. Validar los datos del punto de interés
+  // 2. Verificar que las coordenadas sean válidas
+  // 3. Comprobar si ya existe un POI similar en la ubicación
+  // 4. Guardar el POI en la base de datos
+
+  // 1. Validar los datos del punto de interés
+  if (!poiData.name || !poiData.location || !poiData.category) {
+    throw new Error('Nombre, ubicación y categoría son campos obligatorios');
+  }
+  
+  // 2. Verificar que las coordenadas sean válidas
+  const location = poiData.location;
+  if (!location || 
+      !location.type || 
+      location.type !== 'Point' || 
+      !location.coordinates || 
+      location.coordinates.length !== 2) {
+    throw new Error('Las coordenadas de ubicación son inválidas');
+  }
+  
+  // 3. Comprobar si ya existe un POI similar en la ubicación
+  const [longitude, latitude] = location.coordinates;
+  const existingPOI = await poiRepository.findOne({
+    where: {
+      name: poiData.name,
+      location: {
+        type: 'Point', 
+        coordinates: [longitude, latitude] 
+      } as any
+    }
+  });
+  
+  if (existingPOI) {
+    throw new Error('Ya existe un punto de interés similar en esta ubicación');
+  }
+  
+  // 4. Guardar el POI en la base de datos
+  const newPOI = poiRepository.create({
+    ...poiData,
+    createdAt: new Date()
+    });
+  
+  return await poiRepository.save(newPOI);
+};
+
+
+
+
+
+
+
+
+
 
 /**
  * Obtiene un punto de interés por su ID
@@ -56,9 +138,19 @@ export const getPOIById = async (poiId: string): Promise<PointOfInterest | null>
   // TODO: Implementar la obtención de un punto de interés por ID
   // 1. Buscar el POI en la base de datos
   // 2. Retornar null si no se encuentra
-  // 3. Incrementar el contador de visitas si corresponde
   
-  throw new Error('Método no implementado');
+  // 1. Buscar el POI en la base de datos
+  const poi = await poiRepository.findOne({
+    where: { id: poiId },
+    relations: ['user', 'district']
+  });
+  
+  // 2. Retornar null si no se encuentra
+  if (!poi) {
+    return null;
+  }
+
+  return poi;
 };
 
 /**
@@ -69,17 +161,44 @@ export const getPOIById = async (poiId: string): Promise<PointOfInterest | null>
  */
 export const updatePOI = async (
   poiId: string,
-  updateData: Partial<Omit<PointOfInterest, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>>,
+  updateData: Partial<Omit<PointOfInterest, 'id'>>,
   userId: string
 ): Promise<PointOfInterest | null> => {
   // TODO: Implementar la actualización de un punto de interés
   // 1. Verificar que el POI existe
-  // 2. Comprobar que el usuario tiene permisos para actualizar el POI
+  // 2. Comprobar que el POI pertenece al User
   // 3. Validar los datos de actualización
   // 4. Actualizar el POI en la base de datos
-  // 5. Publicar evento de POI actualizado
   
-  throw new Error('Método no implementado');
+  // 1. Verificar que el POI existe
+  const existingPOI = await poiRepository.findOne({
+    where: { id: poiId },
+    relations: ['user']
+  });
+  
+  if (!existingPOI) {
+    return null;
+  }
+  
+  // 2. Comprobar que el POI pertenece al User
+  if (existingPOI.user.id !== userId) {
+    throw new Error('No tienes permisos para actualizar este punto de interés');
+  }
+  
+  // 3. Validar los datos de actualización
+  if (updateData.location) {
+    const location = updateData.location;
+    if (!location.type || 
+        location.type !== 'Point' || 
+        !location.coordinates || 
+        location.coordinates.length !== 2) {
+      throw new Error('Las coordenadas de ubicación son inválidas');
+    }
+  }
+  
+  // 4. Actualizar el POI en la base de datos
+  Object.assign(existingPOI, updateData);
+  return await poiRepository.save(existingPOI);
 };
 
 /**
@@ -90,11 +209,27 @@ export const updatePOI = async (
 export const deletePOI = async (poiId: string, userId: string): Promise<boolean> => {
   // TODO: Implementar la eliminación de un punto de interés
   // 1. Verificar que el POI existe
-  // 2. Comprobar que el usuario tiene permisos para eliminar el POI
+  // 2. Comprobar que el POI pertenece al User
   // 3. Marcar el POI como inactivo o eliminarlo de la base de datos
-  // 4. Publicar evento de POI eliminado
   
-  throw new Error('Método no implementado');
+  // 1. Verificar que el POI existe
+  const poi = await poiRepository.findOne({
+    where: { id: poiId },
+    relations: ['user']
+  });
+  
+  if (!poi) {
+    return false;
+  }
+  
+  // 2. Comprobar que el POI pertenece al User
+  if (poi.user.id !== userId) {
+    throw new Error('No tienes permisos para eliminar este punto de interés');
+  }
+  
+  // 3. Eliminar el POI de la base de datos
+  await poiRepository.remove(poi);
+  return true;
 };
 
 /**
@@ -102,7 +237,7 @@ export const deletePOI = async (poiId: string, userId: string): Promise<boolean>
  * @param latitude Latitud del centro de búsqueda
  * @param longitude Longitud del centro de búsqueda
  * @param radiusInKm Radio de búsqueda en kilómetros
- * @param filters Filtros adicionales (categoría, tipo, etc.)
+ * @param filters Filtros adicionales (categoría)
  */
 export const findNearbyPOIs = async (
   latitude: number,
@@ -110,9 +245,6 @@ export const findNearbyPOIs = async (
   radiusInKm: number,
   filters?: {
     category?: string;
-    type?: string;
-    tags?: string[];
-    minRating?: number;
   }
 ): Promise<PointOfInterest[]> => {
   // TODO: Implementar la búsqueda de POIs cercanos
@@ -121,42 +253,43 @@ export const findNearbyPOIs = async (
   // 3. Ordenar resultados por distancia
   // 4. Limitar resultados a un número máximo
   
-  throw new Error('Método no implementado');
-};
-
-/**
- * Registra una visita a un punto de interés
- * @param poiId ID del punto de interés visitado
- * @param userId ID del usuario que realiza la visita
- */
-export const registerPOIVisit = async (poiId: string, userId: string): Promise<boolean> => {
-  // TODO: Implementar el registro de visitas a POIs
-  // 1. Verificar que el POI existe
-  // 2. Registrar la visita en la base de datos
-  // 3. Incrementar el contador de visitas del POI
-  // 4. Actualizar las estadísticas del usuario si es necesario
-  // 5. Publicar evento de visita a POI
+  // 1. Construir consulta geoespacial para la base de datos
+  // ST_DWithin calcula qué puntos están dentro del radio especificado
+  // ST_MakePoint crea un punto con las coordenadas dadas
+  // ST_SetSRID establece el sistema de referencia espacial (4326 es el estándar para GPS)
+  const query = poiRepository.createQueryBuilder('poi')
+    .where(`ST_DWithin(
+      poi.location::geography,
+      ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
+      :distance
+    )`, {
+      latitude,
+      longitude,
+      distance: radiusInKm * 1000 // Convertir a metros
+    });
   
-  throw new Error('Método no implementado');
-};
-
-/**
- * Califica un punto de interés
- * @param poiId ID del punto de interés a calificar
- * @param userId ID del usuario que realiza la calificación
- * @param rating Calificación (1-5)
- */
-export const ratePOI = async (
-  poiId: string,
-  userId: string,
-  rating: number
-): Promise<{ success: boolean; newRating: number }> => {
-  // TODO: Implementar la calificación de POIs
-  // 1. Verificar que el rating está en el rango correcto (1-5)
-  // 2. Verificar que el POI existe
-  // 3. Guardar o actualizar la calificación del usuario
-  // 4. Recalcular el rating promedio del POI
-  // 5. Publicar evento de POI calificado
+  // 2. Aplicar filtros adicionales si existen
+  if (filters?.category) {
+    query.andWhere('poi.category = :category', { category: filters.category });
+  }
   
-  throw new Error('Método no implementado');
-}; 
+  // 3. Ordenar resultados por distancia
+  query.orderBy(`ST_Distance(
+    poi.location::geography,
+    ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography
+  )`, 'ASC');
+  
+  // 4. Limitar resultados a un número máximo
+  query.limit(10);
+  
+  return await query.getMany();
+};
+/**
+ * Obtiene todos los puntos de interés
+ * @returns Lista de puntos de interés
+ */
+export const getAllPOIs = async (): Promise<PointOfInterest[]> => {
+  return await poiRepository.find({
+    relations: ['user', 'district']
+  });
+};

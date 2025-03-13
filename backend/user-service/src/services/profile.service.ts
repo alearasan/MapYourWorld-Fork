@@ -1,202 +1,200 @@
 /**
  * Servicio de Perfil de Usuario
- * Gestiona la información de perfil, preferencias y estadísticas de los usuarios
+ * Gestiona la información de perfil (UserProfile).
  */
 
-import { publishEvent } from '@shared/libs/rabbitmq';
+// import { publishEvent } from '@shared/libs/rabbitmq';
+import { UserProfileRepository } from '../repositories/userProfile.repository';
+import { UserProfile } from '../models/userProfile.model';
 
-/**
- * Tipo para representar un perfil de usuario
- */
-export interface UserProfile {
-  userId: string;
-  username: string;
-  email: string;
-  fullName?: string;
-  bio?: string;
-  avatar?: string;
-  phone?: string;
-  location?: {
-    city?: string;
-    country?: string;
-    latitude?: number;
-    longitude?: number;
-  };
-  social?: {
-    instagram?: string;
-    twitter?: string;
-    facebook?: string;
-  };
-  preferences: {
-    language: string;
-    theme: 'light' | 'dark' | 'system';
-    notificationsEnabled: boolean;
-    privacySettings: {
-      showLocation: boolean;
-      showActivity: boolean;
-      profileVisibility: 'public' | 'followers' | 'private';
-    };
-  };
-  statistics: {
-    totalPoints: number;
-    level: number;
-    districtsUnlocked: number;
-    poisVisited: number;
-    photosUploaded: number;
-    achievements: number;
-    followers: number;
-    following: number;
-  };
-  accountStatus: 'active' | 'suspended' | 'deactivated';
-  lastActive: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const userProfileRepository = new UserProfileRepository();
 
 /**
- * Obtiene el perfil completo de un usuario
- * @param userId ID del usuario
+ * Obtiene el perfil completo de un usuario por su ID de perfil (UUID).
+ * @param profileId UUID del perfil (campo 'id' de UserProfile)
  */
-export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  // TODO: Implementar la obtención del perfil de usuario
-  // 1. Buscar el usuario en la base de datos
-  // 2. Si no existe, retornar null
-  // 3. Cargar estadísticas del usuario
-  // 4. Formatear y retornar el perfil completo
-  
-  throw new Error('Método no implementado');
-};
-
-/**
- * Obtiene perfil básico visible por otros usuarios
- * @param userId ID del usuario
- * @param viewerId ID del usuario que está viendo el perfil (opcional)
- */
-export const getPublicUserProfile = async (
-  userId: string,
-  viewerId?: string
-): Promise<Partial<UserProfile> | null> => {
-  // TODO: Implementar la obtención del perfil público
-  // 1. Obtener el perfil completo
-  // 2. Verificar la configuración de privacidad
-  // 3. Si el visor es el propio usuario o un seguidor (dependiendo de la configuración), mostrar más información
-  // 4. Filtrar información privada
-  // 5. Retornar solo la información pública
-  
-  throw new Error('Método no implementado');
+export const getUserProfile = async (
+  profileId: string
+): Promise<UserProfile | null> => {
+  try {
+    const userProfile = await userProfileRepository.findById(profileId);
+    return userProfile || null;
+  } catch (error) {
+    console.error(`Error al obtener perfil con ID ${profileId}:`, error);
+    throw new Error(
+      `No se pudo obtener el perfil: ${
+        error instanceof Error ? error.message : 'Error desconocido'
+      }`
+    );
+  }
 };
 
 /**
  * Actualiza el perfil de un usuario
- * @param userId ID del usuario
- * @param profileData Datos del perfil a actualizar
+ * @param profileId UUID del perfil (campo 'id')
+ * @param profileData Datos del perfil a actualizar (username, firstName, lastName, picture)
  */
 export const updateUserProfile = async (
-  userId: string,
-  profileData: Partial<Omit<UserProfile, 'userId' | 'email' | 'createdAt' | 'updatedAt' | 'statistics' | 'accountStatus'>>
+  profileId: string,
+  profileData: Partial<Omit<UserProfile, 'id'>>
 ): Promise<UserProfile | null> => {
-  // TODO: Implementar la actualización del perfil
-  // 1. Verificar que el usuario existe
-  // 2. Validar los datos de actualización
-  // 3. Si se actualiza el nombre de usuario, verificar que no esté en uso
-  // 4. Actualizar los campos en la base de datos
-  // 5. Publicar evento de perfil actualizado
-  // 6. Retornar el perfil actualizado
-  
-  throw new Error('Método no implementado');
+  try {
+    const existingProfile = await userProfileRepository.findById(profileId);
+    if (!existingProfile) {
+      return null;
+    }
+
+
+    if (
+      profileData.username &&
+      profileData.username !== existingProfile.username
+    ) {
+      const userWithSameUsername = await userProfileRepository.findByUsername(
+        profileData.username
+      );
+      if (userWithSameUsername) {
+        throw new Error('El nombre de usuario ya está en uso');
+      }
+    }
+
+    const updatedProfile = await userProfileRepository.update(profileId, profileData);
+    if (!updatedProfile) {
+      throw new Error('Error al actualizar el perfil');
+    }
+
+
+    // await publishEvent('user.profile.updated', {
+    //   profileId,
+    //   updatedFields: Object.keys(profileData),
+    //   timestamp: new Date().toISOString(),
+    // });
+
+    return updatedProfile;
+  } catch (error) {
+    console.error(`Error al actualizar perfil con ID ${profileId}:`, error);
+    throw new Error(
+      `No se pudo actualizar el perfil: ${
+        error instanceof Error ? error.message : 'Error desconocido'
+      }`
+    );
+  }
 };
 
 /**
- * Actualiza la imagen de avatar del usuario
- * @param userId ID del usuario
- * @param avatarData Imagen en base64 o URL de imagen
+ * Actualiza la imagen (picture) del usuario
+ * @param profileId UUID del perfil (campo 'id')
+ * @param pictureData Imagen en base64 o URL de imagen
  */
-export const updateUserAvatar = async (
-  userId: string,
-  avatarData: string
-): Promise<{ success: boolean; avatarUrl: string }> => {
-  // TODO: Implementar la actualización del avatar
-  // 1. Verificar que el usuario existe
-  // 2. Validar el formato de la imagen
-  // 3. Procesar la imagen (redimensionar, comprimir)
-  // 4. Subir la imagen al almacenamiento
-  // 5. Actualizar la URL del avatar en el perfil
-  // 6. Publicar evento de avatar actualizado
-  
-  throw new Error('Método no implementado');
+export const updateUserPicture = async (
+  profileId: string,
+  pictureData: string
+): Promise<{ success: boolean; pictureUrl: string }> => {
+  try {
+    const existingProfile = await userProfileRepository.findById(profileId);
+    if (!existingProfile) {
+      throw new Error('Perfil no encontrado');
+    }
+
+    let pictureUrl: string;
+
+    if (pictureData.startsWith('data:')) {
+      pictureUrl = `https://storage.example.com/pictures/${profileId}-${Date.now()}.jpg`;
+    } else if (
+      pictureData.startsWith('http://') ||
+      pictureData.startsWith('https://')
+    ) {
+      pictureUrl = pictureData;
+    } else {
+      throw new Error('Formato de imagen no soportado');
+    }
+
+    const updatedProfile = await userProfileRepository.update(profileId, {
+      picture: pictureUrl,
+    });
+    if (!updatedProfile) {
+      throw new Error('Error al actualizar la imagen');
+    }
+
+
+    // await publishEvent('user.picture.updated', {
+    //   profileId,
+    //   pictureUrl,
+    //   timestamp: new Date().toISOString(),
+    // });
+
+    return { success: true, pictureUrl };
+  } catch (error) {
+    console.error(`Error al actualizar imagen del perfil ${profileId}:`, error);
+    throw new Error(
+      `No se pudo actualizar la imagen: ${
+        error instanceof Error ? error.message : 'Error desconocido'
+      }`
+    );
+  }
 };
 
 /**
- * Actualiza las preferencias del usuario
- * @param userId ID del usuario
- * @param preferences Preferencias a actualizar
- */
-export const updateUserPreferences = async (
-  userId: string,
-  preferences: Partial<UserProfile['preferences']>
-): Promise<UserProfile['preferences']> => {
-  // TODO: Implementar la actualización de preferencias
-  // 1. Verificar que el usuario existe
-  // 2. Validar las preferencias enviadas
-  // 3. Actualizar las preferencias en la base de datos
-  // 4. Retornar las preferencias actualizadas
-  
-  throw new Error('Método no implementado');
-};
-
-/**
- * Busca usuarios por nombre de usuario o nombre completo
+ * Busca usuarios por username, nombre o apellido
  * @param query Texto a buscar
  * @param limit Límite de resultados (por defecto 10)
- * @param offset Desplazamiento para paginación
+ * @param offset Desplazamiento para paginación (por defecto 0)
  */
 export const searchUsers = async (
   query: string,
   limit: number = 10,
   offset: number = 0
-): Promise<{
-  users: Partial<UserProfile>[];
-  total: number;
-}> => {
-  // TODO: Implementar búsqueda de usuarios
-  // 1. Validar la consulta
-  // 2. Construir la consulta de búsqueda
-  // 3. Aplicar límite y desplazamiento para paginación
-  // 4. Ejecutar la búsqueda
-  // 5. Formatear los resultados (solo información pública)
-  // 6. Retornar resultados y total
-  
-  throw new Error('Método no implementado');
+): Promise<{ users: Partial<UserProfile>[]; total: number }> => {
+  try {
+    if (!query || query.trim().length < 3) {
+      throw new Error('La consulta de búsqueda debe tener al menos 3 caracteres');
+    }
+
+    const sanitizedQuery = query.trim();
+
+
+    const [users, total] = await userProfileRepository.search(
+      sanitizedQuery,
+      limit,
+      offset
+    );
+
+
+    const formattedUsers = users.map((user) => ({
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      picture: user.picture,
+    }));
+
+    return { users: formattedUsers, total };
+  } catch (error) {
+    console.error(`Error al buscar usuarios con "${query}":`, error);
+    throw new Error(
+      `No se pudo realizar la búsqueda: ${
+        error instanceof Error ? error.message : 'Error desconocido'
+      }`
+    );
+  }
 };
 
-/**
- * Desactiva la cuenta de un usuario
- * @param userId ID del usuario
- * @param reason Razón de la desactivación
- */
-export const deactivateUserAccount = async (
-  userId: string,
-  reason?: string
-): Promise<boolean> => {
-  // TODO: Implementar desactivación de cuenta
-  // 1. Verificar que el usuario existe
-  // 2. Cambiar el estado de la cuenta a 'deactivated'
-  // 3. Registrar la razón de la desactivación
-  // 4. Publicar evento de cuenta desactivada
-  // 5. Actualizar todas las sesiones activas
-  
-  throw new Error('Método no implementado');
+  /**
+   * Crea un nuevo perfil de usuario.
+   * @param profileData Datos del nuevo perfil.
+   */
+  export const createUserProfile = async (
+    profileData: Partial<UserProfile>
+  ): Promise<UserProfile> => {
+    try {
+      const newProfile = await userProfileRepository.create(profileData);
+      return newProfile;
+    } catch (error) {
+      console.error('Error al crear el perfil:', error);
+      throw new Error(
+        `No se pudo crear el perfil: ${
+          error instanceof Error ? error.message : 'Error desconocido'
+        }`
+      );
+    }
 };
 
-/**
- * Reactiva la cuenta de un usuario
- * @param userId ID del usuario
- */
-export const reactivateUserAccount = async (userId: string): Promise<boolean> => {
-  // TODO: Implementar reactivación de cuenta
-  // 1. Verificar que el usuario existe y está desactivado
-  // 2. Cambiar el estado de la cuenta a 'active'
-  // 3. Publicar evento de cuenta reactivada
-  
-  throw new Error('Método no implementado');
-}; 

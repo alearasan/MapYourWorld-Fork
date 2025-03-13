@@ -3,7 +3,7 @@
  */
 
 import { Request } from 'express';
-import { ISODateString, UUID } from '@backend/types/common/common.types';
+import { ISODateString, UUID } from './common/common.types';
 
 /** Datos del usuario en el token JWT */
 export interface UserData {

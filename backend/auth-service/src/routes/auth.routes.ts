@@ -4,10 +4,11 @@
 
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { register, login, verify } from '../controllers/auth.controller';
+import { register, login, forgotPassword, resetPassword, verify, changePassword, logout } from '../controllers/auth.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { AuthenticatedRequest } from '@backend/auth-service/src/types';
-
+import { requireAdmin, isAuthenticated } from '../middleware/auth.middleware';
+import adminRoutes from './admin.routes';
+import { AuthenticatedRequest } from '../types';
 const router: Router = Router();
 
 // Ruta para registrar un usuario
@@ -30,16 +31,6 @@ router.post(
       .withMessage('La contraseña debe contener al menos una letra mayúscula')
       .matches(/[!@#$%^&*(),.?":{}|<>]/)
       .withMessage('La contraseña debe contener al menos un carácter especial'),
-    body('firstName')
-      .notEmpty()
-      .withMessage('El nombre es obligatorio')
-      .isLength({ min: 2 })
-      .withMessage('El nombre debe tener al menos 2 caracteres'),
-    body('lastName')
-      .notEmpty()
-      .withMessage('El apellido es obligatorio')
-      .isLength({ min: 2 })
-      .withMessage('El apellido debe tener al menos 2 caracteres'),
   ],
   register
 );
@@ -55,14 +46,76 @@ router.post(
 );
 
 // Ruta para verificar token
-router.post('/verify', verify);
+router.post(
+  '/verify',
+  [
+    body('token').notEmpty().withMessage('El token es obligatorio')
+  ],
+  verify
+);
 
+
+// Rutas para cambio y recuperación de contraseña
+router.post(
+  '/forgot-password',
+  [
+    body('email').isEmail().withMessage('Introduce un email válido').normalizeEmail(),
+  ],
+  forgotPassword
+);
+
+router.post(
+  '/reset-password',
+  [
+    body('token').notEmpty().withMessage('El token es obligatorio'),
+    body('password')
+      .isLength({ min: 8 })
+      .withMessage('La contraseña debe tener al menos 8 caracteres')
+      .matches(/\d/)
+      .withMessage('La contraseña debe contener al menos un número')
+      .matches(/[a-z]/)
+      .withMessage('La contraseña debe contener al menos una letra minúscula')
+      .matches(/[A-Z]/)
+      .withMessage('La contraseña debe contener al menos una letra mayúscula')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/)
+      .withMessage('La contraseña debe contener al menos un carácter especial'),
+  ],
+  resetPassword
+);
+
+// Ruta para cambiar contraseña (usuario autenticado)
+router.post(
+  '/change-password',
+  authMiddleware(),
+  [
+    body('currentPassword').notEmpty().withMessage('La contraseña actual es obligatoria'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('La contraseña debe tener al menos 8 caracteres')
+      .matches(/\d/)
+      .withMessage('La contraseña debe contener al menos un número')
+      .matches(/[a-z]/)
+      .withMessage('La contraseña debe contener al menos una letra minúscula')
+      .matches(/[A-Z]/)
+      .withMessage('La contraseña debe contener al menos una letra mayúscula')
+      .matches(/[!@#$%^&*(),.?":{}|<>]/)
+      .withMessage('La contraseña debe contener al menos un carácter especial'),
+  ],
+  changePassword
+);
 // Ruta para obtener el perfil del usuario autenticado
-router.get('/profile', authMiddleware(), (req: AuthenticatedRequest, res) => {
-  res.status(200).json({
-    success: true,
-    user: req.user
-  });
-});
+router.get('/profile', );
 
-export default router; 
+// Ruta para cerrar sesión (sin requerir middleware de autenticación)
+router.post(
+  '/logout',
+  [
+    body('token').optional().isString().withMessage('El token debe ser una cadena válida'),
+    body('userId').optional().isString().withMessage('El ID de usuario debe ser una cadena válida')
+  ],
+  logout
+);
+
+// Rutas para permisos de administrador
+
+export default router;

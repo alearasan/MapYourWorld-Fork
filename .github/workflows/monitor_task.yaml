@@ -2,11 +2,6 @@ name: Monitor task
 
 on:
   push:
-    branches: [ main, develop, feature/CI-CD ]
-
-permissions:
-  issues: write
-  contents: read
 
 jobs:
   update-task-status:
@@ -28,119 +23,11 @@ jobs:
             sudo apt install gh -y
           fi
           # Configure GitHub CLI for API use
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
 
       - name: Process commit
-        if: github.event_name == 'push'
-        run: |
-          # Get commit message
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MSG"
-          
-          # Extract issue number from commit message (format: "... #123 ...")
-          ISSUE_NUM=$(echo "$COMMIT_MSG" | grep -oP '#\K[0-9]+' || echo "")
-          
-          if [ -z "$ISSUE_NUM" ]; then
-            echo "No issue number found in commit message. Skipping."
-            exit 0
-          fi
-          
-          # Ensure issue number is an integer
-          if ! [[ "$ISSUE_NUM" =~ ^[0-9]+$ ]]; then
-            echo "Invalid issue number: $ISSUE_NUM. Skipping."
-            exit 0
-          fi
-          
-          # Check for keywords anywhere in the message
-          if echo "$COMMIT_MSG" | grep -q "start"; then
-            KEYWORD="start"
-          elif echo "$COMMIT_MSG" | grep -q "to_review"; then
-            KEYWORD="to_review"
-          elif echo "$COMMIT_MSG" | grep -q "end"; then
-            KEYWORD="end"
-          else
-            echo "No keyword (start, to_review, end) found in commit message. Skipping."
-            exit 0
-          fi
-          
-          echo "Processing commit for issue $ISSUE_NUM with action: $KEYWORD"
-          
-          # Get Project data for this issue - using validated integer
-          PROJECT_DATA=$(gh api graphql -f query='
-            query($owner:String!, $repo:String!, $issue_number:Int!) {
-              repository(owner:$owner, name:$repo) {
-                issue(number:$issue_number) {
-                  projectItems(first:1) {
-                    nodes {
-                      id
-                      project {
-                        id
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number=$ISSUE_NUM)
-          
-          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
-          PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
-          
-          if [ -z "$ITEM_ID" ] || [ -z "$PROJECT_ID" ]; then
-            echo "Issue is not associated with a project or couldn't retrieve project data"
-            exit 0
-          fi
-          
-          # Get Status field ID and option ID for "Status"
-          FIELDS_DATA=$(gh api graphql -f query='
-            query($project_id:ID!) {
-              node(id:$project_id) {
-                ... on ProjectV2 {
-                  fields(first:20) {
-                    nodes {
-                      ... on ProjectV2SingleSelectField {
-                        id
-                        name
-                        options {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          ' -f project_id=$PROJECT_ID)
-          
-          STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id // empty')
-          STATUS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Status") | .id // empty')
-          
-          if [ -z "$STATUS_FIELD_ID" ] || [ -z "$STATUS_OPTION_ID" ]; then
-            echo "Could not find Status field or Status option"
-            exit 1
-          fi
-          
-          # Set status to "Status"
-          gh api graphql -f query='
-            mutation($project_id:ID!, $item_id:ID!, $field_id:ID!, $option_id:String!) {
-              updateProjectV2ItemFieldValue(input: {
-                projectId: $project_id
-                itemId: $item_id
-                fieldId: $field_id
-                value: { 
-                  singleSelectOptionId: $option_id
-                }
-              }) {
-                clientMutationId
-              }
-            }
-          ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$STATUS_OPTION_ID
-
-      - name: Process commit
-        if: github.event_name == 'push'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           # Get commit message
           COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -167,7 +54,9 @@ jobs:
           fi
           
           echo "Processing commit for issue #$ISSUE_NUM with action: $KEYWORD"
-          
+          echo "Owner: ${{ github.repository_owner }}, Repo: $(echo "${{ github.repository }}" | cut -d'/' -f2)"
+          echo "Issue number: $((ISSUE_NUM))"
+
           # Get Project data for this issue
           PROJECT_DATA=$(gh api graphql -f query='
             query($owner:String!, $repo:String!, $issue_number:Int!) {
@@ -184,8 +73,8 @@ jobs:
                 }
               }
             }
-          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.repository.name }}" -f issue_number=$ISSUE_NUM)
-          
+          ' -f owner="${{ github.repository_owner }}" -f repo="$(echo "${{ github.repository }}" | cut -d'/' -f2)" -F issue_number=$ISSUE_NUM)
+                    
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].id // empty')
           PROJECT_ID=$(echo "$PROJECT_DATA" | jq -r '.data.repository.issue.projectItems.nodes[0].project.id // empty')
           
@@ -209,9 +98,10 @@ jobs:
                           name
                         }
                       }
-                      ... on ProjectV2DateField {
+                      ... on ProjectV2Field {
                         id
                         name
+                        dataType
                       }
                     }
                   }
@@ -222,8 +112,8 @@ jobs:
           
           # Get field IDs
           STATUS_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .id // empty')
-          START_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real start date") | .id // empty')
-          END_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real end date") | .id // empty')
+          START_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real start date" and .dataType=="DATE") | .id // empty')
+          END_DATE_FIELD_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Real end date" and .dataType=="DATE") | .id // empty')          
           
           # Get status option IDs
           IN_PROGRESS_OPTION_ID=$(echo "$FIELDS_DATA" | jq -r '.data.node.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="In Progress") | .id // empty')
@@ -324,30 +214,28 @@ jobs:
               
               # Get item data to calculate time difference
               ITEM_DATA=$(gh api graphql -f query='
-                query($project_id:ID!, $item_id:ID!) {
-                  node(id: $project_id) {
-                    ... on ProjectV2 {
-                      item(id: $item_id) {
-                        fieldValues(first: 20) {
-                          nodes {
-                            ... on ProjectV2ItemFieldDateValue {
-                              field {
-                                ... on ProjectV2FieldCommon {
-                                  name
+                              query($item_id:ID!) {
+                                node(id: $item_id) {
+                                  ... on ProjectV2Item {
+                                    fieldValues(first: 20) {
+                                      nodes {
+                                        ... on ProjectV2ItemFieldDateValue {
+                                          field {
+                                            ... on ProjectV2FieldCommon {
+                                              name
+                                            }
+                                          }
+                                          date
+                                        }
+                                      }
+                                    }
+                                  }
                                 }
                               }
-                              date
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              ' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID)
+                            ' -f item_id=$ITEM_ID)
               
               # Extract start date
-              START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.item.fieldValues.nodes[] | select(.field.name=="Real start date") | .date // empty')
+              START_DATE=$(echo "$ITEM_DATA" | jq -r '.data.node.fieldValues.nodes[] | select(.field.name=="Real start date") | .date // empty')
               
               if [ -n "$START_DATE" ]; then
                 # Calculate time difference in days

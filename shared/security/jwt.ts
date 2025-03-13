@@ -7,6 +7,10 @@
 // npm install jsonwebtoken
 // npm install --save-dev @types/jsonwebtoken
 import * as jwt from 'jsonwebtoken';
+import { UserData } from '../config/jwt.config';
+import { BlacklistedToken } from '../../backend/auth-service/src/models/blacklisted_token.model';
+import { AppDataSource } from '../../backend/database/appDataSource';
+import * as crypto from 'crypto';
 
 // Implementación propia para no depender de lodash
 // Reemplaza a import { isObject } from 'lodash';
@@ -81,8 +85,17 @@ export const generateToken = (
   // 2. Asegurar que tiene los campos necesarios
   // 3. Usar jwt.sign para crear el token
   // 4. Devolver el token generado
+  if (!isObject(payload)) {
+    throw new Error('Payload debe ser un objeto');
+  }
   
-  throw new Error('Método no implementado');
+  // Crear payload base si no tiene el campo 'sub' requerido
+  const tokenPayload = { ...payload };
+  if (!('sub' in tokenPayload) && options.subject) {
+    tokenPayload.sub = options.subject;
+  }
+  
+  return jwt.sign(tokenPayload, secret, options as jwt.SignOptions);
 };
 
 /**
@@ -102,8 +115,25 @@ export const verifyToken = <T = any>(
   // 2. Intentar verificar con jwt.verify
   // 3. Devolver resultado con payload si es válido
   // 4. Capturar y devolver errores si los hay
-  
-  throw new Error('Método no implementado');
+  if (!token) {
+    return {
+      valid: false,
+      error: new Error('Token vacío o no proporcionado')
+    };
+  }
+
+  try {
+    const payload = jwt.verify(token, secret, options as jwt.VerifyOptions) as unknown as T & JWTPayload;
+    return {
+      valid: true,
+      payload
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      error: error instanceof Error ? error : new Error('Error desconocido al verificar token')
+    };
+  }  
 };
 
 /**
@@ -116,8 +146,12 @@ export const decodeToken = <T = any>(token: string): (T & JWTPayload) | null => 
   // 1. Comprobar que el token no esté vacío
   // 2. Usar jwt.decode para obtener el payload
   // 3. Devolver el payload tipado o null
+  if (!token) {
+    return null;
+  }
   
-  throw new Error('Método no implementado');
+  const decoded = jwt.decode(token);
+  return decoded && isObject(decoded) ? decoded as T & JWTPayload : null;
 };
 
 /**
@@ -134,8 +168,14 @@ export const isTokenExpired = (
   // 1. Si es un string, decodificarlo primero
   // 2. Comprobar si tiene campo de expiración
   // 3. Comparar con la hora actual considerando la tolerancia
+  const payload = typeof token === 'string' ? decodeToken(token) : token;
   
-  throw new Error('Método no implementado');
+  if (!payload || typeof payload.exp !== 'number') {
+    return true; // Si no hay payload o fecha de expiración, consideramos expirado
+  }
+  
+  const currentTime = Math.floor(Date.now() / 1000);
+  return payload.exp <= currentTime - clockTolerance;  
 };
 
 /**
@@ -147,8 +187,13 @@ export const extractUserId = (token: string | JWTPayload): string | null => {
   // TODO: Implementar extracción de ID
   // 1. Si es un string, decodificarlo primero
   // 2. Devolver el subject (sub) o null
+  const payload = typeof token === 'string' ? decodeToken(token) : token;
   
-  throw new Error('Método no implementado');
+  if (!payload || !payload.sub) {
+    return null;
+  }
+  
+  return payload.sub;
 };
 
 /**
@@ -161,6 +206,140 @@ export const getRemainingTime = (token: string | JWTPayload): number => {
   // 1. Si es un string, decodificarlo primero
   // 2. Calcular diferencia entre expiración y hora actual
   // 3. Devolver máximo entre 0 y el tiempo calculado
+  const payload = typeof token === 'string' ? decodeToken(token) : token;
   
-  throw new Error('Método no implementado');
+  if (!payload || typeof payload.exp !== 'number') {
+    return 0;
+  }
+  
+  const currentTime = Math.floor(Date.now() / 1000);
+  return Math.max(0, payload.exp - currentTime);
+};
+
+/**
+ * Genera un token de actualización (refresh token)
+ * @param userId ID del usuario
+ * @param expiresIn Tiempo de expiración (por defecto 7 días)
+ * @returns Token de actualización
+ */
+export const generateRefreshToken = (userId: string, secret: string, expiresIn: string = '7d'): string => {
+  // TODO: Implementar la generación de refresh token
+  // 1. Crear un payload mínimo con el ID del usuario
+  // 2. Configurar una expiración más larga que el token principal
+  // 3. Firmar con una clave secreta diferente o la misma
+  // 4. Retornar el refresh token
+  // Crear un payload mínimo con el ID del usuario
+  const payload = {
+    sub: userId,
+    type: 'refresh' // Indicar que es un token de actualización
+  };
+  
+  // Usar una expiración más larga que el token de acceso normal
+  const options: JWTOptions = {
+    expiresIn,
+    jwtid: `refresh_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`
+  };
+  
+  // Generar el token de actualización usando la función generateToken existente
+  return generateToken(payload, secret, options);  
+};
+
+export const renewToken = (refreshToken: string, userData: UserData): string | null => {
+  // TODO: Implementar la renovación de token
+  // 1. Verificar el refresh token
+  // 2. Si es válido, generar un nuevo token JWT
+  // 3. Si no es válido, retornar null
+  // Use the secret from environment or a fallback for development
+  const secret = process.env.JWT_SECRET || 'development-secret-key';
+  
+  try {
+    // Verify the refresh token
+    const result = verifyToken(refreshToken, secret);
+    
+    if (!result.valid || !result.payload) {
+      return null;
+    }
+    
+    // Check if it's actually a refresh token
+    if (result.payload.type !== 'refresh') {
+      return null;
+    }
+    
+    // Generate a new access token with user data
+    const payload = {
+      sub: userData.userId,
+      user: userData
+    };
+    
+    // Use a shorter expiration for the access token
+    return generateToken(payload, secret, { expiresIn: '1h' });
+  } catch (error) {
+    console.error('Error renewing token:', error);
+    return null;
+  }  
+};
+
+/**
+ * Añade un token a la lista negra (para cierre de sesión)
+ * @param token Token a invalidar
+ * @returns true si se añadió correctamente
+ */
+export const blacklistToken = async (token: string): Promise<boolean> => {
+  // TODO: Implementar blacklist de tokens
+  // 1. Extraer la expiración del token
+  // 2. Guardar el token en una base de datos o caché (Redis)
+  // 3. Establecer TTL hasta la expiración para limpieza automática
+  try {
+    // Decode the token to get its expiration time
+    const decoded = decodeToken(token);
+    
+    if (!decoded || !decoded.exp) {
+      return false;
+    }
+    
+    // Generate hash of the token for secure storage
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(decoded.exp * 1000); // Convert to milliseconds
+    
+    // Get repository for blacklisted tokens
+    const blacklistRepo = AppDataSource.getRepository(BlacklistedToken);
+    
+    // Insert token hash into the blacklist
+    await blacklistRepo.save({
+      tokenHash,
+      expiresAt
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error blacklisting token:', error);
+    return false;
+  }
+};
+
+/**
+ * Verifica si un token está en la lista negra
+ * @param token Token a verificar
+ * @returns true si el token está en la lista negra
+ */
+export const isTokenBlacklisted = async (token: string): Promise<boolean> => {
+  // TODO: Implementar verificación de blacklist
+  // 1. Comprobar si el token existe en la base de datos o caché
+  try {
+    // Calculate token hash
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    // Get repository for blacklisted tokens
+    const blacklistRepo = AppDataSource.getRepository(BlacklistedToken);
+    
+    // Check if token exists in the blacklist
+    const blacklistedToken = await blacklistRepo.findOne({
+      where: { tokenHash }
+    });
+    
+    return blacklistedToken !== null;
+  } catch (error) {
+    console.error('Error checking blacklisted token:', error);
+    return false;
+  } 
 }; 

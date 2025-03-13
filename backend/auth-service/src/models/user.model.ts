@@ -1,119 +1,123 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  OneToMany,
+  ManyToMany,
+  JoinColumn,
+  JoinTable,
+  ManyToOne,
+} from 'typeorm';
+import {UserProfile} from "../../../user-service/src/models/userProfile.model";
+import {Friend} from "../../../social-service/src/models/friend.model"
+//TODO Aún está pendiente de hacer y corregir la importación
+//import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
+//TODO Aún está pendiente de hacer y corregir la importación
+import { Map } from '../../../map-service/src/models/map.model';
+//TODO Aún está pendiente de hacer y corregir la importación
+//import { Plan } from './Plan';
+
 /**
- * Modelo de usuario para el servicio de autenticación
+ * Rol posible para el usuario (ejemplo).
+ * Ajusta si necesitas más roles.
  */
-
-import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-
-// Interfaz para los datos del usuario
-export interface IUser extends Document {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  plan: 'free' | 'premium';
-  active: boolean;
-  lastLogin: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
 
-// Esquema de mongoose para el usuario
-const UserSchema = new Schema<IUser>(
-  {
-    email: {
-      type: String,
-      required: [true, 'El email es obligatorio'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Por favor, introduce un email válido'],
-    },
-    password: {
-      type: String,
-      required: [true, 'La contraseña es obligatoria'],
-      minlength: [8, 'La contraseña debe tener al menos 8 caracteres'],
-      select: false, // No incluir en las consultas por defecto
-    },
-    firstName: {
-      type: String,
-      required: [true, 'El nombre es obligatorio'],
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      required: [true, 'El apellido es obligatorio'],
-      trim: true,
-    },
-    plan: {
-      type: String,
-      enum: ['free', 'premium'],
-      default: 'free',
-    },
-    active: {
-      type: Boolean,
-      default: true,
-    },
-    lastLogin: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    timestamps: true, // Añadir createdAt y updatedAt automáticamente
-  }
-);
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-// Hook pre-save para cifrar la contraseña
-UserSchema.pre<IUser>('save', async function (next) {
-  // Sólo cifrar si la contraseña ha sido modificada
-  if (!this.isModified('password')) return next();
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email!: string;
 
-  try {
-    // Implementación con AES y SHA-256 para mayor seguridad
-    // 1. Generar un salt aleatorio
-    const salt = await bcrypt.genSalt(10);
-    
-    // 2. Crear un hash SHA-256 de la contraseña
-    const sha256Hash = crypto
-      .createHash('sha256')
-      .update(this.password)
-      .digest('hex');
-    
-    // 3. Cifrar el hash con bcrypt (que ya usa un método más robusto internamente)
-    const hashedPassword = await bcrypt.hash(sha256Hash, salt);
-    
-    // 4. Guardar la contraseña cifrada
-    this.password = hashedPassword;
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
-});
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role!: Role;
 
-// Método para comparar contraseñas
-UserSchema.methods.comparePassword = async function (
-  candidatePassword: string
-): Promise<boolean> {
-  try {
-    // Primero, crear un hash SHA-256 de la contraseña candidata
-    const sha256Hash = crypto
-      .createHash('sha256')
-      .update(candidatePassword)
-      .digest('hex');
-    
-    // Comparar con la contraseña almacenada (que ya está cifrada)
-    // Seleccionar explícitamente el campo password ya que está excluido por defecto
-    const user = await this.model('User').findById(this._id).select('+password');
-    if (!user) return false;
-    
-    return await bcrypt.compare(sha256Hash, user.password);
-  } catch (error) {
-    throw new Error(`Error al comparar contraseñas: ${error}`);
-  }
-};
+  @Column({ type: 'varchar', length: 255 })
+  password!: string;
 
-// Crear y exportar el modelo
-export const User = mongoose.model<IUser>('User', UserSchema); 
+  @Column({ type: 'boolean', default: false })
+  is_active!: boolean;
+
+  @Column({ type: 'varchar', length: 700, nullable: true })
+  token_data?: string;
+  /**
+   * Relación inversa de 1:1 con UserProfile.
+   * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
+   */
+  
+  @OneToOne(() => UserProfile, (profile) => profile.id)
+  profile!: UserProfile;
+
+  /**
+   * Relación 1:N con solicitudes de amistad enviadas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.requester)
+  sentFriendRequests!: Friend[];
+
+  /**
+   * Relación 1:N con solicitudes de amistad recibidas.
+   */
+  @OneToMany(() => Friend, (friend) => friend.recipient)
+  receivedFriendRequests!: Friend[];
+  /**
+   * Relación 1:N con Map
+   * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).
+   */
+  @ManyToMany(() => Map, (map) => map.users_joined, {eager: true})
+  @JoinTable({
+    name: 'user_maps_joined',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'map_id',
+      referencedColumnName: 'id',
+    },
+  })
+  maps_joined!: Map[];
+
+
+
+
+
+  /**
+   * Relación N:N (autorreferenciada) para "is friend of"
+   * Un usuario puede tener muchos amigos (que también son usuarios).
+   * Se usa un JoinTable para la tabla intermedia.
+   */
+  // @ManyToMany(() => User, (user) => user.friends)
+  // @JoinTable({
+  //   name: 'user_friends',
+  //   joinColumn: {
+  //     name: 'user_id',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'friend_id',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
+  // friends!: User[];
+
+  /**
+   * Columnas de auditoría (fechas de creación y actualización).
+   */
+  // @CreateDateColumn()
+  // createdAt!: Date;
+
+  // @UpdateDateColumn()
+  // updatedAt!: Date;
+}

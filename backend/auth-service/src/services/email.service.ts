@@ -7,7 +7,8 @@
 // npm install nodemailer
 // npm install --save-dev @types/nodemailer
 // import * as nodemailer from 'nodemailer';
-import { emailConfig } from '@backend/auth-service/src/config/email.config';
+import { emailConfig } from '../config/email.config';
+import { text } from 'stream/consumers';
 
 // Define tipos manualmente para no depender de @types/nodemailer
 interface Transport {
@@ -44,15 +45,33 @@ export interface EmailResult {
  * Crea un transportador de correo basado en la configuración
  * @returns Transportador configurado
  */
-const createTransporter = (): any => {
+export const createTransporter = (): any => {
   // TODO: Implementar la creación del transportador
   // 1. Usar nodemailer.createTransport con la configuración de email
   // 2. Configurar opciones SSL/TLS según el entorno
   // NOTA: Requiere instalar el paquete nodemailer:
   // npm install nodemailer
   // npm install --save-dev @types/nodemailer
+  const nodemailer = require('nodemailer');
   
-  throw new Error('Método no implementado');
+  // Create the transporter with the email configuration
+  const transporter = nodemailer.createTransport({
+    host: emailConfig.host,
+    port: emailConfig.port,
+    secure: emailConfig.secure, 
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD 
+    },
+    
+    ...(emailConfig.secure ? {} : {
+      tls: {
+        rejectUnauthorized: process.env.NODE_ENV === 'production' 
+      }
+    })
+  });
+  
+  return transporter;
 };
 
 /**
@@ -65,8 +84,23 @@ export const sendEmail = async (options: EmailOptions): Promise<EmailResult> => 
   // 1. Crear transportador
   // 2. Enviar correo con las opciones proporcionadas
   // 3. Manejar errores y devolver resultado
-  
-  throw new Error('Método no implementado');
+  try {
+    const transporter = createTransporter();
+    const mailOptions = {
+      from: options.from || emailConfig.from,
+      ...options
+    };
+    const result = await transporter.sendMail(mailOptions);
+    return {
+      success: true,
+      messageId: result.messageId
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error as Error
+    };
+  }
 };
 
 /**
@@ -85,8 +119,21 @@ export const sendVerificationEmail = async (
   // 1. Generar la URL de verificación con el token
   // 2. Crear el contenido HTML y texto plano con el enlace
   // 3. Enviar correo con sendEmail
-  
-  throw new Error('Método no implementado');
+  const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
+  const verificationUrl = `${baseUrl}/verify?token=${verificationToken}`;
+  const htmlContent = `
+    <p>Hola ${username},</p>
+    <p>Gracias por registrarte en MapYourWorld. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
+    <p><a href="${verificationUrl}">Verificar cuenta</a></p>
+  `;
+  const textContent = `Hola ${username},\n\nPor favor, verifica tu cuenta visitando el siguiente enlace:\n${verificationUrl}\n\nSi no solicitaste esta acción, ignora este correo.`;
+  const mailOptions = {
+    to: email,
+    subject: 'Verifica tu cuenta en MapYourWorld',
+    html: htmlContent,
+    text: textContent
+  };
+  return await sendEmail(mailOptions);
 };
 
 /**
@@ -105,8 +152,23 @@ export const sendPasswordResetEmail = async (
   // 1. Generar la URL de restablecimiento con el token
   // 2. Crear el contenido HTML y texto plano
   // 3. Enviar correo con sendEmail
-  
-  throw new Error('Método no implementado');
+  const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
+  const resetUrl = `${baseUrl}/verify?token=${resetToken}`;
+  const htmlContent = `
+    <p>Hola ${username},</p>
+    <p>Has solicitado restablecer tu contraseña en MapYourWorld.</p>
+    <p>Haz clic en el siguiente enlace para restablecerla:</p>
+    <p><a href="${resetUrl}">Restablecer contraseña</a></p>
+    <p>Si no has solicitado este cambio, ignora este correo.</p>
+  `;
+  const textContent = `Hola ${username},\n\nHas solicitado restablecer tu contraseña en MapYourWorld.\n\nVisita el siguiente enlace para restablecerla:\n${resetUrl}\n\nSi no has solicitado este cambio, ignora este correo.`;
+  const mailOptions: EmailOptions = {
+    to: email,
+    subject: 'Restablece tu contraseña en MapYourWorld',
+    html: htmlContent,
+    text: textContent
+  };
+  return await sendEmail(mailOptions);
 };
 
 /**
@@ -123,8 +185,21 @@ export const sendPasswordChangeNotification = async (
   // 1. Crear contenido informando del cambio de contraseña
   // 2. Incluir información de contacto en caso de actividad no autorizada
   // 3. Enviar correo con sendEmail
+  const htmlContent = `
+    <p>Hola ${username},</p>
+    <p>Te informamos que tu contraseña ha sido cambiada exitosamente en MapYourWorld.</p>
+    <p>Si no realizaste este cambio, por favor contacta de inmediato a nuestro equipo de soporte en support@mapyourworld.com.</p>
+  `;
+  const textContent = `Hola ${username},\n\nTe informamos que tu contraseña ha sido cambiada exitosamente en MapYourWorld.\n\nSi no realizaste este cambio, por favor contacta de inmediato a nuestro equipo de soporte en support@mapyourworld.com.\n`;
   
-  throw new Error('Método no implementado');
+  const mailOptions: EmailOptions = {
+    to: email,
+    subject: 'Cambio de contraseña en MapYourWorld',
+    html: htmlContent,
+    text: textContent
+  };
+
+  return await sendEmail(mailOptions);
 };
 
 /**
@@ -135,6 +210,12 @@ export const testEmailConnection = async (): Promise<boolean> => {
   // TODO: Implementar la prueba de conexión
   // 1. Intentar verificar conexión con el servidor SMTP
   // 2. Manejar cualquier error y devolver resultado
-  
-  throw new Error('Método no implementado');
+  try {
+    const transporter = createTransporter();
+    await transporter.verify();
+    return true;
+  } catch (error) {
+    console.error('Error al probar la conexión del servidor SMTP:', error);
+    return false;
+  }
 }; 
