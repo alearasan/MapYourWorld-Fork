@@ -23,6 +23,10 @@ interface POI {
 const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
   if (!visible) return null;
   
+  // Determinar si es un error o información para usar el color apropiado
+  const isError = title.toLowerCase().includes('error') || title.toLowerCase().includes('no válid') || title.toLowerCase().includes('bloqueado');
+  const buttonColor = isError ? '#f44336' : (title.toLowerCase().includes('éxito') ? '#4CAF50' : '#2196F3');
+  
   return (
     <div 
       style={{
@@ -50,9 +54,19 @@ const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, ti
           padding: '20px',
           maxWidth: '90%',
           width: '350px',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center'
         }}
       >
+        <div style={{ marginBottom: '15px' }}>
+          {isError ? (
+            <span style={{ fontSize: '32px', color: '#f44336' }}>⚠️</span>
+          ) : title.toLowerCase().includes('éxito') ? (
+            <span style={{ fontSize: '32px', color: '#4CAF50' }}>✅</span>
+          ) : (
+            <span style={{ fontSize: '32px', color: '#2196F3' }}>ℹ️</span>
+          )}
+        </div>
         <h2 style={{
           fontSize: '20px',
           fontWeight: 'bold',
@@ -73,7 +87,7 @@ const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, ti
             width: '100%',
             padding: '10px',
             borderRadius: '8px',
-            backgroundColor: '#3182ce',
+            backgroundColor: buttonColor,
             color: 'white',
             fontWeight: 600,
             border: 'none',

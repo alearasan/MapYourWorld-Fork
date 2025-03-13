@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, Pressable } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
@@ -122,6 +122,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   const [friendEmail, setFriendEmail] = useState<string>('');
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
+
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -248,11 +252,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               .filter((d: Distrito | null): d is Distrito => d !== null);
             setDistritosBackend(distritosMapeados);
           } else {
-            Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+            showError("Error", "No se pudieron cargar los distritos de ninguna fuente");
           }
         } catch (fallbackError) {
           console.error("Error al obtener distritos de fallback:", fallbackError);
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+          showError("Error", "No se pudieron cargar los distritos de ninguna fuente");
         }
       }
     } catch (error) {
@@ -287,11 +291,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             .filter((d: Distrito | null): d is Distrito => d !== null);
           setDistritosBackend(distritosMapeados);
         } else {
-          Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+          showError("Error", "No se pudieron cargar los distritos de ninguna fuente");
         }
       } catch (fallbackError) {
         console.error("Error al obtener distritos de fallback:", fallbackError);
-        Alert.alert("Error", "No se pudieron cargar los distritos de ninguna fuente");
+        showError("Error", "No se pudieron cargar los distritos de ninguna fuente");
       }
     } finally {
       setLoading(false);
@@ -419,7 +423,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
 
       // Si no hay mapId, no podemos inicializar el mapa
       if (!mapId) {
-        Alert.alert("Error", "No se pudo encontrar el ID del mapa colaborativo");
+        showError("Error", "No se pudo encontrar el ID del mapa colaborativo");
         return;
       }
 
@@ -438,7 +442,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log("Mapa colaborativo inicializado correctamente");
     } catch (error) {
       console.error("Error al inicializar el mapa colaborativo:", error);
-      Alert.alert(
+      showError(
         "Error",
         "Ha ocurrido un error al inicializar el mapa colaborativo. Intente nuevamente."
       );
@@ -516,12 +520,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   // Función para invitar a un amigo al mapa colaborativo
   const inviteFriend = async () => {
     if (!friendEmail || friendEmail.trim() === '') {
-      Alert.alert("Error", "Por favor, introduce un email válido");
+      showError("Error", "Por favor, introduce un email válido");
       return;
     }
     
-    if (invitedFriends.length >= 5) { // Máximo 6 usuarios incluyendo el creador
-      Alert.alert("Límite alcanzado", "Solo puedes invitar a 5 amigos a un mapa colaborativo");
+    if (invitedFriends.length >= 5) {
+      showError("Límite alcanzado", "Solo puedes invitar a 5 amigos a un mapa colaborativo");
       return;
     }
     
@@ -554,13 +558,13 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         // Añadir el email a la lista de invitados para mostrarlo en la UI
         setInvitedFriends([...invitedFriends, friendEmail]);
         setFriendEmail('');
-        Alert.alert("Éxito", `Se ha enviado una invitación a ${friendEmail}`);
+        showError("Éxito", `Se ha enviado una invitación a ${friendEmail}`);
       } else {
         throw new Error(data.message || 'Error al procesar la invitación');
       }
     } catch (error) {
       console.error("Error al invitar amigo:", error);
-      Alert.alert("Error", `No se pudo enviar la invitación: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      showError("Error", `No se pudo enviar la invitación: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
 
@@ -569,7 +573,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa colaborativo.");
+        showError("Permiso denegado", "Necesitamos acceso a tu ubicación para mostrar el mapa colaborativo.");
         return;
       }
       
@@ -591,7 +595,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.log("Seguimiento de ubicación iniciado");
     } catch (locationError) {
       console.error("Error al iniciar el seguimiento de ubicación:", locationError);
-      Alert.alert(
+      showError(
         "Error de ubicación", 
         "No se pudo acceder a tu ubicación. Algunas funciones del mapa podrían no estar disponibles."
       );
@@ -607,11 +611,61 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     }
   };
 
+  // Función para mostrar errores en un modal en lugar de un Alert
+  const showError = (title: string, message: string) => {
+    setErrorTitle(title);
+    setErrorMessage(message);
+    setShowErrorModal(true);
+  };
+
+  // Modal para mostrar errores
+  const renderErrorModal = () => {
+    return (
+      <Modal
+        visible={showErrorModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowErrorModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.errorIconContainer}>
+              {errorTitle.toLowerCase().includes("error") ? (
+                <Icon name="error" size={32} color="#f44336" />
+              ) : errorTitle.toLowerCase().includes("éxito") ? (
+                <Icon name="check-circle" size={32} color="#4CAF50" />
+              ) : (
+                <Icon name="info" size={32} color="#2196F3" />
+              )}
+            </View>
+            <Text style={styles.modalTitle}>{errorTitle}</Text>
+            <Text style={styles.modalText}>{errorMessage}</Text>
+            <TouchableOpacity 
+              style={[
+                styles.closeButton, 
+                {
+                  backgroundColor: errorTitle.toLowerCase().includes("error") 
+                    ? "#f44336" 
+                    : errorTitle.toLowerCase().includes("éxito")
+                      ? "#4CAF50"
+                      : "#2196F3"
+                }
+              ]} 
+              onPress={() => setShowErrorModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Aceptar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   // Al montar el componente se obtienen distritos, POIs, usuarios y se comienza a observar la ubicación
   useEffect(() => {
     // Si no hay un mapId válido, no continuamos
     if (!mapId) {
-      Alert.alert("Error", "No se ha proporcionado un ID de mapa válido");
+      showError("Error", "No se ha proporcionado un ID de mapa válido");
       return;
     }
     
@@ -694,11 +748,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       <Modal
         visible={showInviteModal}
         transparent={true}
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setShowInviteModal(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
+            <Icon name="people" size={32} color="#2196F3" style={{ marginBottom: 10 }} />
             <Text style={styles.modalTitle}>Invitar Amigos</Text>
             <Text style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</Text>
             
@@ -719,20 +774,25 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
             {invitedFriends.length > 0 && (
               <>
                 <Text style={styles.invitedTitle}>Amigos invitados:</Text>
-                {invitedFriends.map((email, index) => (
-                  <View key={index} style={styles.invitedItem}>
-                    <Text>{email}</Text>
-                    <TouchableOpacity onPress={() => {
-                      setInvitedFriends(invitedFriends.filter((_, i) => i !== index));
-                    }}>
-                      <Icon name="close" size={20} color="red" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                <View style={styles.invitedListContainer}>
+                  {invitedFriends.map((email, index) => (
+                    <View key={index} style={styles.invitedItem}>
+                      <Text style={styles.invitedEmail}>{email}</Text>
+                      <TouchableOpacity onPress={() => {
+                        setInvitedFriends(invitedFriends.filter((_, i) => i !== index));
+                      }}>
+                        <Icon name="close" size={20} color="#f44336" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
               </>
             )}
             
-            <TouchableOpacity style={styles.closeButton} onPress={() => setShowInviteModal(false)}>
+            <TouchableOpacity 
+              style={[styles.closeButton, { backgroundColor: "#2196F3", marginTop: 20 }]}
+              onPress={() => setShowInviteModal(false)}
+            >
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -773,28 +833,35 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       ) : (
         <>
           {renderInviteFriendsModal()}
+          {renderErrorModal()}
           
           <Modal
             visible={showForm}
             transparent={true}
+            animationType="fade"
             onRequestClose={() => setShowForm(false)}
           >
-            <PuntoDeInteresForm
-              pointOfInterest={pointOfInterest}
-              setPointOfInterest={setPointOfInterest}
-              setShowForm={setShowForm}
-              onSave={(newPOI: any) => {
-                // Convertir el POI recién creado al formato esperado
-                const poiConverted = {
-                  ...newPOI,
-                  location: {
-                    type: "Point",
-                    coordinates: [newPOI.longitude, newPOI.latitude],
-                  },
-                };
-                setPointsOfInterest((prev) => [...prev, poiConverted]);
-              }}
-            />
+            <View style={styles.modalContainer}>
+              <View style={styles.poiFormContainer}>
+                <Text style={styles.poiFormTitle}>Registrar Punto de Interés</Text>
+                <PuntoDeInteresForm
+                  pointOfInterest={pointOfInterest}
+                  setPointOfInterest={setPointOfInterest}
+                  setShowForm={setShowForm}
+                  onSave={(newPOI: any) => {
+                    // Convertir el POI recién creado al formato esperado
+                    const poiConverted = {
+                      ...newPOI,
+                      location: {
+                        type: "Point",
+                        coordinates: [newPOI.longitude, newPOI.latitude],
+                      },
+                    };
+                    setPointsOfInterest((prev) => [...prev, poiConverted]);
+                  }}
+                />
+              </View>
+            </View>
           </Modal>
           
           <MapView
@@ -806,6 +873,37 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               longitudeDelta: 0.1,
             }}
             showsUserLocation={true}
+            onPress={(e) => {
+              const { coordinate } = e.nativeEvent;
+              const { latitude, longitude } = coordinate;
+
+              let poiDistrict = null;
+              for (const distrito of distritosBackend) {
+                if (isPointInPolygon({ latitude, longitude }, distrito.coordenadas)) {
+                  poiDistrict = distrito;
+                  break;
+                }
+              }
+              
+              // Verificar si puede crear un POI en este distrito
+              if (!poiDistrict) {
+                showError('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
+                return;
+              }
+              
+              if (!poiDistrict.isUnlocked) {
+                showError('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Desbloquéalo primero para añadir puntos de interés.`);
+                return;
+              }
+              
+              setPointOfInterest({
+                ...pointOfInterest,
+                latitude,
+                longitude,
+                district: poiDistrict,
+              });
+              setShowForm(true);
+            }}
           >
             {distritosBackend.map((distrito, index) => (
               <Polygon
@@ -964,15 +1062,39 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "80%",
     backgroundColor: "white",
-    borderRadius: 10,
+    borderRadius: 15,
     padding: 20,
     elevation: 5,
+    alignItems: "center",
+  },
+  errorIconContainer: {
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 10,
     textAlign: "center",
+    color: "#333",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    lineHeight: 22,
+    color: "#555",
+  },
+  closeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 5,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   modalSubtitle: {
     fontSize: 14,
@@ -983,14 +1105,16 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     marginBottom: 15,
+    width: "100%",
   },
   input: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
-    padding: 8,
+    padding: 10,
     marginRight: 10,
+    fontSize: 16,
   },
   inviteButton: {
     backgroundColor: "#4CAF50",
@@ -1003,21 +1127,15 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  closeButton: {
-    backgroundColor: "#f44336",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
   invitedTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 10,
+    alignSelf: "flex-start",
+  },
+  invitedListContainer: {
+    width: "100%",
+    maxHeight: 150,
   },
   invitedItem: {
     flexDirection: "row",
@@ -1025,7 +1143,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
-    paddingVertical: 8,
+    paddingVertical: 10,
+    width: "100%",
+  },
+  invitedEmail: {
+    fontSize: 14,
+    color: "#333",
+    flex: 1,
   },
   reloadButton: {
     position: "absolute",
@@ -1034,15 +1158,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF9800",
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     borderRadius: 25,
     elevation: 5,
   },
   reloadButtonText: {
     color: "white",
-    marginLeft: 5,
+    marginLeft: 8,
     fontWeight: "bold",
+    fontSize: 14,
+  },
+  poiFormContainer: {
+    width: "90%",
+    maxWidth: 380,
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 20,
+    elevation: 5,
+    maxHeight: "90%",
+  },
+  poiFormTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+    color: "#333",
   },
 });
 
