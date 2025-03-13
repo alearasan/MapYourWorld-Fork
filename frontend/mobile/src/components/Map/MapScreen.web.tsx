@@ -380,24 +380,40 @@ const MapScreen = () => {
       // En web usamos la API de geolocalización del navegador
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
         console.log("Obteniendo geolocalización...");
-        navigator.geolocation.getCurrentPosition(
+        
+        // Configurar un watcher para la posición
+        const watchId = navigator.geolocation.watchPosition(
           (position) => {
-            console.log("Posición obtenida:", position.coords);
-            setLocation([
+            console.log("Posición actualizada:", position.coords);
+            const newLocation: [number, number] = [
               position.coords.latitude,
               position.coords.longitude
-            ]);
+            ];
+            setLocation(newLocation);
+            
+            // Verificar si la nueva ubicación está dentro de algún distrito
+            checkDistrictUnlock(newLocation);
+            
             setLoading(false);
           },
           (err) => {
             console.error("Error al obtener la ubicación:", err);
             setError("No se pudo acceder a tu ubicación. Mostrando una ubicación predeterminada.");
             // Ubicación por defecto (Madrid)
-            setLocation([40.416775, -3.703790]);
+            setLocation([37.390881, -5.993327]);
             setLoading(false);
           },
-          { timeout: 10000, enableHighAccuracy: true }
+          { 
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0 
+          }
         );
+        
+        // Limpiar el watcher cuando el componente se desmonte
+        return () => {
+          navigator.geolocation.clearWatch(watchId);
+        };
       } else {
         console.log("Geolocalización no disponible");
         setError("Tu navegador no soporta geolocalización.");
@@ -407,6 +423,56 @@ const MapScreen = () => {
       }
     }
   }, [leafletReady, error]);
+
+  // Función para desbloquear un distrito
+  const desbloquearDistrito = async (districtId: string) => {
+    try {
+      console.log(`Intentando desbloquear distrito ${districtId}...`);
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isUnlocked: true }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log(`Distrito ${districtId} desbloqueado con éxito.`);
+        // Actualizar el estado local con el distrito desbloqueado
+        setDistritos((prev) =>
+          prev.map((d) => (d.id === districtId ? { ...d, isUnlocked: true } : d))
+        );
+        
+        // Opcional: Mostrar alguna notificación o alerta de éxito
+        showAlert('¡Distrito Desbloqueado!', 'Has desbloqueado un nuevo distrito en el mapa.');
+      } else {
+        console.warn(`No se pudo desbloquear el distrito ${districtId}:`, data);
+      }
+    } catch (error) {
+      console.error("Error al desbloquear el distrito:", error);
+    }
+  };
+
+  // Función para verificar si la ubicación está dentro de algún distrito y desbloquearlo
+  const checkDistrictUnlock = (userLocation: [number, number]) => {
+    if (!distritos || distritos.length === 0) return;
+    
+    // Convertir la ubicación a formato lat, lng
+    const point = { lat: userLocation[0], lng: userLocation[1] };
+    
+    // Verificar cada distrito
+    for (const distrito of distritos) {
+      if (isPointInPolygon(point, distrito.coordenadas)) {
+        console.log(`Usuario dentro del distrito: ${distrito.nombre}`);
+        
+        // Si el distrito no está desbloqueado, intentar desbloquearlo
+        if (!distrito.isUnlocked) {
+          console.log(`Intentando desbloquear distrito: ${distrito.nombre}`);
+          desbloquearDistrito(distrito.id);
+        }
+        
+        break; // Salir del bucle una vez encontrado el distrito
+      }
+    }
+  };
 
   // Función para transformar coordenadas desde GeoJSON al formato de react-native-maps
   const transformarCoordenadasGeoJSON = (geoJson: any): any => {
