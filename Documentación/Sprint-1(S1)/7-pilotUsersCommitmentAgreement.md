@@ -100,9 +100,24 @@ Firma:
 ![Firma](./Images/FirmaClaudioPiloto.png)
 
 
-Yo, como [Nombre, apellidos], [alumno de ispp/ persona externa a la asignatura] y usuario piloto de la aplicación desarrollada por el grupo 7 en el marco de la asignatura ISPP (Ingeniería del Software y Práctica Profesional), me comprometo a cumplir con los requisitos y condiciones estipuladas en este documento
+Yo, como Ana Isabel, Niza Cobo, persona externa a la asignatura y usuario piloto de la aplicación desarrollada por el grupo 7 en el marco de la asignatura ISPP (Ingeniería del Software y Práctica Profesional), me comprometo a cumplir con los requisitos y condiciones estipuladas en este documento
 Firma:
 
 
-![Firma](./Images/FirmaUsuarioPiloto.png)
+![Firma](./Images/AnaNizaFirma.jpg)
 
+
+Yo, como Miguel Hernández Sánchez, alumno de ispp y usuario piloto de
+la aplicación desarrollada por el grupo 7 en el marco de la asignatura
+ISPP (Ingeniería del Software y Práctica Profesional), me comprometo a
+cumplir con los requisitos y condiciones estipuladas en este
+documento.
+
+
+![Firma](./Images/MiguelHernandezFirma.png)
+
+
+Yo, como Juan Antonio Moreno Moguel, alumno de ispp y usuario piloto de la aplicación desarrollada por el grupo 7 en el marco de la asignatura ISPP (Ingeniería del Software y Práctica Profesional), me comprometo a cumplir con los requisitos y condiciones estipuladas en este documento
+
+
+![Firma](./Images/JuanAntonioMorenoFirma.png)

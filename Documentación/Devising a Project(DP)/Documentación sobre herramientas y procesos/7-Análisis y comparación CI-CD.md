@@ -93,7 +93,7 @@ Las pruebas automatizadas se ejecutarán con **GitHub Actions**, utilizando **Je
 
 Para la gestión de dependencias, **Dependabot** será responsable de detectar y actualizar automáticamente librerías vulnerables o desactualizadas, evitando riesgos de seguridad y asegurando que el proyecto utilice versiones seguras y estables sin necesidad de intervención manual.
 
-Finalmente, el despliegue se realizará mediante un **script personalizado ejecutado desde un workflow de GitHub Actions**, lo que permite adaptar el proceso a los requisitos específicos del proyecto y de la Raspberry Pi donde será alojado. Aunque existen soluciones más avanzadas como ArgoCD o Ansible, un script directo proporciona mayor control y simplicidad para un entorno autogestionado, evitando configuraciones innecesarias para un despliegue de menor escala.
+Finalmente, el despliegue se realizará mediante un **script personalizado ejecutado desde un workflow de GitHub Actions**, lo que permite adaptar el proceso a los requisitos específicos del proyecto y de la máquina virtual de Azure donde será alojado. Aunque existen soluciones más avanzadas como ArgoCD o Ansible, un script directo proporciona mayor control y simplicidad para un entorno autogestionado, evitando configuraciones innecesarias para un despliegue de menor escala.
 
 Para la monitorización del rendimiento de la aplicación, hemos optado por scripts personalizados en **TypeScript**, lo que permite un control con una granularidad muy fina y asegura que la solución se adapte a nuestras necesidades particulares, eliminando complejidad y dependencias innecesarias.
 

@@ -69,7 +69,7 @@ usuario visite físicamente una nueva área, basándose en la
 geolocalización.
 
 6.  **Despliegue de la primera versión:** El despliegue se realizará en
-Raspberry Pi tras la finalización de cada hito.
+una máquina virtual de Azure tras la finalización de cada hito.
 
 ---
 
