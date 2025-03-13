@@ -26,6 +26,7 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 13/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán |
+| V1.1      | 13/03/2025| Añadir justificación disparidad de horas         | Alfonso Luis Alonso Lanzarán |
 
 <!-- omit in toc-->
 # Índice
@@ -42,8 +43,22 @@
 
 En este documento se muestra la cantidad de horas invertidas en el proyecto por cada miembro del equipo, en el siguiente punto se comentan los desvíos de las horas planificadas para este sprint (30 horas)
 
-## 2. Explicación de las horas excesivas o escasas de los miembros
+NOTA: El "pantallazo" de las horas ha sido tomado el día 13/03 a aproximadamente las 18:30
 
+## 2. Explicación de las horas excesivas o escasas de los miembros
+Gonzalo García Lama:
+Como se puede observar en las gráficas de lo puntos 3.1 y 3.2, hay un miembro del equipo, Gonzalo García Lama, que ha trabajado una cantidad de horas completamente desmedida durante este Sprint. 
+Esto se debe a que Gonzalo es la persona con más conocimientos técnicos sobre el proyecto y las tecnologías que estamos usando, eso se ha traducido en que no solo ha inicializado la totalidad del proyecto sino que ha creado la api gateway y los webhooks. 
+Lo anteriormente mencionado es aproximadamente la mitad del tiempo trabajado por Gonzalo incluyendo documentación para evitar la dependencia que el equipo tiene de él y fomentar la autonomía a la hora de desarrollar del equipo.
+
+Lamentablemente los miembros del equipo no hemos implementado correctamente las cosas más básicas(entidades, controladores, servicios, etc.) y debieron de invertirse una enorme cantidad de horas en corregir el trabajo de otros compañeros.
+
+Para paliar este exceso de horas y dado que el backend está implementado casi en su totalidad, a partir del Sprint 2 Gonzalo tendrá un rol más pasivo en el que se utilizarán sus horas para las tareas muy exigentes a nivel técnico, api-gateway, webhooks, configurar rabbitMQ. También se usarán para resolver errores puntuales que los miembros no puedan indidualmente.
+
+Aberto Escobar Sanchez:
+A este miembro del equipo se le asignó inicialmente una cantidad normal de tareas y se estimaba que iba a trabajar 30 horas durante el sprint aproximadamente, hizo sus tareas extremadamente rápido(crear una entidad y un conjunto servicio-controlador-ruta) con una calidad extremadamente baja lo que implicó invertir 10 horas de Manuel Velez y 10 horas de Pedro Pablo Santos en correcciones del servicio Auth, las entidades y las relaciones.
+
+Se ha planeado corregir está diferencia respecto al tiempo estimado en el Sprint 2, también se han tomado medidas para mejorar la calidad de las tareas siendo la más potente crear una suite de test y obligar mediante el commitment agreement al equipo a crear test unitarios.
 ## 3. Gráficas del tiempo invertido
 
 ### 3.1. Gráfico de barras
@@ -54,9 +69,6 @@ En este documento se muestra la cantidad de horas invertidas en el proyecto por 
 ![Gráfico de sectores con lsa horas trabajadas](Images/diagramaSectoresHoras.png)
 
 ## 4. Datos originales exportados de clockify
-|   |   |
-|   |   |
-
 |User|	Description|	Time (h)|
 |---|---|---|
 |Gongarlam|		|86:48:07|
