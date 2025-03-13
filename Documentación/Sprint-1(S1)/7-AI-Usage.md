@@ -58,6 +58,7 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 |  Ángel Neria Acal  |            Obtener ideas para realizar una función en frontend         |      Tengo un componente MapView en react-native y necesito una función que a partir de unas coordenadas recibidas por parámetro me dibuje una serie de polígonos en el mapa     |         No    |
 |  Ángel Neria Acal     |            Obtención de conocimientos sobre react native         |      Necesito saber cómo manejar una pulsación en un componente de react-native.|       No      |
 |  Ángel Neria Acal     |          Solución de errores con el componente textInput           |        Cuando pruebo un textInput de react-native con multiline=true al pulsar intro en el teclado no puedo salir del modo de escritura   |      Si       |
+| Pablo Olivencia Moreno    | Detección de errores en consola durante el desarrollo de backend y frontend con IA (GitHub Copilot) | Necesito encontrar qué está causando el siguiente error: <"Traza de error">                                                   | No                                     |
 
 ---
 
