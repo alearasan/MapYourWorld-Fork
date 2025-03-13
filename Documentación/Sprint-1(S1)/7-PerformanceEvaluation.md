@@ -27,7 +27,6 @@
 |---------|-----------|--------------------------|--------------------|
 | V1      | 12/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán, Pablo Caballero María      |
 
-
 | Student                            | #DP1 | #S1 | #S2 | #S3 | #PPL | #WPL | Total | Weight |
 |------------------------------------|------|-----|-----|-----|------|------|-------|--------|
 | Alonso Lanzarán, Alfonso Luis      | 10   | 6,2 |     |     |      |      |       |        |
@@ -37,15 +36,15 @@
 | Carreño Mariño, Ricardo            | 10   | 3,5 |     |     |      |      |       |        |
 | Dell ‘Aguila Ureña, Franco         | 10   | 7,5 |     |     |      |      |       |        |
 | Escobar Sánchez, Alberto           | 10   | 3,1 |     |     |      |      |       |        |
-| Gómez Marín, Jaime                 | 10   |     |     |     |      |      |       |        |
-| González Benito, Claudio           | 10   |     |     |     |      |      |       |        |
-| Neria Acal, Ángel                  | 10   |     |     |     |      |      |       |        |
-| Olliencia Moreno, Pablo            | 10   |     |     |     |      |      |       |        |
-| Porcar Aragón, Antonio Daniel      | 10   |     |     |     |      |      |       |        |
-| Ramos Vargas, Alba                 | 10   |     |     |     |      |      |       |        |
-| Santos Dominguez, Pedro Pablo      | 10   |     |     |     |      |      |       |        |
-| Vélez López, Manuel                | 10   |     |     |     |      |      |       |        |
-| García Lama, Gonzalo               | 10   |     |     |     |      |      |       |        |
+| Gómez Marín, Jaime                 | 10   | 7,4 |     |     |      |      |       |        |
+| González Benito, Claudio           | 10   | 6,3 |     |     |      |      |       |        |
+| Neria Acal, Ángel                  | 10   | 10  |     |     |      |      |       |        |
+| Olliencia Moreno, Pablo            | 10   | 7,0 |     |     |      |      |       |        |
+| Porcar Aragón, Antonio Daniel      | 10   | 7,7 |     |     |      |      |       |        |
+| Ramos Vargas, Alba                 | 10   | 9,2 |     |     |      |      |       |        |
+| Santos Dominguez, Pedro Pablo      | 10   | 10  |     |     |      |      |       |        |
+| Vélez López, Manuel                | 10   | 10  |     |     |      |      |       |        |
+| García Lama, Gonzalo               | 10   | 10  |     |     |      |      |       |        |
 | **Total**                          | 160  |     |     |     |      |      |       |        |
 
 <h1 align="center">Individual Contribution Summary</h1>
