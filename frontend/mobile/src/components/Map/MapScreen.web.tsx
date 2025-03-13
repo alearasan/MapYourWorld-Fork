@@ -1,11 +1,92 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Alert, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, Alert, ActivityIndicator, StyleSheet, Modal } from "react-native";
 import { styled } from 'nativewind';
 import { API_URL } from "@/constants/config";
+import PuntoDeInteresForm from "../POI/PoiForm";
 
 // Agregar logs para depuración
 console.log("Cargando MapScreen.web.tsx");
 console.log("API_URL:", API_URL);
+
+// Interfaces para POIs y distritos
+interface POI {
+  id?: string;
+  name: string;
+  description: string;
+  location: {
+    type: string;
+    coordinates: number[]; // [longitude, latitude]
+  };
+}
+
+// Componente de Modal para alertas personalizado
+const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
+  if (!visible) return null;
+  
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1001 // Mayor que el formulario POI
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        style={{ 
+          backgroundColor: 'white',
+          borderRadius: '12px', 
+          padding: '20px',
+          maxWidth: '90%',
+          width: '350px',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <h2 style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          marginBottom: '12px',
+          color: '#2d3748'
+        }}>
+          {title}
+        </h2>
+        <p style={{
+          fontSize: '16px',
+          color: '#4a5568',
+          marginBottom: '20px'
+        }}>
+          {message}
+        </p>
+        <button 
+          style={{
+            width: '100%',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: '#3182ce',
+            color: 'white',
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onClick={onClose}
+        >
+          Aceptar
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // Definición de tipos para los componentes de Leaflet
 type LeafletComponent = any;
@@ -19,8 +100,34 @@ let Polygon: LeafletComponent = null;
 let Marker: LeafletComponent = null;
 let L: LeafletLibrary = null;
 
+// Función para verificar si un punto está dentro de un polígono (distrito)
+const isPointInPolygon = (
+  point: { lat: number; lng: number },
+  polygon: number[][]
+) => {
+  let inside = false;
+  const { lat, lng } = point;
+  const len = polygon.length;
+  let j = len - 1;
+  for (let i = 0; i < len; i++) {
+    const vertex1 = polygon[i];
+    const vertex2 = polygon[j];
+    if (
+      (vertex1[1] > lng) !== (vertex2[1] > lng) &&
+      lat <
+      ((vertex2[0] - vertex1[0]) * (lng - vertex1[1])) /
+      (vertex2[1] - vertex1[1]) +
+      vertex1[0]
+    ) {
+      inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+};
+
 // Componente de mapa real que se renderizará
-const LeafletMap = ({ location, distritos }: any) => {
+const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) => {
   console.log("Renderizando LeafletMap interno");
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -53,6 +160,34 @@ const LeafletMap = ({ location, distritos }: any) => {
       }).addTo(map);
     });
     
+    // Añadir marcadores para los puntos de interés
+    if (pointsOfInterest && pointsOfInterest.length > 0) {
+      console.log(`Renderizando ${pointsOfInterest.length} puntos de interés`);
+      pointsOfInterest.forEach((poi: POI) => {
+        const marker = L.marker([
+          poi.location.coordinates[1], // latitude
+          poi.location.coordinates[0], // longitude
+        ]);
+        
+        marker.bindPopup(`
+          <div>
+            <h3>${poi.name}</h3>
+            <p>${poi.description}</p>
+          </div>
+        `);
+        
+        marker.addTo(map);
+      });
+    }
+    
+    // Agregar evento de clic para añadir nuevo POI
+    map.on('click', (e: any) => {
+      if (onMapClick) {
+        const latlng = e.latlng;
+        onMapClick({ latitude: latlng.lat, longitude: latlng.lng });
+      }
+    });
+    
     // Guardar referencia al mapa
     mapInstanceRef.current = map;
     setMapReady(true);
@@ -64,7 +199,7 @@ const LeafletMap = ({ location, distritos }: any) => {
         mapInstanceRef.current = null;
       }
     };
-  }, [location, distritos]);
+  }, [location, distritos, pointsOfInterest, onMapClick]);
   
   return (
     <div style={{height: "100vh", width: "100vw"}}>
@@ -80,8 +215,44 @@ const MapScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [distritos, setDistritos] = useState<any[]>([]);
+  const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [pointOfInterest, setPointOfInterest] = useState<any>({
+    name: "",
+    description: "",
+    category: "",
+    photos: [],
+    latitude: 0,
+    longitude: 0,
+    district: "",
+  });
+  
+  // Estado para el modal de alertas
+  const [alertModal, setAlertModal] = useState({
+    visible: false,
+    title: '',
+    message: ''
+  });
+  
   const mapRef = useRef(null);
   const [leafletReady, setLeafletReady] = useState(false);
+  
+  // Función para mostrar alerta en modal
+  const showAlert = (title: string, message: string) => {
+    setAlertModal({
+      visible: true,
+      title,
+      message
+    });
+  };
+  
+  // Función para cerrar el modal de alerta
+  const closeAlertModal = () => {
+    setAlertModal({
+      ...alertModal,
+      visible: false
+    });
+  };
   
   // Cargar Leaflet solo una vez al inicio
   useEffect(() => {
@@ -149,6 +320,7 @@ const MapScreen = () => {
     // Solo procedemos si Leaflet está cargado o tenemos un error
     if (leafletReady || error) {
       fetchDistritos();
+      fetchPOIs();
 
       // En web usamos la API de geolocalización del navegador
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -255,6 +427,63 @@ const MapScreen = () => {
     }
   };
 
+  // Función para obtener todos los POIs desde el backend
+  const fetchPOIs = async () => {
+    try {
+      console.log("Obteniendo puntos de interés...");
+      const response = await fetch(`${API_URL}/api/poi/all`);
+      const data = await response.json();
+      if (data.pois) {
+        console.log(`Se obtuvieron ${data.pois.length} puntos de interés`);
+        setPointsOfInterest(data.pois);
+      } else {
+        console.warn("No se pudieron obtener los puntos de interés");
+      }
+    } catch (error) {
+      console.error("Error al obtener los puntos de interés:", error);
+    }
+  };
+
+  // Manejador cuando se hace clic en el mapa
+  const handleMapClick = (coordinate: { latitude: number; longitude: number }) => {
+    console.log("Clic en el mapa:", coordinate);
+    
+    // Verificar si el punto está dentro de algún distrito
+    let poiDistrict = null;
+    for (const distrito of distritos) {
+      if (isPointInPolygon(
+        { lat: coordinate.latitude, lng: coordinate.longitude },
+        distrito.coordenadas
+      )) {
+        poiDistrict = distrito;
+        break;
+      }
+    }
+    
+    // Verificar si el distrito existe y está desbloqueado
+    if (!poiDistrict) {
+      // No está en ningún distrito
+      showAlert('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
+      return;
+    }
+    
+    if (!poiDistrict.isUnlocked) {
+      // Está en un distrito bloqueado
+      showAlert('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Desbloquéalo primero para añadir puntos de interés.`);
+      return;
+    }
+    
+    // Si llegamos aquí, el distrito está desbloqueado
+    setPointOfInterest({
+      ...pointOfInterest,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      district: poiDistrict,
+    });
+    
+    setShowForm(true);
+  };
+
   // Renderizado condicional para mostrar pantalla de carga
   if (loading) {
     console.log("Renderizando pantalla de carga");
@@ -292,9 +521,155 @@ const MapScreen = () => {
     );
   }
 
-  // Renderización del mapa usando un enfoque más seguro
-  console.log("Renderizando mapa con MapContainer");
-  return <LeafletMap location={location} distritos={distritos} />;
+  // Renderización del mapa con el componente Modal para el formulario
+  console.log("Renderizando mapa completo");
+  return (
+    <>
+      {/* Modal de alertas */}
+      <AlertModal 
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
+      
+      {showForm && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}
+          onClick={(e) => {
+            // Cerrar modal al hacer clic fuera del formulario
+            if (e.target === e.currentTarget) {
+              setShowForm(false);
+            }
+          }}
+        >
+          <div 
+            style={{ 
+              backgroundColor: 'white',
+              borderRadius: '12px', 
+              padding: '20px',
+              maxWidth: '90%',
+              width: '380px',
+              maxHeight: '90vh', 
+              overflow: 'auto',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {/* Estilo personalizado para el formulario web */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              .form-container input, .form-container textarea {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .dropdown {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                background-color: white;
+                cursor: pointer;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .section-title {
+                font-size: 18px;
+                font-weight: 500;
+                margin-bottom: 8px;
+              }
+              
+              .form-container .add-photo-btn {
+                width: 64px;
+                height: 64px;
+                border-radius: 8px;
+                border: 1px solid #d1d5db;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+              }
+              
+              .form-container .btn-primary {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #2563eb;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                margin-bottom: 10px;
+                cursor: pointer;
+                border: none;
+              }
+              
+              .form-container .btn-danger {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #dc2626;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                cursor: pointer;
+                border: none;
+              }
+            ` }} />
+
+            <h1 style={{
+              fontSize: '22px',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: '16px'
+            }}>
+              Registrar Punto de Interés
+            </h1>
+
+            <div className="form-container">
+              <PuntoDeInteresForm
+                pointOfInterest={pointOfInterest}
+                setPointOfInterest={setPointOfInterest}
+                setShowForm={setShowForm}
+                onSave={(newPOI: any) => {
+                  // Convertir el POI recién creado al formato esperado
+                  const poiConverted = {
+                    ...newPOI,
+                    location: {
+                      type: "Point",
+                      coordinates: [newPOI.longitude, newPOI.latitude],
+                    },
+                  };
+                  setPointsOfInterest((prev) => [...prev, poiConverted]);
+                }}
+                showAlert={showAlert}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      <LeafletMap 
+        location={location} 
+        distritos={distritos} 
+        pointsOfInterest={pointsOfInterest}
+        onMapClick={handleMapClick}
+      />
+    </>
+  );
 };
 
 const StyledView = styled(View);

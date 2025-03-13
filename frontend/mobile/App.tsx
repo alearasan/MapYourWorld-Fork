@@ -18,6 +18,8 @@ import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapLis
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
+import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
+import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -30,14 +32,6 @@ const FallbackScreen = ({ title, message }: { title: string, message: string }) 
     <StyledText className="text-xl font-bold mb-2">{title}</StyledText>
     <StyledText className="text-base text-gray-600 text-center">{message}</StyledText>
   </StyledView>
-);
-
-// Pantalla temporal para recuperar contraseña
-const ForgotPasswordScreen = () => (
-  <FallbackScreen 
-    title="Recuperar Contraseña" 
-    message="Esta funcionalidad está en desarrollo" 
-  />
 );
 
 // Usamos la definición de tipos de navegación centralizada
@@ -90,6 +84,16 @@ const CollaborativeMapScreenWithParams = (props: any) => {
     }
   } else {
     return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  }
+};
+
+// Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
+const ForgotPasswordScreenWrapper = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    return <ForgotPasswordScreenWeb {...props} />;
+  } else {
+    return <ForgotPasswordScreenMobile {...props} />;
   }
 };
 
@@ -190,7 +194,7 @@ const AppContent = () => {
         />
         <Stack.Screen 
           name="ForgotPassword" 
-          component={ForgotPasswordScreen}
+          component={ForgotPasswordScreenWrapper}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

@@ -14,8 +14,6 @@ body, html {
     font-family: sans-serif;
 }
 
-.disappear { display: none; }
-
 .image-background > div {
     width: 100% !important;
 }

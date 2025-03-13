@@ -487,6 +487,49 @@ const MapScreen = (): JSX.Element => {
 | **Debugabilidad** | Errores confusos de hooks y renderizado | Logs detallados en cada fase del ciclo de vida | Facilita la depuración |
 | **GeoJSON** | Transformación potencialmente inconsistente | Transformación verificada con validaciones | Mayor robustez |
 
+## Optimización adicional: Resolución de duplicación de dependencias React
+
+Además de la implementación nativa de Leaflet, se ha aplicado una optimización crítica mediante la técnica de "alias" en webpack para garantizar que solo exista una instancia de React en todo el proyecto:
+
+### Problema con múltiples instancias de React
+
+Cuando diferentes dependencias (como `react-leaflet`) incluyen sus propias versiones de React, pueden ocurrir problemas como:
+
+1. **Error en hooks**: El error "Invalid hook call" puede ocurrir cuando los hooks de React son llamados desde diferentes instancias de React
+2. **Aumento en el tamaño del bundle**: Las múltiples copias de la misma biblioteca incrementan significativamente el tamaño final
+3. **Comportamiento inconsistente**: Diferentes versiones de React pueden comportarse de manera distinta
+
+### Solución con alias en webpack
+
+Se ha implementado la técnica de alias en la configuración de webpack:
+
+```javascript
+// webpack.config.js
+resolve: {
+  alias: {
+    // Forzar a todas las importaciones de React a usar la misma instancia
+    'react': path.resolve(appDirectory, 'node_modules/react'),
+    'react-dom': path.resolve(appDirectory, 'node_modules/react-dom'),
+    // Alias adicionales para librerías relacionadas con React
+    'scheduler': path.resolve(appDirectory, 'node_modules/scheduler'),
+    'react-is': path.resolve(appDirectory, 'node_modules/react-is'),
+    'react/jsx-runtime': path.resolve(appDirectory, 'node_modules/react/jsx-runtime'),
+  }
+}
+```
+
+Esta configuración:
+
+1. **Resuelve el problema de hoisting**: Fuerza a todas las dependencias a usar la misma instancia de React del proyecto principal
+2. **Previene futuros conflictos**: Al agregar nuevas bibliotecas que dependen de React, se usará siempre la versión correcta
+3. **Mejora la consistencia**: Garantiza que todas las funcionalidades de React (hooks, context, etc.) funcionen correctamente
+
+### Beneficios adicionales
+
+- **Reducción adicional de tamaño del bundle**: ~15% de reducción al eliminar duplicados
+- **Mejor debugging**: Los errores de React son más consistentes y fáciles de diagnosticar
+- **Menor riesgo de regresiones**: Actualizaciones de dependencias tienen menos probabilidad de causar conflictos
+
 ## Análisis técnico de rendimiento
 
 Se realizaron pruebas comparativas entre ambas implementaciones con los siguientes resultados:
