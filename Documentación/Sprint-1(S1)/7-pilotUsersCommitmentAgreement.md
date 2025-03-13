@@ -15,6 +15,9 @@
     Sprint 1
 </p>
 <p align="center">
+    Claudio Gonzalez Benito
+</p>
+<p align="center">
     13/03/2025
 </p>
 
