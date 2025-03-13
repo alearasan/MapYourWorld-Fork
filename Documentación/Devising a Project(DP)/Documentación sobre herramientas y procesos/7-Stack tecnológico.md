@@ -1,13 +1,26 @@
-![Portada](../Imagenes/Herramientasyprocesos/Portada-Stack.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-## Stack Tecnológico
+<h1 align="center">Stack tecnológico</h1>
 
-**CONTROL DE VERSIONES**
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Ángel Neria, Pedro Pablo Santos, Antonio Porcar y Ricardo Carrero
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
-| **VERSIÓN** | **FECHA**    | **COMENTARIOS**              | **AUTOR**                         |
-|-------------|--------------|------------------------------|-----------------------------------|
-| v1          | 15/02/2025   | Creación del documento       | Ángel Neria, Pedro Pablo Santos  |
-| V1.1        | 19/02/2025   | Revisión del documento       | Antonio Porcar y Ricardo Carrero  |
 
 ---
 
@@ -28,9 +41,13 @@
   - [6.2. Pruebas en Frontend](#pruebas-en-frontend)
 - [7. Metodología de Implementación](#metodología-de-implementación)
 
+---
+
 # Introducción
 
 El presente documento detalla la selección del stack tecnológico utilizado en el desarrollo del proyecto, justificando cada tecnología en función de su rendimiento, escalabilidad, facilidad de uso y compatibilidad con los requerimientos del sistema. Se ha priorizado la eficiencia en términos de desarrollo, mantenimiento y despliegue.
+
+---
 
 # Backend
 
@@ -56,6 +73,8 @@ Para garantizar una comunicación eficiente entre microservicios, se ha optado p
 - Escalabilidad horizontal y alta disponibilidad.
 - Soporte para integración con múltiples tecnologías.
 
+---
+
 # Frontend
 
 ## Tecnología seleccionada: React Native con Tailwind CSS
@@ -75,6 +94,8 @@ El desarrollo del frontend se ha basado en **React Native** debido a su capacida
 - Facilita la implementación de un diseño modular y escalable.
 - Mejora la productividad del equipo gracias a su sintaxis simplificada.
 
+---
+
 # Base de Datos
 
 ## Tecnología seleccionada: PostgreSQL con la extensión PostGIS
@@ -87,6 +108,8 @@ Para el almacenamiento de datos, se ha optado por **PostgreSQL**, un sistema de 
 - Escalabilidad y rendimiento óptimo en grandes volúmenes de datos.
 - Capacidad de realizar análisis geoespaciales complejos.
 - Fuerte comunidad y documentación extensa.
+
+---
 
 # Despliegue
 
@@ -104,6 +127,8 @@ El despliegue del sistema se realizará en un entorno **Raspberry Pi**, lo que p
 **Despliegue de la landing page:**
 
 El despliegue de la landing page se realizará en **Vercel**. Se ha elegido esta solución por su simplicidad e idoneidad para desplegar una página web compuesta únicamente por una capa de frontend en React Native.
+
+---
 
 # Pruebas y Validación
 
@@ -126,6 +151,8 @@ El frontend será validado con **Jest**, **React Testing Library** y **Postman**
 - **Jest:** Facilita la ejecución de pruebas unitarias en componentes React Native.
 - **React Testing Library:** Mejora la confiabilidad de las pruebas en UI.
 - **Postman:** Permite validar el correcto funcionamiento de las API REST.
+
+---
 
 # Metodología de Implementación
 

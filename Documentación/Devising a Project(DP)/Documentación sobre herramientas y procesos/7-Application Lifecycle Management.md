@@ -1,13 +1,27 @@
-![Portada](../Imagenes/Herramientasyprocesos/Portada-ap.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-## Application Lifecycle Management
+<h1 align="center">Application Lifecycle Management</h1>
 
-### CONTROL DE VERSIONES
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Ángel Neria, Pedro Pablo Santos, Pablo Caballero, Pablo Olivencia y Ricardo Carrero
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
-| **VERSIÓN** | **FECHA**  | **COMENTARIOS** | **AUTOR**                                                           |
-|-------------|------------|-----------------|----------------------------------------------------------------------|
-| V1.0        | 18/2/2025  |                 | Ángel Neria Acal, Pedro Pablo Santos Domínguez, Pablo Caballero María |
-| V1.1        | 19/2/2025  | Revisión        | Pablo Olivencia y Ricardo Carrero                                    |
+---
 
 # Índice
 
@@ -33,11 +47,15 @@
   - [7.7. Postman](#postman)
   - [7.8. Microsoft Teams](#microsoft-teams)
 
+---
+
 # Introducción
 
 Definir la estrategia de ALM para MapYourWorld, abarcando desde la planificación hasta el mantenimiento, para asegurar un desarrollo estructurado, eficiente y adaptable.
 
 Este documento abarca todas las fases del ciclo de vida de la aplicación, integrando el diseño de la arquitectura, el desarrollo e implementación del software con un riguroso control de versiones, la ejecución de pruebas integrales para garantizar su funcionamiento y seguridad, el despliegue en entornos productivos de manera controlada y, finalmente, la actualización continua mediante la gestión de incidencias y la incorporación de mejoras.
+
+---
 
 # Estrategia y Metodología
 
@@ -49,6 +67,8 @@ Durante el desarrollo se realizarán 3 sprints. Cada sprint será precedido por 
 
 Con mayor detalle, cada sprint incluirá subfases dedicadas a la planificación, desarrollo, pruebas y despliegue de lo que se esté implementando en ese momento.
 
+---
+
 ## Enfoque del ciclo de vida: Descripción de las fases
 
 Dentro de cada sprint existen las siguientes fases: **planificación**, **desarrollo**, **pruebas**, **despliegue** y **mantenimiento**. Esta elección es un estándar de la industria en la ejecución de proyectos ingenieriles, aunque puede variar ligeramente para adaptarse a las características de cada proyecto.
@@ -59,11 +79,13 @@ Dentro de cada sprint existen las siguientes fases: **planificación**, **desarr
 - **Despliegue:** El equipo de DevOps actualizará el despliegue en nuestro servidor local (Raspberry Pi), comprobando que la aplicación sea accesible y funcional desde un cliente externo.
 - **Mantenimiento:** Se implementarán acciones para mantener y actualizar la aplicación tras su despliegue, garantizando la corrección de errores y la mejora continua.
 
+---
+
 # Diseño y Arquitectura
 
 ## Diseño de la solución
 
-![Diagrama de clases](../Imagenes/Herramientas%20y%20procesos/DiagramaClases.png)
+![Diagrama de clases](../Imagenes/Herramientasyprocesos/DiagramaClases.png)
 
 Se presenta el diagrama de clases, en el que se han tomado las siguientes decisiones:
 
@@ -88,6 +110,8 @@ Finalmente, se implementarán estrategias de pruebas y validación utilizando he
 
 Esta combinación de tecnologías y patrones ha sido cuidadosamente seleccionada para responder óptimamente a los requerimientos del negocio, asegurando un desarrollo ágil, escalable y adaptable a las demandas del mercado.
 
+---
+
 # Desarrollo y Control de Versiones
 
 El entorno de desarrollo estará centrado en **Node.js** para el backend, utilizando **Express** como framework para construir APIs REST. En el frontend, se empleará **React Native** para crear aplicaciones móviles nativas para Android e iOS con una única base de código, junto con **Tailwind CSS** para una estilización rápida y eficiente.
@@ -101,6 +125,8 @@ Cuando un desarrollador comience a trabajar en una nueva funcionalidad, se crea 
 Una vez que la funcionalidad esté lista y probada localmente, se realizará un **pull request** o fusión de la rama de la característica a **develop**. Este proceso permite integrar el código de manera controlada y segura en el proyecto principal; posteriormente, al desplegar, se fusionará en **main**.
 
 *Después de fusionar la rama de la característica, esta se elimina, ya que su propósito se ha cumplido. Esto mantiene el repositorio limpio y organizado.*
+
+---
 
 # Integración Continua y Despliegue Continuo (CI/CD)
 
@@ -116,6 +142,8 @@ Con cada commit al repositorio se desencadenará un conjunto de workflows autom�
 
 Posteriormente, se realizará un análisis estático del código mediante **SonarCloud**, junto con workflows de testing y despliegue, para asegurar que todas las funcionalidades sigan operando correctamente tras cada incremento.
 
+---
+
 # Implementación y Mantenimiento
 
 El proceso de despliegue se realizará al final de cada sprint, permitiendo liberar de forma continua las funcionalidades completadas. Cada vez que se termine una funcionalidad, primero se desplegará en un **entorno de pruebas o staging**, donde se validará que cumpla con los requerimientos establecidos y se ejecutarán las pruebas automatizadas y manuales necesarias. Esto garantiza que el código esté listo para integrarse en producción sin introducir errores.
@@ -129,6 +157,8 @@ El mantenimiento post-lanzamiento será crucial para garantizar la estabilidad y
 Además, el sistema se actualizará **regularmente** después de cada sprint con nuevas funcionalidades, mejoras en el rendimiento, corrección de errores y actualizaciones de seguridad. Estas actualizaciones se desplegarán en entornos de prueba antes de pasar a producción, siguiendo el mismo flujo de trabajo para garantizar que cada cambio no afecte negativamente al sistema.
 
 El proceso de **mejora continua** también será prioritario, incluyendo la recolección de **feedback de usuarios**, análisis de métricas de uso y monitoreo del rendimiento para identificar áreas de mejora.
+
+---
 
 # Herramientas utilizadas
 

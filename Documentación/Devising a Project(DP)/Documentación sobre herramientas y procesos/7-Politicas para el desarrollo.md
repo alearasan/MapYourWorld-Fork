@@ -1,12 +1,26 @@
-![Portada](../Imagenes/Herramientasyprocesos/Portada-pol.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-### CONTROL DE VERSIONES
+<h1 align="center">Políticas para el desarrollo</h1>
 
-| **VERSIÓN** | **FECHA**    | **COMENTARIOS**               | **AUTOR**                        |
-|-------------|--------------|-------------------------------|----------------------------------|
-| v1.0        | 19/02/2025   | Creación del documento        | Pedro Pablo Santos               |
-| v1.1        | 19/02/2025   | Revisión del formato          | Ricardo Carrero                  |
-| V1.2        | 05/03/2025   | Actualización de documento    | Manuel Vélez                     |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Pedro Pablo Santos, Ricardo Carrero y Manuel Vélez
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
 
 ---
 
@@ -18,6 +32,8 @@
     - [1.2.1. Responsabilidades](#responsabilidades)
   - [1.3. Estrategia de Ramas](#estrategia-de-ramas)
   - [1.4. Flujo de Trabajo](#flujo-de-trabajo)
+
+---
 
 # Convenciones de Desarrollo
 

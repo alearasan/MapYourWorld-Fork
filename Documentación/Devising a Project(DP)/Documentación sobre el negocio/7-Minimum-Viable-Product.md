@@ -23,19 +23,6 @@
 </p>
 
 
-### CONTROL DE VERSIONES
-
-| VERSIÓN | FECHA      | COMENTARIOS                                     | AUTOR                                            |
-| ------- | ---------- | ----------------------------------------------- | ------------------------------------------------ |
-| v1.0    | 04/02/2025 | Primera versión                                 | Manuel Vélez, Pedro Pablo Santos                 |
-| v1.1    | 04/02/2025 | Cambios menores                                 | Manuel Vélez, Ángel Neria                        |
-| v1.2    | 04/02/2025 | Revisión del formato                            | Ricardo Carreño                                  |
-| v1.2.1  | 05/02/2025 | Revisión del formato                            | Ricardo Carreño                                  |
-| v1.3.1  | 01/02/2025 | Cambio en MVP y Casos de uso esenciales         | Ángel Neria                                      |
-| v1.3.1  | 01/02/2025 | Casos de uso para cada tipo de público objetivo | Antonio Porcar, Alejandro Aragón                 |
-| v1.4.0  | 07/02/2025 | Cambios en los casos de uso core                | Ángel Neria Acal                                 |
-| v1.5.0  | 09/02/2025 | Revisión del documento                          | Antonio Porcar, Pablo Olivencia, Ricardo Carreño |
-
 ---
 
 ## Índice
@@ -52,7 +39,7 @@
   - [6.3. Innovación del modelo de negocio](#63-innovación-del-modelo-de-negocio)
   - [6.4. Innovación tecnológica](#64-innovación-tecnológica)
 
-
+---
 
 # 1. Introducción
 
@@ -68,6 +55,8 @@ compartir y documentar el progreso de tus recorridos a lo largo de todo
 el planeta. La aplicación no sólo permite a los usuarios ver las
 localizaciones que ha visitado, sino que también motiva a explorar
 nuevos destinos a través de una interfaz interactiva y social.
+
+---
 
 # 2. Público Objetivo
 
@@ -90,7 +79,10 @@ fascinación por el descubrimiento y la necesidad de dejar huella ya sea
 recorriendo continentes lejanos o simplemente dando una vuelta por la
 esquina.
 
+---
+
 # 3. Casos de uso core
+
 | **Visualización de un mapa personal interactivo** |  |
 |:-------------------------------------------------:|:-----------------------------------:|
 | **Actor Principal** | Viajero |
@@ -125,6 +117,7 @@ esquina.
 | **Precondiciones** | \- Si se trata de un usuario con plan gratuito, este no puede pertenecer a otro mapa colaborativo. <br> \- Un mapa colaborativo debe estar formado entre 2 y 5 personas. |
 | **Flujo del caso de uso** | 1. El cliente selecciona "Crear Mapa Colaborativo" en el menú de funciones. <br> 2. Define los detalles iniciales del mapa: nombre, descripción y usuarios invitados. <br> 3. Los usuarios invitados se unen al mapa colaborativo aceptando la invitación dentro del menú de funciones. <br> 4. El mapa se actualiza en tiempo real conforme los colaboradores visitan zonas o añaden puntos de interés. |
 
+---
 
 # 4. Funcionalidades del MVP
 
@@ -146,6 +139,8 @@ esquina.
 -   **Pago de suscripciones:** Se ofrece la posibilidad de mejorar la
     experiencia de usuario mediante el pago de una suscripción premium
     mensual.
+
+---
 
 # 5. Roles de cliente
 
@@ -217,6 +212,8 @@ Esta diferenciación de roles permite que MapYourWorld ofrezca una
 experiencia atractiva a un amplio público, facilitando el acceso a
 funcionalidades básicas para todos y, al mismo tiempo, generando un
 canal de monetización a través de la suscripción premium.
+
+---
 
 # 6. Valor e innovación del proyecto
 

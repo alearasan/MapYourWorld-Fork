@@ -1,10 +1,26 @@
-![Portada](../Imagenes/Herramientasyprocesos/Portada-an.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-### CONTROL DE VERSIONES
+<h1 align="center">Análisis y comparación CI-CD</h1>
 
-| **VERSIÓN** | **FECHA**    | **COMENTARIOS**               | **AUTOR**                        |
-|-------------|--------------|-------------------------------|----------------------------------|
-| v1          | 06/03/2025   | Creación del documento        | Pablo Caballero María            |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Pablo Caballero 
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
 
 ---
 
@@ -21,11 +37,15 @@
   - [2.7. Monitoreo y Observabilidad](#monitoreo-y-observabilidad)
 - [3. Conclusiones](#conclusiones)
 
+---
+
 # Introducción
 
 En el proceso de desarrollo de software, la integración y entrega continua (CI/CD) juegan un papel fundamental para garantizar la calidad, estabilidad y rapidez en la entrega de nuevas funcionalidades. Implementar un pipeline de CI/CD eficiente implica la combinación de diversas herramientas que automatizan tareas clave, como la validación de mensajes de commit, análisis de estilo de código, ejecución de pruebas, construcción de artefactos y despliegue en distintos entornos, entre otras.
 
 Este documento analiza y compara diferentes herramientas utilizadas en cada etapa del proceso de CI/CD, evaluando sus características, ventajas y limitaciones. El objetivo es proporcionar una visión clara de las opciones disponibles para optimizar el flujo de desarrollo y garantizar entregas confiables y automatizadas.
+
+---
 
 # 2. Análisis del pipeline
 
@@ -56,6 +76,8 @@ El despliegue automatizado es la fase en la que el software es entregado en ento
 ### 2.7. Monitoreo y Observabilidad
 
 Una vez que el software ha sido desplegado, es fundamental contar con herramientas de monitoreo y observabilidad para detectar problemas de rendimiento, errores inesperados y métricas clave sobre el comportamiento del sistema. Este proceso implica la recopilación y análisis de *logs*, métricas y trazas de ejecución para obtener una visión completa de la salud de la aplicación. Herramientas como **Prometheus** y **Grafana** permiten monitorear métricas en tiempo real, mientras que soluciones como **New Relic** y **ELK Stack** (Elasticsearch, Logstash, Kibana) facilitan la visualización y análisis de registros.
+
+---
 
 # 3. Conclusiones
 

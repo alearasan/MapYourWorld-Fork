@@ -1,4 +1,27 @@
-![Portada](../Imagenes/Equipo/Portada-perf.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
+
+<h1 align="center">Análisis de rendimiento del equipo</h1>
+
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Alfonso Luis Alonso Lanzarán
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 | Student                            | #DP1 | #S1 | #S2 | #S3 | #PPL | #WPL | Total | Weight |
 |------------------------------------|------|-----|-----|-----|------|------|-------|--------|

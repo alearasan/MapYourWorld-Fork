@@ -22,17 +22,6 @@
     18/02/2025
 </p>
 
-
----
-
-**CONTROL DE VERSIONES**
-
-| VERSIÓN | FECHA      | COMENTARIOS                          | AUTOR              |
-| ------- | ---------- | ------------------------------------- | ------------------ |
-| V1.0    | 18/02/2025 | Gestión y proceso de usuarios piloto | Claudio González Benito |
-| V1.1    | 19/02/2025 | Lista de usuarios piloto             | Ángel Neria, Manuel Vélez |
-| V1.2    | 19/02/2025 | Revisión del documento               | Ricardo Carreño    |
-
 ---
 
 # Índice

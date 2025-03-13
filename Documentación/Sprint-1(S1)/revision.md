@@ -1,10 +1,27 @@
-![Login](./Images/portada.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-**CONTROL DE VERSIONES**
+<h1 align="center">Guia de Revisión</h1>
 
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
-|---------|-----------|--------------------------|--------------------|
-| V1      | 12/03/2025| Primera versión          | Jaime Gómez, Ángel Neria y José María Baquero    |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
 

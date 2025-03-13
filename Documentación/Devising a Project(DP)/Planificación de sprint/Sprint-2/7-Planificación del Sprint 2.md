@@ -1,11 +1,27 @@
-![portada](../../Imagenes/Planificacion/Portada-Spirnt1.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
+<h1 align="center">Planificación del Sprint 2</h1>
 
-**CONTROL DE VERSIONES**
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 2
+</p>
+<p align="center">
+    Pedro Pablo Santos Domínguez
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR                                      |
-|---------|----------|--------------------------|-------------------------------------------|
-| V1.0    | 12/03/2025 | Primera versión         | Pedro Pablo Santos Domínguez         |
+---
 
 <!-- omit in toc--> # Índice
 
@@ -14,6 +30,7 @@
 - [3. Estimación de horas](#3-estimación-de-horas)
 - [4. Hitos del Sprint](#4-hitos-del-sprint)
 
+---
 
 # 1. Planificación del Sprint 1
 
@@ -32,6 +49,8 @@ El equipo se centrará en la implementación de las siguientes tareas clave:
 4.  **Funcionalidad de admin:** Se implementara la funcionalidad de admin, que con ella se podra acceder a todas las funcionalidades y podremos manejar que hacen los usuarios en nuesta aplicacion.
 
 5.  **Despliegue de la segunda versión:** Para el despliegue web se utilizara una maquina virtual, Microsoft Azure, y una herrramienta que permite que el proceso perviva incluso saliendote de la maquina es pm2. 
+
+---
 
 # 2. Responsabilidades del equipo
 
@@ -53,6 +72,8 @@ del proyecto. Se dividen en encargados de Backend, Frontend y Testing/Calidad.
 | Funcionalidad de admin | Manuel Vélez, Pedro Pablo Santos, Gonzalo García |  |  |
 | Despliegue de la segunda versión | Alejandro Aragón | Gonzalo García | Alejandro Aragón |
 
+---
+
 # 3. Estimación de horas
 
 Para la estimación de horas, hemos utilizado la estimación en tres valores,
@@ -65,6 +86,8 @@ medidos en horas:
 | Modulo de logros | 12                   | 18                   | 14                  |  14.33              |
 | Funcionalidad de admin | 12                   | 19                   | 15                  | 15.17            |
 | Despliegue de la segunda versión | 3                    | 6                    | 4                   |  4.17            |
+
+---
 
 # 4. Hitos del Sprint
 
