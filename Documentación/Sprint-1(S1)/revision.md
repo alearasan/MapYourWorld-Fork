@@ -17,12 +17,20 @@
 <p align="center">
     Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez
 </p>
+
 <p align="center">
     12/03/2025
 </p>
 
 ---
+**CONTROL DE VERSIONES**
 
+| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
+|---------|-----------|--------------------------|--------------------|
+| V1      | 12/03/2025| Primera versión          | Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez     |
+| V2      | 13/03/2025| Actualización del documento| Ángel Neria Acal y José María Baquero Rodríguez
+
+---
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
 
 
@@ -45,12 +53,14 @@
   ![ZonaDescubierta](./Images/ZonaDescubierta.png)
   *(Caso de uso implementado en #S1)*
 
-    - **registro de puntos de interés**:  
+    - **Registro de puntos de interés**:  
   El usuario selecciona una zona del mapa desbloqueada en la que desea añadir un punto de interés. Al tocar la ubicación, se muestra una ventana emergente con un formulario donde debe añadir un nombre y una descripción, una etiqueta, que es opcional y fotografías, también opcionales. Una vez completado el proceso, el punto de interés queda registrado y aparece en el mapa interactivo con un marcador.
   ![POIFormulario](./Images/POIFormulario.png)
   *(Caso de uso implementado en #S1)*
+
   ![ExitoPOI](./Images/exitoPOI.png)
   *(Caso de uso implementado en #S1)*
+
   ![VerPOI](./Images/verPOI.png)
   *(Caso de uso implementado en #S1)*
 
@@ -85,26 +95,27 @@
 
 ## 2. Datos Necesarios para Realizar la Revisión
 
-- **URL de la página de inicio (Landing Page):**  
-  [Inserta la URL aquí]  
-  *(Debe permitir la navegación al despliegue)*
+- **URL de la página de inicio (Landing Page):** [Landing Page de MapYourWorld](https://mapyourworld.netlify.app/)  
+  
 
 - **Credenciales de Usuarios:**
+  Por ahora la funcionalidad implementada no precisa de credenciales de acceso para la aplicación, ya que el registro y login no se ha implementado como es debido. Para acceder se presenta la opción de *Entrar en modo prueba*, dentro de la pantalla de *Login*, lo que permite el acceso instantáneo usando un usuario de prueba. No obstante existen usuarios creados en la base de datos, aunque como se ha mencionado, actualmente no es posible acceder con sus credenciales.
+
   - **Usuario 1:**  
-    - Usuario: `[nombre_usuario]`  
-    - Contraseña: `[contraseña]`
+    - Usuario: `user1`  
+    - Contraseña: `user12345`
   - **Usuario 2:**  
-    - Usuario: `[nombre_usuario]`  
-    - Contraseña: `[contraseña]`
+    - Usuario: `user2`  
+    - Contraseña: `user12345`
   - **Administrador:**  
-    - Usuario: `[nombre_usuario]`  
-    - Contraseña: `[contraseña]`
+    - Usuario: `admin`  
+    - Contraseña: `admin12345`
 
 - **Plataforma de Despliegue:**
   - **URL:** [Inserta la URL aquí]  
   - **Credenciales:**  
-    - Usuario: `[nombre_usuario]`  
-    - Contraseña: `[contraseña]`
+    - Acceder como usuario de prueba.
+
 
 - **Repositorio en GitHub:**  
   - **URL:** [Repositorio de MapYourWorld](https://github.com/ISPP-Grupo-7/MapYourWorld)
