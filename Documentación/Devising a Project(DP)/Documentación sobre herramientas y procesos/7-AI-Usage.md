@@ -51,18 +51,21 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 
 # Registro de uso de IA
 
-
-| Miembro | Intención de uso | Prompt              | ¿Requirió modificación el resultado?              |
-|---------|-----------|--------------------------|--------------------|
-|   Manuel Vélez López | Dividir en mas zonas un mapa de los distritos de sevilla                      |   Quiero que dividas los distritos del siguiente archivos en partes aun más pequeás      |  No           |
-|  Ángel Neria Acal  |            Obtener ideas para realizar una función en frontend         |      Tengo un componente MapView en react-native y necesito una función que a partir de unas coordenadas recibidas por parámetro me dibuje una serie de polígonos en el mapa     |         No    |
-|  Ángel Neria Acal     |            Obtención de conocimientos sobre react native         |      Necesito saber cómo manejar una pulsación en un componente de react-native.|       No      |
-|  Ángel Neria Acal     |          Solución de errores con el componente textInput           |        Cuando pruebo un textInput de react-native con multiline=true al pulsar intro en el teclado no puedo salir del modo de escritura   |      Si       |
+- **Pablo Caballero María, 06/02/2024:** Usé la herramienta *removebg* para eliminar el fondo de mi firma en el documento "*Commitment Agreement*". Dicha herramienta utiliza IA para detectar automáticamente el fondo de la imagen.
+- **Jaime Gómez Marín y José María Baquero Rodríguez, 11/02/2024:** Usamos la herramienta *ChatGPT* para consultar aplicaciones similares a MapYourWorld, con el fin de identificar competidores.
+- **Franco Dell Águila Ureña, 12/02/2024:** Usé la herramienta *ChatGPT* para obtener ideas sobre distintos logos posibles y una paleta de colores adecuada.
+- **Claudio González Benito, 13/02/2025:** Usé *ChatGPT* para esquematizar mejor la información de una de las proto-personas creadas previamente, de manera que se distribuya adecuadamente en 3 diapositivas.
+- **Ricardo Carrero Mario, 13/02/2025:** Usé *ChatGPT* para obtener versiones formales de términos y oraciones para la correcta realización de documentos y para la presentación de la semana 2.
+- **Pablo Olivencia Moreno, 14/02/2025:** Usé *ChatGPT* para el formateo y correcta presentación de los **Usuarios Piloto** en el documento de diseño.
+- **Manuel Vélez López, 14/02/2025:** Usé *ChatGPT* para encontrar información sobre algunos competidores de MapYourWorld.
+- **Jaime Gómez Marín, 17/02/2025:** Usé *lovable* para generar una plantilla para la landing page.
+- **Manuel Vélez López, 01/03/2025:** Usé *ChatGPT* para dividir los distritos en partes más pequeñas.
+- **Jaime Gómez Marín, 12/03/2025:** Usé *ChatGPT* para crear una plantilla para revision.md
 
 ---
 
 # Referencias
 
-
+- Herramienta [removebg](https://www.remove.bg/es)
 - Herramienta [ChatGPT](https://chatgpt.com/)
 - Documento [Commitment Agreement](https://uses0.sharepoint.com/:w:/s/Grupo7ISPP/EUFGat98vcJCnMvGZ59XVxMBkPwpRwgfIKd-jkLpSDAshg?e=qFeslr)
