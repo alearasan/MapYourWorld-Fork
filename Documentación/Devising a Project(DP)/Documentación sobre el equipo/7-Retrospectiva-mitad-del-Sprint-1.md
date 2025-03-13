@@ -1,10 +1,27 @@
-![Portada](../Imagenes/Equipo/Portada-retro.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-**CONTROL DE VERSIONES**
+<h1 align="center">Retropsectiva mitad del Sprint 1</h1>
 
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
-|---------|-----------|--------------------------|--------------------|
-| V1      | 05/03/2025| Primera versión          | Manuel Vélez, Pedro Pablo Santos, Alfonso Alonso, Ángel Neria      |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Manuel Vélez, Pedro Pablo Santos, Alfonso Alonso y Ángel Neria
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 <!-- omit in toc--> # Índice
 
@@ -35,6 +52,8 @@
 
 - Fomentar una actitud de empatía y responsabilidad en el equipo.
 
+---
+
 # 2. Empezar a hacer
 
 **Reforzar el cumplimiento del Commitment Agreement:**
@@ -59,6 +78,8 @@
 
 - Fomentar la consulta de dudas con los coordinadores para evitar malentendidos.
 
+---
+
 # 3. Dejar de hacer
 
 **Malas prácticas en la comunicación:**
@@ -68,6 +89,8 @@
 **Falta de compromiso con las tareas asignadas:**
 
 - No avisar con antelación cuando no se pueda realizar una tarea.
+
+---
 
 # 4. Continuar haciendo
 

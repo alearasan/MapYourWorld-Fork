@@ -1,23 +1,26 @@
-![Portada](../Imagenes/Herramientasyprocesos/Portada-Ai.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-## Uso de Inteligencia Artificial
+<h1 align="center">AI Usage</h1>
 
----
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Antonio Porcar, Ricardo Carrero, Pablo Caballero, Jaime Gómez, José María Baquero, Claudio González y Pablo Olivencia
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
-### CONTROL DE VERSIONES
-
-| **VERSIÓN** | **FECHA**    | **COMENTARIOS**                          | **AUTOR**                                               |
-|-------------|--------------|------------------------------------------|---------------------------------------------------------|
-| v1          | 03/02/2025   | Primera versión                          | Antonio Porcar                                          |
-| v1.1        | 04/02/2025   | Revisión del formato                     | Ricardo Carrero                                         |
-| v1.1.1      | 05/02/2025   | Cambios menores del formato              | Ricardo Carrero                                         |
-| V1.1.2      | 11/02/2025   | Añadida sección registro uso IA          | Pablo Caballero                                         |
-| V1.1.3      | 12/02/2025   | Añadida sección registro uso IA          | Jaime Gómez y José María Baquero                        |
-| V1.1.4      | 13/02/2025   | Añadida sección registro uso IA          | Claudio González Benito                                 |
-| v1.1.5      | 13/02/2025   | Añadida sección registro uso IA          | Ricardo Carrero                                         |
-| v1.2        | 13/02/2025   | Arreglos menores; sección de referencias   | Ricardo Carrero                                         |
-| V1.2.1      | 14/02/2025   | Añadida sección registro uso IA          | Pablo Olivencia                                         |
-| v1.2.2      | 19/02/2025   | Revisión del formato                     | Ricardo Carrero                                         |
 
 ---
 
@@ -28,17 +31,23 @@
 - [3. Registro de uso de IA](#registro-de-uso-de-ia)
 - [4. Referencias](#referencias)
 
+---
+
 # Introducción
 
 En el siguiente documento se presenta de manera detallada y estructurada el uso que se dará a las herramientas de **Inteligencia Artificial** en el Grupo 7 de la asignatura *Ingeniería del Software y Práctica Profesional*.
 
 Se implementarán soluciones apoyándose en estas herramientas para redactar textos más claros y concisos, así como para mejorar el software desarrollado, obteniendo uno más robusto y con mayor rendimiento siempre que sea posible.
 
+---
+
 # ¿Para qué y cómo vamos a usar la IA?
 
 Las herramientas de **Inteligencia Artificial** permitirán ajustar tanto el estilo como la estructura de los documentos a presentar, de modo que el contenido mantenga la coherencia y precisión de la información. Esto permitirá ahorrar tiempo en revisiones manuales y garantizar un cierto grado de calidad en los informes generados.
 
 En cuanto al desarrollo de código, se aplicarán estas herramientas en las fases de depuración y mejora continua. Una vez desarrollado el código de la funcionalidad encomendada, el miembro del equipo podrá apoyarse en ellas para analizar la sintaxis y lógica del código generado, detectando inconsistencias, vulnerabilidades o ineficiencias.
+
+---
 
 # Registro de uso de IA
 
@@ -52,6 +61,8 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 - **Jaime Gómez Marín, 17/02/2025:** Usé *lovable* para generar una plantilla para la landing page.
 - **Manuel Vélez López, 01/03/2025:** Usé *ChatGPT* para dividir los distritos en partes más pequeñas.
 - **Jaime Gómez Marín, 12/03/2025:** Useé *ChatGPT* para crear una plantilla para revision.md
+
+---
 
 # Referencias
 

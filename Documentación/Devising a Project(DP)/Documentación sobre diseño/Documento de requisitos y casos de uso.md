@@ -1,3 +1,28 @@
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
+
+<h1 align="center">Documento de requistos y casos de uso</h1>
+
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Alfonso Luis Alonso Lanzarán
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
+
 # Documento de Especificación de Requisitos de Software (ERS)
 
 ## 1. Introducción

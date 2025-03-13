@@ -1,9 +1,24 @@
-![Portada](../Imagenes/Equipo/Portada-an.png)
-**CONTROL DE VERSIONES**
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
-|---------|-----------|--------------------------|--------------------|
-| V1      | 05/03/2025| Primera versión          | Alfonso Alonso     |
+<h1 align="center">Análisis de rendimiento del equipo</h1>
+
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Alfonso Luis Alonso Lanzarán
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 <!-- omit in toc--> # Índice
 
@@ -15,6 +30,8 @@
   - [1.5. Participación y Colaboración en el Equipo](#15-participación-y-colaboración-en-el-equipo)
   - [1.6. Índice Global de Cumplimiento del Commitment Agreement](#16-índice-global-de-cumplimiento-del-commitment-agreement)
 - [2. Tabla resumen de las métricas (Mitad Sprint 1)](#2-tabla-resumen-de-las-métricas-mitad-sprint-1)
+
+---
 
 # 1. Métricas de rendimiento
 
@@ -65,6 +82,8 @@ En esta sección se definirán las métricas utilizadas para medir el rendimient
 **Descripción:** Este indicador mide el grado de cumplimiento de los compromisos adquiridos por el equipo en un período determinado.
 
 **Indicador/fórmula:** (compromisos cumplidos/total de compromisos asumidos) \* 100
+
+---
 
 # 2. Tabla resumen de las métricas (Mitad Sprint 1)
 

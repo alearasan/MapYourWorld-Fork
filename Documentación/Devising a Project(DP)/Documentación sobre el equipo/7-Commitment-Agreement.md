@@ -1,12 +1,27 @@
-![Portada](../Imagenes/Equipo/Portada-CA.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-**CONTROL DE VERSIONES**
+<h1 align="center">Commitment Agreement</h1>
 
-| **VERSIÓN**              | **FECHA**    | **COMENTARIOS**          | **AUTOR**     |
-|--------------------------|--------------|--------------------------|---------------|
-| v1                       | 03/02/2025   | Primera versión          | Pablo Caballero |
-| v1.1                     | 18/02/2025   | Añadida clausula Teams   | Pablo Olivencia |
-| v1.2                     | 19/02/2025   | Revisión del formato     | Ricardo Carreño |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Alfonso Alonso, Jaime Gomez, Angel Neria, Claudio Gonzalez, Antonio Porcar, Jose Maria Baquero, Pedro Pablo Santos, Pablo Olivencia, Alba Ramos, Ricardo Carreño, Franco Dell Aguila, Pablo Caballero, Alberto Escobar, Alejandro Aragón, Gonzalo García
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 <!-- omit in toc--># Índice
 
@@ -26,6 +41,9 @@
   - [1.13. Pablo Caballero María](#113-pablo-caballero-maría)
   - [1.14. Alberto Escobar Sánchez](#114-alberto-escobar-sánchez)
   - [1.15. Alejandro Aragón Sánchez](#115-alejandro-aragón-sánchez)
+  - [1.15. Gonzalo García Lama](#116-gonzalo-garcía-lama)
+
+---
 
 # 1. Contenido
 

@@ -1,15 +1,27 @@
-![Portada](../Imagenes/Equipo/Portada-org.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
-**CONTROL DE VERSIONES**
+<h1 align="center">Organización del equipo</h1>
 
-| VERSIÓN | FECHA    | COMENTARIOS              | AUTOR              |
-|---------|----------|--------------------------|--------------------|
-| v1      | 03/02/2025 | Primera versión          | Pablo Caballero, Alfonso Alonso |
-| v1.1    | 04/02/2025 | Revisión del formato     | Ricardo Carreño    |
-| v1.2    | 05/02/2025 | Actualización de contenido | Alfonso Alonso, Pablo Caballero |
-| v1.2.1  | 05/02/2025 | Revisión del formato     | Ricardo Carreño    |
-| v1.2.2  | 09/02/2025 | Cambiar equipos por roles | Alberto Escobar    |
-| v1.2.3  | 19/02/2025 | Revisión del documento   | Antonio Porcar, Pablo Olivencia, Ricardo Carreño |
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Pablo Caballero, Alfonso Alonso, Ricardo Carreño, Alberto Escobar, Antonio Porcar y Pablo Olivencia
+</p>
+<p align="center">
+    12/03/2025
+</p>
+
+---
 
 <!-- omit in toc--># Índice
 
@@ -29,6 +41,8 @@
 - [12. Coordinación](#12-coordinación)
 - [13. Referencias](#13-referencias)
 
+---
+
 # 1. Introducción
 
 En este documento se describe la organización de los miembros del equipo, los roles que se ha decidido crear y quienes los conforman. Todos los miembros están asignados a los roles de *backend* o *frontend* puesto que todos deben desarrollar código, adicionalmente pertenecen a uno o más roles a los que han sido asignados de manera  voluntaria y basada en sus aptitudes.
@@ -36,6 +50,8 @@ En este documento se describe la organización de los miembros del equipo, los r
 Las personas que tienen una ***C*** a su derecha son los coordinadores del rol, se ha designado 2 coordinadores por rol para en caso de que una persona no se encuentre disponible, la otra pueda asistir a las reuniones.
 
 Los coordinadores de cada rol se encargarán de garantizar el buen desempeño de las tareas dentro del rol y asistirán a las reuniones de coordinación del proyecto en la que compartirán el estado, solicitarán más recursos, etc.
+
+---
 
 # 2. Asignación de roles
 
@@ -66,13 +82,19 @@ Los coordinadores de cada rol se encargarán de garantizar el buen desempeño de
 | Manuel Vélez         | 🔵      |          | 🔵      | 🔵     |           |       |           |              |
 | Gonzalo García       | 🔵      | 🔵       | 🔵      | 🔵     | 🔵        |       |           |              |
 
+---
+
 # 3. Aptitudes del equipo
 
 Se pidió a los miembros del equipo que describieran en un documento sus aptitudes y en qué área del proyecto tenían más interés en participar, estos documentos se encuentran en la carpeta *"Competencias personales"*.
 
+---
+
 # 4. Rotación en las funciones de los miembros
 
 A lo largo de la duración del proyecto los miembros podrán cambiar de rol si así lo desean o si se requiere balancear cargas de trabajo, siempre se tendrán en cuenta las aptitudes y motivaciones de los miembros.
+
+---
 
 # 5. Backend
 
@@ -90,6 +112,8 @@ Formado por:
 - Pedro Pablo Santos - **C**
 - Manuel Vélez
 
+---
+
 # 6. Frontend
 
 Los miembros de este rol están encargados de desarrollar el *frontend*, diseñar la interfaz de usuario, la experiencia de usuario (UX), etc. Las personas que han sido asignadas a este rol tienen interés por mejorar la experiencia del usuario, son creativas y tienen conocimiento en tecnologías de frontend (React, Tailwind, etc.)
@@ -105,6 +129,8 @@ Formado por:
 - Alba Ramos
 - Gonzalo García
 
+---
+
 # 7. Testing
 
 Rol encargado de realizar las pruebas (*testing*), garantizar la calidad del software, detectar errores y asegurar el buen funcionamiento del sistema. Este rol está compuesto por personas que tienen experiencia en testing, habilidad para el análisis de código.
@@ -117,6 +143,8 @@ Formado por:
 - Antonio Porcar - **C**
 - Manuel Vélez - **C**
 
+---
+
 # 8. DevOps
 
 Rol encargado de la integración continua, la automatización de despliegues, el monitoreo y la gestión de la  infraestructura. En este rol encontramos personas que disfrutan de la automatización de procesos, tienen experiencia con diferentes herramientas de testing y disfrutan revisando código y encontrando errores.
@@ -127,6 +155,8 @@ Formado por:
 - Franco Dell Águila
 - Manuel Vélez
 - Gonzalo García
+
+---
 
 # 9. Seguridad
 
@@ -139,6 +169,8 @@ Formado por:
 - Claudio González
 - Gonzalo García
 
+---
+
 # 10. Asesoría Legal
 
 Rol encargado de asegurar el cumplimiento de las normativas vigentes que pudieran afectar al proyecto. Este rol está compuesto por personas que tienen interés por la legislación que atañe al desarrollo del software.
@@ -146,6 +178,8 @@ Rol encargado de asegurar el cumplimiento de las normativas vigentes que pudiera
 Formado por:
 
 - Alba Ramos - **C**
+
+---
 
 # 11. Marketing/Presentaciones/UI/UX
 
@@ -158,6 +192,8 @@ Formado por:
 - Jaime Gómez
 - José María Baquero
 - Ángel Neria
+
+---
 
 # 12. Coordinación
 
@@ -183,6 +219,8 @@ Formado por:
 - **Seguridad** - Alejandro Aragón
 - **Legal** - Alba Ramos
 - **Marketing** - Ricardo Carreño
+
+---
 
 # 13. Referencias
 

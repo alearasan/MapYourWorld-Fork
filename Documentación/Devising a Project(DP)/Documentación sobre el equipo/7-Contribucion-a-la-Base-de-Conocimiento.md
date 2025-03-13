@@ -1,12 +1,28 @@
-![Portada](../Imagenes/Equipo/Portada-KB.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
+
+<h1 align="center">Contribución a la base del conocmiento</h1>
+
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Antonio Porcar, Manuel Velez y Angel Neria
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
 
-**CONTROL DE VERSIONES**
-
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
-|---------|-----------|--------------------------|--------------------|
-| v1.0    | 20/02/2025| Primera versión          | Antonio Porcar y Manuel Vélez     |
-| v1.1    | 20/02/2025| Versión revisada         | Ángel Neria        |
+---
 
 <!-- omit in toc--> # Índice
 
@@ -30,11 +46,13 @@
       - [2.2.4.2. Semana 2](#2242-semana-2)
 - [3. Acciones de consolidación](#3-acciones-de-consolidación)
 
-
+---
 
 # 1. Enlace a la base del conocimiento
 
 <https://bcc2425.vercel.app/docs/intro>
+
+---
 
 # 2. Contenido contribuido por el equipo 7
 
@@ -331,6 +349,8 @@ En esta página se encuentra el feedback recogido por el equipo del grupo 7 dura
 - Considerar diferentes modelos de monetización, no solo por transacción sino también por tráfico.
 
 - Identificar riesgos de manera más fundamentada y no solo basándose en preocupaciones personales.
+
+---
 
 # 3. Acciones de consolidación
 

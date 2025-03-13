@@ -1,12 +1,27 @@
-![portada](../../Imagenes/Planificacion/Portada-Spirnt1.png)
+<p align="center">
+  <img src="https://www.ucm.es/al-acmes/file/logo-universidad-sevilla/?ver" alt="Logo Universidad Sevilla" width="200" height="200">
+  <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
+</p>
 
+<h1 align="center">Planificación del Sprint 1</h1>
 
-**CONTROL DE VERSIONES**
+<p align="center">
+    Grupo 7
+</p>
+<p align="center">
+    ISPP-MapYourWorld
+</p>
+<p align="center">
+    Sprint 1
+</p>
+<p align="center">
+    Pedro Pablo Santos, Ángel Neria, Antonio Porcar, Pablo Olivencia y Ricardo Carreño
+</p>
+<p align="center">
+    12/03/2025
+</p>
 
-| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR                                      |
-|---------|----------|--------------------------|-------------------------------------------|
-| V1.0    | 08/02/2025 | Primera versión         | Pedro Pablo Santos, Ángel Neria          |
-| V1.1    | 09/02/2025 | Revisión                | Antonio Porcar, Pablo Olivencia, Ricardo Carreño, Ángel Neria |
+---
 
 <!-- omit in toc--> # Índice
 
@@ -15,6 +30,7 @@
 - [3. Estimación de horas](#3-estimación-de-horas)
 - [4. Hitos del Sprint](#4-hitos-del-sprint)
 
+---
 
 # 1. Planificación del Sprint 1
 
@@ -55,6 +71,8 @@ geolocalización.
 6.  **Despliegue de la primera versión:** El despliegue se realizará en
 Raspberry Pi tras la finalización de cada hito.
 
+---
+
 # 2. Responsabilidades del equipo
 
 Dentro de nuestra organización existen dos roles con distintas
@@ -76,6 +94,8 @@ del proyecto. Se dividen en encargados de Backend, Frontend y Testing/Calidad.
 | Creación de mapas colaborativos | Pablo Caballero, Alberto Escobar, Alfonso Luis Lanzarán, Antonio Porcar, Claudio González | Franco Dell Águila, Ricardo Carreño, Alba Ramos | Manuel Vélez, Pedro Pablo Santos |
 | Despliegue de la primera versión | Alejandro Aragón | Gonzalo García | Alejandro Aragón |
 
+---
+
 # 3. Estimación de horas
 
 Para la estimación de horas, hemos utilizado la estimación en tres valores,
@@ -89,6 +109,8 @@ medidos en horas:
 | Creación de mapas colaborativos | 12                   | 19                   | 15                  | 15.17            |
 | Exploración de zonas no descubiertas | 12                   | 30                   | 20                  | 20.33            |
 | Despliegue de la primera versión | 3                    | 6                    | 4                   | 4.17             |
+
+---
 
 # 4. Hitos del Sprint
 
