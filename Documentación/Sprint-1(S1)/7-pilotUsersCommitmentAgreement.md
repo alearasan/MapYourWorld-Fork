@@ -23,6 +23,7 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 13/03/2025| Primera versión          | Claudio Gonzalez Benito |
+| V2      | 13/03/2025| Especificando calculo de nota total         | Claudio Gonzalez Benito |
 
 <!-- omit in toc--> 
 # Índice
@@ -59,7 +60,7 @@ Al firmar este documento, entiendo y acepto las responsabilidades que se me han 
 
 ## 1.2. Evaluación
 
-La evaluación de los usuarios piloto se realizará según la siguiente rúbrica:
+La evaluación de los usuarios piloto se realizará según la siguiente rúbrica por cada encuesta exceptuando la primera, y la nota por cada sprint sera la nota de la encuesta de ese sprint, siendo la nota final la media de todas. La rubrica es:
 
 **Puntuación total: 10 puntos**
 
