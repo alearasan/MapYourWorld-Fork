@@ -98,7 +98,6 @@
 
 - **URL de la página de inicio (Landing Page):** [Landing Page de MapYourWorld](https://mapyourworld.netlify.app/)  
   
-
 - **Credenciales de Usuarios:**
   Por ahora la funcionalidad implementada no precisa de credenciales de acceso para la aplicación, ya que el registro y login no se ha implementado como es debido. Para acceder se presenta la opción de *Entrar en modo prueba*, dentro de la pantalla de *Login*, lo que permite el acceso instantáneo usando un usuario de prueba. No obstante existen usuarios creados en la base de datos, aunque como se ha mencionado, actualmente no es posible acceder con sus credenciales.
 
@@ -113,10 +112,9 @@
     - Contraseña: `admin12345`
 
 - **Plataforma de Despliegue:**
-  - **URL:** [Inserta la URL aquí]  
+  - **URL:** [Despliegue de MapYourWorld](https://52.143.134.165/)
   - **Credenciales:**  
     - Acceder como usuario de prueba.
-
 
 - **Repositorio en GitHub:**  
   - **URL:** [Repositorio de MapYourWorld](https://github.com/ISPP-Grupo-7/MapYourWorld)
@@ -124,7 +122,6 @@
 - **Herramienta de Seguimiento de Tiempo:**
   - **URL:** [Reporte de Clockify](https://app.clockify.me/shared/67d1d4ef61753b24b9d8d838)  
   
-
 ---
 
 ## 3. Requisitos Potenciales para Usar el Sistema
@@ -136,8 +133,7 @@
 
 ## 4. Demo de la Evaluación
 
-- **Enlace a la demo:**  
-  [Inserta el enlace al archivo mp4 de la demo almacenado en GitHub]
+- **URL:** [Demo de MapYourWorld](https://youtu.be/prP8lgc8mk4)
 
 ## 5. Acceso al despliegue
 
@@ -154,4 +150,3 @@ Concretamente, el proceso de node (llamado mapyourworld) está gestionado por la
 `http://52.143.134.165:4444`
 
 ---
-
