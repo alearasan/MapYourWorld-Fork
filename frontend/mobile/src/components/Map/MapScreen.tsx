@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
 import { API_URL } from '../../constants/config';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Tipos para distritos y POIs
 interface Distrito {
@@ -70,43 +69,6 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   );
 };
 
-// Componente para mostrar errores en un modal
-const ErrorModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
-  if (!visible) return null;
-  
-  const isError = title.toLowerCase().includes('error') || title.toLowerCase().includes('no válid') || title.toLowerCase().includes('bloqueado');
-  const iconName = isError ? "error" : "info";
-  const iconColor = isError ? "#f44336" : "#2196F3";
-  
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <View style={styles.errorIconContainer}>
-            <Icon name={iconName} size={32} color={iconColor} />
-          </View>
-          <Text style={styles.modalTitle}>{title}</Text>
-          <Text style={styles.modalText}>{message}</Text>
-          <TouchableOpacity 
-            style={[
-              styles.closeButton, 
-              { backgroundColor: isError ? "#f44336" : "#2196F3" }
-            ]} 
-            onPress={onClose}
-          >
-            <Text style={styles.closeButtonText}>Aceptar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
 const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [distritosBackend, setDistritosBackend] = useState<Distrito[]>([]);
@@ -126,7 +88,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   });
   // State para almacenar los POIs obtenidos del backend
   const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
-  const [alertModal, setAlertModal] = useState({ visible: false, title: '', message: '' });
 
   // Función para verificar si un punto está dentro de un polígono (distrito)
   const isPointInPolygon = (
@@ -259,23 +220,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     }
   };
 
-  // Función para mostrar alertas con el modal
-  const showAlert = (title: string, message: string) => {
-    setAlertModal({
-      visible: true,
-      title,
-      message
-    });
-  };
-  
-  // Función para cerrar el modal de alerta
-  const closeAlertModal = () => {
-    setAlertModal({
-      ...alertModal,
-      visible: false
-    });
-  };
-
   // Al montar el componente se obtienen distritos, POIs y se comienza a observar la ubicación
   useEffect(() => {
     fetchDistritos();
@@ -350,42 +294,28 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         </View>
       ) : (
         <>
-          {/* Modal de alertas */}
-          <ErrorModal 
-            visible={alertModal.visible}
-            title={alertModal.title}
-            message={alertModal.message}
-            onClose={closeAlertModal}
-          />
-          
           <Modal
             visible={showForm}
             transparent={true}
-            animationType="fade"
             onRequestClose={() => setShowForm(false)}
           >
-            <View style={styles.modalContainer}>
-              <View style={styles.poiFormContainer}>
-                <Text style={styles.poiFormTitle}>Registrar Punto de Interés</Text>
-                <PuntoDeInteresForm
-                  pointOfInterest={pointOfInterest}
-                  setPointOfInterest={setPointOfInterest}
-                  setShowForm={setShowForm}
-                  onSave={(newPOI: any) => {
-                    // Convertir el POI recién creado al formato esperado
-                    const poiConverted = {
-                      ...newPOI,
-                      location: {
-                        type: "Point",
-                        coordinates: [newPOI.longitude, newPOI.latitude],
-                      },
-                    };
-                    setPointsOfInterest((prev) => [...prev, poiConverted]);
-                  }}
-                  showAlert={showAlert}
-                />
-              </View>
-            </View>
+            <PuntoDeInteresForm
+              pointOfInterest={pointOfInterest}
+              setPointOfInterest={setPointOfInterest}
+              setShowForm={setShowForm}
+              onSave={(newPOI: any) => {
+                // Convertir el POI recién creado al formato esperado
+                const poiConverted = {
+                  ...newPOI,
+                  
+                  location: {
+                    type: "Point",
+                    coordinates: [newPOI.longitude, newPOI.latitude],
+                  },
+                };
+                setPointsOfInterest((prev) => [...prev, poiConverted]);
+              }}
+            />
           </Modal>
           <MapView
             style={styles.map}
@@ -407,18 +337,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                   break;
                 }
               }
-              
-              // Verificar si puede crear un POI en este distrito
-              if (!poiDistrict) {
-                showAlert('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
-                return;
-              }
-              
-              if (!poiDistrict.isUnlocked) {
-                showAlert('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Desbloquéalo primero para añadir puntos de interés.`);
-                return;
-              }
-              
               setPointOfInterest({
                 ...pointOfInterest,
                 latitude,
@@ -508,65 +426,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "yellow",
     fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 20,
-    elevation: 5,
-    alignItems: "center",
-  },
-  poiFormContainer: {
-    width: "90%",
-    maxWidth: 380,
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 20,
-    elevation: 5,
-    maxHeight: "90%",
-  },
-  poiFormTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-    color: "#333",
-  },
-  errorIconContainer: {
-    marginBottom: 15,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-    color: "#333",
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
-    lineHeight: 22,
-    color: "#555",
-  },
-  closeButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 5,
-  },
-  closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
   },
 });
 

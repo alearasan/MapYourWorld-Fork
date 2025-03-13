@@ -45,58 +45,31 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
 
   // Función para mostrar alertas según la plataforma
   const mostrarAlerta = (titulo: string, mensaje: string) => {
-    if (showAlert) {
-      // Usamos el modal de alerta personalizado si está disponible
+    if (isWeb && showAlert) {
+      // En web usamos el modal de alerta personalizado
       showAlert(titulo, mensaje);
     } else {
-      // Fallback a Alert.alert solo si showAlert no está disponible
+      // En mobile seguimos usando Alert.alert
       Alert.alert(titulo, mensaje);
     }
   };
 
   // Función para seleccionar una foto desde la galería usando Expo Image Picker
   const handleAddPhoto = async () => {
-    if (isWeb) {
-      // Para la versión web, usamos input de tipo file
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*'; // Solo aceptar imágenes
-      
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        
-        if (!file) return;
-        
-        // Validar que es un archivo de imagen
-        if (!file.type.startsWith('image/')) {
-          mostrarAlerta('Tipo de archivo no válido', 'Por favor, selecciona solo archivos de imagen (jpg, png, gif, etc.)');
-          return;
-        }
-        
-        // Crear URL para la imagen seleccionada
-        const uri = URL.createObjectURL(file);
-        const updatedPhotos = pointOfInterest.photos ? [...pointOfInterest.photos, uri] : [uri];
-        setPointOfInterest({ ...pointOfInterest, photos: updatedPhotos });
-      };
-      
-      input.click();
-    } else {
-      // Versión móvil original
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permissionResult.granted) {
-        mostrarAlerta('Permiso denegado', 'Se requiere acceso a la galería para seleccionar una imagen.');
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 1,
-      });
-      if (!result.canceled) {
-        const uri = result.assets[0].uri;
-        const updatedPhotos = pointOfInterest.photos ? [...pointOfInterest.photos, uri] : [uri];
-        setPointOfInterest({ ...pointOfInterest, photos: updatedPhotos });
-      }
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      mostrarAlerta('Permiso denegado', 'Se requiere acceso a la galería para seleccionar una imagen.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      const updatedPhotos = pointOfInterest.photos ? [...pointOfInterest.photos, uri] : [uri];
+      setPointOfInterest({ ...pointOfInterest, photos: updatedPhotos });
     }
   };
 
@@ -106,24 +79,11 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
   };
 
   const handleSubmit = async () => {
+  
     try {
+      
       if (pointOfInterest.district === null || !pointOfInterest.district.isUnlocked) {
         mostrarAlerta('Distrito no válido', 'Este distrito está bloqueado. No se puede crear el punto de interés.');
-        return;
-      }
-      
-      if (!pointOfInterest.name || pointOfInterest.name.trim() === '') {
-        mostrarAlerta('Nombre requerido', 'Por favor, introduce un nombre para el punto de interés.');
-        return;
-      }
-      
-      if (!pointOfInterest.description || pointOfInterest.description.trim() === '') {
-        mostrarAlerta('Descripción requerida', 'Por favor, introduce una descripción para el punto de interés.');
-        return;
-      }
-      
-      if (!pointOfInterest.category || pointOfInterest.category.trim() === '') {
-        mostrarAlerta('Categoría requerida', 'Por favor, selecciona una categoría para el punto de interés.');
         return;
       }
       
@@ -166,8 +126,8 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
         mostrarAlerta('Error', data.error || 'No se pudo crear el punto de interés.');
       }
     } catch (error) {
-      console.error("Error al guardar el punto de interés:", error);
-      mostrarAlerta('Error', 'Ha ocurrido un error al guardar el punto de interés.');
+      console.error("Error al crear el punto de interés:", error);
+      mostrarAlerta('Error', 'Ocurrió un error al crear el punto de interés.');
     }
   };
 
