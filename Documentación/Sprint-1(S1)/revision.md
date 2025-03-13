@@ -15,7 +15,7 @@
     Sprint 1
 </p>
 <p align="center">
-    Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez
+    Jaime Gómez Marín, Ángel Neria Acal, José María Baquero Rodríguez, Pablo Caballero María
 </p>
 
 <p align="center">
@@ -28,7 +28,8 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 12/03/2025| Primera versión          | Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez     |
-| V2      | 13/03/2025| Actualización del documento| Ángel Neria Acal y José María Baquero Rodríguez
+| V2      | 13/03/2025| Actualización del documento| Ángel Neria Acal y José María Baquero Rodríguez     |
+| V3      | 13/03/2025| Actualización del documento| Pablo Caballero María     |
 
 ---
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
@@ -137,3 +138,20 @@
 
 - **Enlace a la demo:**  
   [Inserta el enlace al archivo mp4 de la demo almacenado en GitHub]
+
+## 5. Acceso al despliegue
+
+- Actualmente, la aplicación web se encuentra desplegada en una instancia de máquina virtual de Microsoft Azure. Para acceder, se requiere conectarse mediante **ssh** a la dirección IP de la máquina virtual. La autenticación se realiza mediante una clave RSA privada que se adjunta. El comando completo es el siguiente:
+
+`ssh -i ispp_key.pem ispp_admin@52.143.134.165`
+
+Concretamente, el proceso de node (llamado mapyourworld) está gestionado por la herramienta **PM2**. Para comprobar el estado del proceso, se puede ejecutar el siguiente comando:
+
+`pm2 list`
+
+- Sin embargo, si lo que deseamos es acceder a la aplicación como un usuario, a través del navegador, entonces debemos conectarnos mediante **http** al socket de la máquina virtual en el cual se está ejecutando el proceso de node, es decir, la IP anteriormente mencionado, en el puerto **4444**. La URL completa sería la siguiente:
+
+`http://52.143.134.165:4444`
+
+---
+
