@@ -15,7 +15,7 @@
     Sprint 2
 </p>
 <p align="center">
-    Pedro Pablo Santos Domínguez, Ángel Neria Acal
+    Pedro Pablo Santos Domínguez, Ángel Neria Acal, Antonio Porcar
 </p>
 <p align="center">
     12/03/2025
@@ -26,6 +26,7 @@
 |---------|-----------|--------------------------|--------------------|
 | V1      | 12/03/2025| Primera versión          | Pedro Pablo Santos     |
 | V2      | 13/03/2025| Actualización del documento| Ángel Neria 
+| V3      | 13/03/2025| Actualización del documento | Antonio Porcar 
 ---
 
 # Índice
@@ -55,6 +56,10 @@ El equipo se centrará en la implementación de las siguientes tareas clave:
 
 5.  **Despliegue de la segunda versión:** Para el despliegue web se utilizara una maquina virtual, Microsoft Azure, y una herrramienta que permite que el proceso perviva incluso saliendote de la maquina es pm2. 
 
+6. **Pruebas unitarias:** El equipo implementará pruebas unitarias utilizando Jest para verificar el correcto funcionamiento de los métodos del servicio.
+
+7. **Bateria de pruebas exhaustivas:**El equipo de testing desarrollará baterías de pruebas exhaustivas que incluirán casos límite, escenarios negativos y pruebas de hacking para asegurar un sistema robusto y eficiente
+
 ---
 
 # 2. Responsabilidades del equipo
@@ -76,6 +81,8 @@ del proyecto. Se dividen en encargados de Backend, Frontend y Testing/Calidad.
 | Modulo de logros | Manuel Vélez, Pedro Pablo, Alfonso Alonso Lanzarán  | Ricardo Carreño, Pablo Olivencia |  |
 | Funcionalidad de admin | Manuel Vélez, Pedro Pablo Santos, Gonzalo García | Jaime Gómez, Ángel Neria y José María Baquero   |  |
 | Despliegue de la segunda versión | Alejandro Aragón | Gonzalo García | Alejandro Aragón |
+| Pruebas unitarias              | Todos                                   | Todos                                       | Todos                       |
+| Bateria de pruebas exhaustivas | | | Gonzalo García, Antonio Porcar, Alejandro Aragón, Pedro Pablo Santos, Manuel Vélez |
 
 ---
 
@@ -91,15 +98,17 @@ medidos en horas:
 | Modulo de logros | 12                   | 18                   | 14                  |  14.33              |
 | Funcionalidad de admin | 12                   | 19                   | 15                  | 15.17            |
 | Despliegue de la segunda versión | 3                    | 6                    | 4                   |  4.17            |
+| Pruebas del sistema              | 12                    | 22                    | 18                 | 17.67             |
+| Bateria de pruebas exhaustivas | 15                   | 26                   | 20                  | 20.17            |
 
 ---
 
 # 4. Hitos del Sprint
 
 -   **20 de marzo:** Para esta fecha, se espera tener completadas las tareas de
-Registro de usuarios, Modulo de pago, modulo de logros. Esto suma un
-total de 35.66 horas.
+Registro de usuarios, Modulo de pago, modulo de logros, pruebas unitarias. Esto suma un
+total de 53.33 horas.
 
 -   **27 de marzo:** Para esta fecha, todas las tareas deberán estar completadas,
-incluyendo sus pruebas y el despliegue de la segunda versión. Esto suma un
-total de 19.34 horas.
+incluyendo las pruebas y el despliegue de la segunda versión. Esto suma un
+total de 39.51 horas.
