@@ -35,7 +35,7 @@
 - [4. Base de Datos](#base-de-datos)
   - [4.1. Tecnología seleccionada: PostgreSQL con la extensión PostGIS](#tecnología-seleccionada-postgresql-con-la-extensión-postgis)
 - [5. Despliegue](#despliegue)
-  - [5.1. Plataforma seleccionada: Raspberry Pi](#plataforma-seleccionada-raspberry-pi)
+  - [5.1. Plataforma seleccionada: máquina virtual de Azurei](#plataforma-seleccionada-azure)
 - [6. Pruebas y Validación](#pruebas-y-validación)
   - [6.1. Pruebas en Backend](#pruebas-en-backend)
   - [6.2. Pruebas en Frontend](#pruebas-en-frontend)
@@ -113,11 +113,11 @@ Para el almacenamiento de datos, se ha optado por **PostgreSQL**, un sistema de 
 
 # Despliegue
 
-## Plataforma seleccionada: Raspberry Pi
+## Plataforma seleccionada: Azure
 
-El despliegue del sistema se realizará en un entorno **Raspberry Pi**, lo que proporciona una infraestructura de bajo costo y consumo energético.
+El despliegue del sistema se realizará en un entorno **máquina virtual de Azure**, lo que proporciona una infraestructura de bajo costo y consumo energético.
 
-**Motivos para elegir Raspberry Pi:**
+**Motivos para elegir máquina virtual de Azure:**
 
 - Permite realizar pruebas en entornos locales antes de escalar.
 - Bajo consumo energético, reduciendo costos operativos.

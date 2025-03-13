@@ -76,7 +76,7 @@ Dentro de cada sprint existen las siguientes fases: **planificación**, **desarr
 - **Planificación:** Los miembros involucrados se reunirán para tomar decisiones que afecten a cada tarea, definiendo y repartiendo las subtareas y organizando los tiempos para su adecuado desarrollo, ya que cada equipo es autogestionado.
 - **Desarrollo:** Se realizarán las tareas de programación o redacción de la documentación pertinente. Al final del proyecto, todos los miembros habrán participado en diversas tareas de ambos tipos. En esta fase, se utilizará el stack tecnológico definido para construir progresivamente las funcionalidades de la aplicación, lo que podría incluir la formación de algún miembro en algún aspecto técnico.
 - **Pruebas:** Se ejecutarán pruebas de integración y de sistema. Cada miembro realizará pruebas unitarias sobre su propio código durante la fase de desarrollo, mientras que el equipo de testing se encargará de pruebas sobre componentes más amplios y sobre la aplicación completa, reportando cualquier error.
-- **Despliegue:** El equipo de DevOps actualizará el despliegue en nuestro servidor local (Raspberry Pi), comprobando que la aplicación sea accesible y funcional desde un cliente externo.
+- **Despliegue:** El equipo de DevOps actualizará el despliegue en nuestro servidor local (máquina virtual de Azure), comprobando que la aplicación sea accesible y funcional desde un cliente externo.
 - **Mantenimiento:** Se implementarán acciones para mantener y actualizar la aplicación tras su despliegue, garantizando la corrección de errores y la mejora continua.
 
 ---
@@ -104,7 +104,7 @@ En el frontend se opta por **React Native** para desarrollar aplicaciones móvil
 
 Para el almacenamiento de datos se ha seleccionado **PostgreSQL**, complementado con la extensión **PostGIS**, que posibilita consultas geoespaciales avanzadas, lo cual es especialmente relevante en una aplicación que utiliza la geolocalización para ofrecer experiencias interactivas a los usuarios.
 
-El despliegue se realizará inicialmente en plataformas **Raspberry Pi**, proporcionando un entorno de bajo costo y consumo energético para pruebas locales, lo que permitirá validar el rendimiento y la estabilidad antes de escalar a una infraestructura más robusta en producción.
+El despliegue se realizará inicialmente en plataformas **máquina virtual de Azure**, proporcionando un entorno de bajo costo y consumo energético para pruebas locales, lo que permitirá validar el rendimiento y la estabilidad antes de escalar a una infraestructura más robusta en producción.
 
 Finalmente, se implementarán estrategias de pruebas y validación utilizando herramientas como **Jest**, **React Testing Library** y **Postman**, garantizando la calidad, estabilidad y seguridad del sistema en cada fase.
 
@@ -134,7 +134,7 @@ Una vez que la funcionalidad esté lista y probada localmente, se realizará un 
 
 La estrategia de automatización para la integración y despliegue consiste en que, según nuestra política de control de versiones, el repositorio público en GitHub contendrá en todo momento una versión atómica y funcional del proyecto sobre la que se irán integrando los incrementos sucesivos.
 
-En cuanto al despliegue, además del hardware (Raspberry Pi), existirá un software específico en el entorno de despliegue que atenderá la aplicación en producción: un balanceador de carga, archivos con las variables de entorno necesarias y todas las dependencias de Node.js requeridas para su funcionamiento.
+En cuanto al despliegue, además del hardware (máquina virtual de Azure), existirá un software específico en el entorno de despliegue que atenderá la aplicación en producción: un balanceador de carga, archivos con las variables de entorno necesarias y todas las dependencias de Node.js requeridas para su funcionamiento.
 
 ## Pipeline de despliegue: Descripción de las etapas de construcción, pruebas y despliegue
 
