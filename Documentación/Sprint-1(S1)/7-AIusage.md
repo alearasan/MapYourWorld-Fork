@@ -26,10 +26,11 @@
 
 # Índice
 
-- [1. Introducción](#introducción)
-- [2. ¿Para qué y cómo vamos a usar la IA?](#para-qu%C3%A9-y-c%C3%B3mo-vamos-a-usar-la-ia)
-- [3. Registro de uso de IA](#registro-de-uso-de-ia)
-- [4. Referencias](#referencias)
+- [Índice](#índice)
+- [Introducción](#introducción)
+- [¿Para qué y cómo vamos a usar la IA?](#para-qué-y-cómo-vamos-a-usar-la-ia)
+- [Registro de uso de IA](#registro-de-uso-de-ia)
+- [Referencias](#referencias)
 
 ---
 
