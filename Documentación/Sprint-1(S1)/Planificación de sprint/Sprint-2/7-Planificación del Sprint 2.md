@@ -15,15 +15,20 @@
     Sprint 2
 </p>
 <p align="center">
-    Pedro Pablo Santos Domínguez
+    Pedro Pablo Santos Domínguez, Ángel Neria Acal
 </p>
 <p align="center">
     12/03/2025
 </p>
 
 ---
+| VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
+|---------|-----------|--------------------------|--------------------|
+| V1      | 12/03/2025| Primera versión          | Pedro Pablo Santos     |
+| V2      | 13/03/2025| Actualización del documento| Ángel Neria 
+---
 
-<!-- omit in toc--> # Índice
+# Índice
 
 - [1. Planificación del Sprint 2](#1-planificación-del-sprint-2)
 - [2. Responsabilidades del equipo](#2-responsabilidades-del-equipo)
@@ -32,7 +37,7 @@
 
 ---
 
-# 1. Planificación del Sprint 1
+# 1. Planificación del Sprint 2
 
 **Duración: 21/02/2025 - 07/03/2025**
 
@@ -66,10 +71,10 @@ del proyecto. Se dividen en encargados de Backend, Frontend y Testing/Calidad.
 
 | TAREA                 | BACKEND                                 | FRONTEND                                    | TESTING                     |
 |-----------------------|---------------------------------------|---------------------------------------------|-----------------------------|
-| Registro de usuarios | Antonio Porcar, Alejandro Aragón, Pablo Olivencia    |                                        |                        |
-| Modulo de pago | Claudio Gonzalez, Pablo caballero, Alberto Escobar |  |  |
-| Modulo de logros | Manuel Vélez, Pedro Pablo, Alfonso Alonso Lanzarán  |  |  |
-| Funcionalidad de admin | Manuel Vélez, Pedro Pablo Santos, Gonzalo García |  |  |
+| Registro de usuarios | Antonio Porcar, Alejandro Aragón, Pablo Olivencia    |  Jaime Gómez, Ángel Neria y José María Baquero Rodríguez                                      |                        |
+| Modulo de pago | Claudio Gonzalez, Pablo caballero, Alberto Escobar |  Alba Ramos, Franco Dell`Aguila|  |
+| Modulo de logros | Manuel Vélez, Pedro Pablo, Alfonso Alonso Lanzarán  | Ricardo Carreño, Pablo Olivencia |  |
+| Funcionalidad de admin | Manuel Vélez, Pedro Pablo Santos, Gonzalo García | Jaime Gómez, Ángel Neria y José María Baquero   |  |
 | Despliegue de la segunda versión | Alejandro Aragón | Gonzalo García | Alejandro Aragón |
 
 ---
