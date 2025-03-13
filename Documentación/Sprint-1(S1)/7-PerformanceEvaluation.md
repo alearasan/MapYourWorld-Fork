@@ -28,16 +28,15 @@
 | V1      | 12/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán, Pablo Caballero María      |
 
 
-
 | Student                            | #DP1 | #S1 | #S2 | #S3 | #PPL | #WPL | Total | Weight |
 |------------------------------------|------|-----|-----|-----|------|------|-------|--------|
-| Alonso Lanzarán, Alfonso Luis      | 10   |     |     |     |      |      |       |        |
-| Aragón Sánchez, Alejandro          | 10   |     |     |     |      |      |       |        |
-| Baquero Rodríguez, Jose María      | 10   |     |     |     |      |      |       |        |
-| Caballero María, Pablo             | 10   |     |     |     |      |      |       |        |
-| Carreño Mariño, Ricardo            | 10   |     |     |     |      |      |       |        |
-| Dell ‘Aguila Ureña, Franco         | 10   |     |     |     |      |      |       |        |
-| Escobar Sánchez, Alberto           | 10   |     |     |     |      |      |       |        |
+| Alonso Lanzarán, Alfonso Luis      | 10   | 6,2 |     |     |      |      |       |        |
+| Aragón Sánchez, Alejandro          | 10   | 6,2 |     |     |      |      |       |        |
+| Baquero Rodríguez, Jose María      | 10   | 7,1 |     |     |      |      |       |        |
+| Caballero María, Pablo             | 10   | 6,2 |     |     |      |      |       |        |
+| Carreño Mariño, Ricardo            | 10   | 3,5 |     |     |      |      |       |        |
+| Dell ‘Aguila Ureña, Franco         | 10   | 7,5 |     |     |      |      |       |        |
+| Escobar Sánchez, Alberto           | 10   | 3,1 |     |     |      |      |       |        |
 | Gómez Marín, Jaime                 | 10   |     |     |     |      |      |       |        |
 | González Benito, Claudio           | 10   |     |     |     |      |      |       |        |
 | Neria Acal, Ángel                  | 10   |     |     |     |      |      |       |        |

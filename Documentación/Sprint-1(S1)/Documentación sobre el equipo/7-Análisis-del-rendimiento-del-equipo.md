@@ -99,20 +99,20 @@ En esta sección se definirán las métricas utilizadas para medir el rendimient
 # 2. Tabla resumen de las métricas (Mitad Sprint 1)
 
 | **Miembro**       | **M-1** | **M-2** | **M-3** | **M-4** | **M-5** | **M-6** | **M-7** | **M-8** |
-|-------------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|
+|-------------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|-|
 | **Alfonso Alonso**| 100%            | -           | 2 días            |   2 días          | 100%          | 100%           | 0%           | 80%           |
 | **Alejandro Aragón**| 100%          | -           | 1 día            | 2 días            | 100%        | 100%           | 0%           | 80%           |
-| **José María Baquero**| 100%        | -           | 2,5 días            |     1 día        | 100%        | 100%          | 7%           | 80%           |
+| **José María Baquero**| 100%        | -           | 2,5 días            |     1 día        | 100%        | 100%          | 7%           | 100%           |
 | **Pablo Caballero**| 100%           | -         | 2 días            |   2 días        | 100%        | 100%           | 0%           | 80%           |
-| **Ricardo Carreño**| 0%           | -        | 3 días            | No se terminaron         | 77%        | 100%          | -22%           | 80%           |
-| **Franco Dell 'Aguila**| 100%       | -         | 4 días            | 4 días            | 100%        | 100%          | 12%           | 80%           |
-| **Alberto Escobar**| 100%           | -           | 1 día            | 2 días           | 59%        | 100%           | -41%           | 80%           |
-| **Jaime Gómez**    | 100%           | -           | 2,5 días            | 2 días            | 100%        | 100%          | 10%           | 80%           |
+| **Ricardo Carreño**| 0%           | -        | 3 días            | No se terminaron         | 77%        | 100%          | -22%           | 100%           |
+| **Franco Dell 'Aguila**| 100%       | -         | 4 días            | 4 días            | 100%        | 100%          | 12%           | 100%           |
+| **Alberto Escobar**| 100%           | -           | 1 día            | 2 días           | 59%        | 100%           | -41%           | 60%           |
+| **Jaime Gómez**    | 100%           | -           | 2,5 días            | 2 días            | 100%        | 100%          | 10%           | 100%           |
 | **Claudio González**| 100%          | -          | 2 días            | 1 día            | 100%        | 100%         | 0%           | 80%           |
-| **Ángel Neria**    | 100%           | -          | 4 días            | 2 días            | 100%          | 100%          | 47%           | 80%           |
-| **Pablo Olivencia**| 100%           | -          | 1 día            | 2 días            | 100%        | 100%          | 4%           | 80%           |
-| **Antonio Porcar** | 100%           | -           | 0,5 días            |    1,5 días         | 100%        | 100%          | 15%           | 80%           |
-| **Alba Ramos**     | 50%           | -          | 2,25 días            |    No se terminaron         | 100%        | 100%          | 36%           | 80%           |
-| **Pedro Pablo Santos**| 100%        | -          | 0,8 días            | 1,2 días            | 100%          | 100%          | 66%           | 80%           |
-| **Manuel Vélez**   | 100%           | -         | 0,8 días            | 1,2 días             | 100%          | 100%          | 63%           | 80%           |
-| **Gonzalo García** | 100%           | -          | 2 días            | 1 día            | 100%          | 100%          | 174%           | 80%           |
+| **Ángel Neria**    | 100%           | -          | 4 días            | 2 días            | 100%          | 100%          | 47%           | 100%           |
+| **Pablo Olivencia**| 100%           | -          | 1 día            | 2 días            | 100%        | 100%          | 4%           | 100%           |
+| **Antonio Porcar** | 100%           | -           | 0,5 días            |    1,5 días         | 100%        | 100%          | 15%           | 100%           |
+| **Alba Ramos**     | 50%           | -          | 2,25 días            |    No se terminaron         | 100%        | 100%          | 36%           | 100%           |
+| **Pedro Pablo Santos**| 100%        | -          | 0,8 días            | 1,2 días            | 100%          | 100%          | 66%           | 100%           |
+| **Manuel Vélez**   | 100%           | -         | 0,8 días            | 1,2 días             | 100%          | 100%          | 63%           | 100%           |
+| **Gonzalo García** | 100%           | -          | 2 días            | 1 día            | 100%          | 100%          | 174%           | 100%           |
