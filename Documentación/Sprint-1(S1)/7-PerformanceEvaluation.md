@@ -45,7 +45,7 @@
 | Santos Dominguez, Pedro Pablo      | 10   | 10  |     |     |      |      |       |        |
 | Vélez López, Manuel                | 10   | 10  |     |     |      |      |       |        |
 | García Lama, Gonzalo               | 10   | 10  |     |     |      |      |       |        |
-| **Total**                          | 160  |     |     |     |      |      |       |        |
+| **Total**                          | 160  |117,4|     |     |      |      |       |        |
 
 <h1 align="center">Individual Contribution Summary</h1>
 
