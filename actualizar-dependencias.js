@@ -211,7 +211,7 @@ function sincronizarDependencias() {
       'chart.js': '4.4.8',
       'react-chartjs-2': '5.3.0',
       'lightningcss': '1.29.1',
-      'react-router-dom': '^7.2.0',
+      'react-router-dom': '7.3.0',
       '@expo/metro-runtime': '~4.0.1',
       'react-native-web': '~0.19.13',
       
