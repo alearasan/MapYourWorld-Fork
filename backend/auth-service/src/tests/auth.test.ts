@@ -22,16 +22,18 @@ import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email
 
 // Simulamos el AuthRepository
 jest.mock('../repositories/auth.repository', () => {
+  const mockRepo = {
+    findByEmail: jest.fn(),
+    save: jest.fn(),
+    findById: jest.fn(),
+    findWithPassword: jest.fn(),
+    findAll: jest.fn(),
+    updatePassword: jest.fn(),
+    create: jest.fn()
+  };
+  
   return {
-    AuthRepository: jest.fn().mockImplementation(() => ({
-      findByEmail: jest.fn(),
-      save: jest.fn(),
-      findById: jest.fn(),
-      findWithPassword: jest.fn(),
-      findAll: jest.fn(),
-      updatePassword: jest.fn(),
-      create: jest.fn()
-    }))
+    AuthRepository: jest.fn().mockImplementation(() => mockRepo)
   };
 });
 
@@ -59,7 +61,10 @@ describe('Auth Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Se obtiene la instancia del repositorio simulado
-    repoInstance = (AuthRepository as jest.Mock).mock.instances[0];
+    const AuthRepositoryMock = AuthRepository as jest.Mock;
+    // Crear una nueva instancia del mock antes de cada test
+    new AuthRepositoryMock();
+    repoInstance = AuthRepositoryMock.mock.results[0].value;
   });
 
   describe('getUserById', () => {
