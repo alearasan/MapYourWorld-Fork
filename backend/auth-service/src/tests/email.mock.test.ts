@@ -11,7 +11,7 @@ jest.mock('nodemailer', () => ({
     }))
   }));
   
-  // Mock the email service methods - IMPORTANT: mock completely instead of using requireActual
+  // Mock the email service methods 
   jest.mock('../services/email.service', () => ({
     sendEmail: jest.fn().mockImplementation(() => 
       Promise.resolve({
@@ -50,7 +50,6 @@ jest.mock('nodemailer', () => ({
   
   describe('Email Service Tests', () => {
     beforeEach(() => {
-      // Clear all mocks before each test
       jest.clearAllMocks();
     });
   
