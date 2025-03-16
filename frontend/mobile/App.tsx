@@ -20,6 +20,7 @@ import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
+import UserStatsScreen from './src/components/Stats/UserStatsScreen';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -95,6 +96,15 @@ const ForgotPasswordScreenWrapper = (props: any) => {
   } else {
     return <ForgotPasswordScreenMobile {...props} />;
   }
+};
+
+const UserStatsScreenWrapper = (props: any) => {
+  // if (Platform.OS === 'web') {
+  //   const WebUserStatsScreen = require('./src/components/Stats/UserStatsScreen.web').default;
+  //   return <WebUserStatsScreen {...props} />;
+  // } else {
+    return <UserStatsScreen {...props} />;
+  // }
 };
 
 // Componente principal de la aplicación
@@ -206,6 +216,23 @@ const AppContent = () => {
               </View>
             ),
           }} 
+        />
+
+        <Stack.Screen 
+          name="UserStats" 
+          component={UserStatsScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Estadísticas</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
