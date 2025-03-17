@@ -44,7 +44,7 @@ export const getAchievements = async (): Promise<UserAchievement[]> => {
 
 //obtener todos los logros de un usuario
 
-export const getAchievementByUser = async (userId: string): Promise<UserAchievement[]> => {
+export const getAchievementsByUser = async (userId: string): Promise<UserAchievement[]> => {
   try {
     const userAchievements = await repo.find({ where: { user: { id: userId } }
     });
