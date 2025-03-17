@@ -6,7 +6,6 @@
 //import { publishEvent } from '@shared/libs/rabbitmq';
 import {Achievement} from '../models/achievement.model';
 import AchievementRepository from '../repositories/achievement.repository';
-import { AppDataSource } from '../../database/appDataSource'; // Importa la instancia de conexión
 
 
 const repo = new AchievementRepository().achievementRepo;
