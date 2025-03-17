@@ -7,6 +7,8 @@ import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
 import { API_URL } from '@/constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -96,52 +98,40 @@ const RegisterScreen = () => {
     setErrors(newErrors);
     return isValid;
   };
-
+  const { signUp } = useAuth();
   const handleRegister = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-        const response = await fetch(`${API_URL}/api/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            const errorMessage = data?.message || 'Error desconocido al registrarse';
-            throw new Error(errorMessage);
-
-        }
-        
-
-        // Registro exitoso
-        navigation.navigate('Map');
+      // Llamada al método signUp del AuthContext
+      // signUp solo recibe (username, email, password) según tu implementación,
+      // por lo que se ignoran los demás campos o podrías modificar signUp para incluirlos.
+      const success = await signUp(formData);
+      
+      if (!success) {
+        throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
+      }
+      
+      // Registro exitoso, navegamos a la pantalla principal
+      navigation.navigate('Map');
     } catch (error: unknown) {
-        console.error('Error al registrarse:', error);
+      console.error('Error al registrarse:', error);
 
-        let errorMessage: string = 'Ocurrió un error inesperado'; // Declaramos explícitamente el tipo
+      let errorMessage: string = 'Ocurrió un error inesperado';
 
-        // Verificar si el error es una instancia de Error
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        } 
-        // Verificar si el error es un objeto con una propiedad `message`
-        else if (error && typeof error === 'object' && 'message' in error) {
-            errorMessage = (error as { message: string }).message;
-        }
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
 
-        // Mostrar el error al usuario
-        Alert.alert('Registro fallido', errorMessage);
+      Alert.alert('Registro fallido', errorMessage);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
 
 

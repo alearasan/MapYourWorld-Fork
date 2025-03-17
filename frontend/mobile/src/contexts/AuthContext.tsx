@@ -15,7 +15,14 @@ interface AuthContextData {
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (username: string, email: string, password: string) => Promise<boolean>;
+  signUp: (formData: {
+    email: string;
+    username: string;
+    firstname: string;
+    lastname: string;
+    picture?: string;
+    password: string;
+  }) => Promise<boolean>;
   signOut: () => Promise<void>;
   testModeSignIn: () => Promise<void>;
 }
@@ -103,32 +110,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   // Registrar usuario
-  async function signUp(username: string, email: string, password: string): Promise<boolean> {
+  async function signUp(formData: {
+    email: string;
+    username: string;
+    firstname: string;
+    lastname: string;
+    picture?: string;
+    password: string;
+  }): Promise<boolean> {
     try {
       setIsLoading(true);
       
-      console.log('Intentando registrar usuario:', { username, email });
       
-      // Simular una llamada a la API en modo de prueba
-      // En producción, aquí usarías un fetch real a tu endpoint de registro
-      const mockResponse = {
-        success: true,
-        user: {
-          id: `user-${Date.now()}`,
-          username,
-          email
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        token: 'mock-token-123456'
-      };
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Puedes manejar aquí distintos errores de validación si tu API los envía
+        throw new Error(data.message || 'Error al registrar el usuario');
+      }
       
       // Guardar los datos en AsyncStorage
-      await AsyncStorage.setItem('@MapYourWorld:user', JSON.stringify(mockResponse.user));
-      await AsyncStorage.setItem('@MapYourWorld:token', mockResponse.token);
-      await AsyncStorage.setItem('userId', mockResponse.user.id);
+      await AsyncStorage.setItem('@MapYourWorld:user', JSON.stringify(data.user));
+      await AsyncStorage.setItem('@MapYourWorld:token', data.token);
+      await AsyncStorage.setItem('userId', data.user.id);
       
       // Actualizar el estado
-      setUser(mockResponse.user);
-      console.log('Usuario registrado y autenticado:', mockResponse.user);
+      setUser(data.user);
+      console.log('Usuario registrado y autenticado:', data.user);
       
       return true;
     } catch (error) {

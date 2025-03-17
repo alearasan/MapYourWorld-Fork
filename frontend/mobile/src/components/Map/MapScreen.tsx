@@ -4,6 +4,7 @@ import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
 import { API_URL } from '../../constants/config';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Tipos para distritos y POIs
 interface Distrito {
@@ -100,6 +101,14 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
 };
 
 const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
+
+  const { user } = useAuth();
+  
+  // Verificamos el usuario con un console.log
+  useEffect(() => {
+    console.log("Usuario actual en MapScreen:", user);
+  }, [user]);
+
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [distritosBackend, setDistritosBackend] = useState<Distrito[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
