@@ -12,6 +12,7 @@ import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
+import subscriptionRoutes from './payment-service/routes/subscription.routes';
 
 dotenv.config();
 
@@ -32,9 +33,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/poi', pointOfInterest);
 app.use('/api/friends', friendRoutes);
-app.use('/api/maps', mapRoutes)
-app.use('/api/collabMap', collabMapRoutes)
-
+app.use('/api/maps', mapRoutes);
+app.use('/api/collabMap', collabMapRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 
 // Interfaz para los servicios
