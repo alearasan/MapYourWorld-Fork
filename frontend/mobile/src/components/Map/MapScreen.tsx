@@ -200,6 +200,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/districts`);
       const data = await response.json();
+      
+
       if (data.success && data.districts) {
         const distritosMapeados = data.districts
           .map((distrito: DistritoBackend) => {

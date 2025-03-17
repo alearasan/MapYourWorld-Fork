@@ -49,10 +49,22 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Error en registro:', error);
-    res.status(500).json({ 
+  
+    let statusCode = 500;
+    let message = 'Error al registrar usuario';
+  
+    if (error instanceof Error) {
+      message = error.message; //  Captura el mensaje exacto del service
+  
+      // Si el error es de validación o usuario ya existe, devolvemos un 400
+      if (message === 'Faltan campos requeridos' || message === 'El usuario ya existe con este email') {
+        statusCode = 400;
+      }
+    }
+  
+    res.status(statusCode).json({ 
       success: false, 
-      message: 'Error al registrar usuario',
-      error: error instanceof Error ? error.message : 'Error desconocido'
+      message //  Enviamos el mensaje exacto al frontend
     });
   }
 };
