@@ -99,12 +99,12 @@ const ForgotPasswordScreenWrapper = (props: any) => {
 };
 
 const UserStatsScreenWrapper = (props: any) => {
-  // if (Platform.OS === 'web') {
-  //   const WebUserStatsScreen = require('./src/components/Stats/UserStatsScreen.web').default;
-  //   return <WebUserStatsScreen {...props} />;
-  // } else {
+  if (Platform.OS === 'web') {
+    const WebUserStatsScreen = require('./src/components/Stats/UserStatsScreen.web').default;
+    return <WebUserStatsScreen {...props} />;
+  } else {
     return <UserStatsScreen {...props} />;
-  // }
+  }
 };
 
 // Componente principal de la aplicación
