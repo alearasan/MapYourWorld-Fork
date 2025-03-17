@@ -71,33 +71,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadStoredData();
   }, []);
 
-  // Iniciar sesión
+ // Iniciar sesión
   async function signIn(email: string, password: string): Promise<boolean> {
     try {
       setIsLoading(true);
       
       console.log('Intentando iniciar sesión con:', { email });
       
-      // Simular una llamada a la API en modo de prueba
-      // En producción, aquí usarías un fetch real a tu endpoint de login
-      const mockResponse = {
-        success: true,
-        user: {
-          id: `user-${Date.now()}`,
-          username: email.split('@')[0],
-          email
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        token: 'mock-token-123456'
-      };
+        // Enviar un objeto con email y password
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
       
       // Guardar los datos en AsyncStorage
-      await AsyncStorage.setItem('@MapYourWorld:user', JSON.stringify(mockResponse.user));
-      await AsyncStorage.setItem('@MapYourWorld:token', mockResponse.token);
-      await AsyncStorage.setItem('userId', mockResponse.user.id);
+      await AsyncStorage.setItem('@MapYourWorld:user', JSON.stringify(data.user));
+      await AsyncStorage.setItem('@MapYourWorld:token', data.token);
+      await AsyncStorage.setItem('userId', data.user.id);
       
-      // Actualizar el estado
-      setUser(mockResponse.user);
-      console.log('Usuario autenticado:', mockResponse.user);
+      // Actualizar el estado con el usuario autenticado
+      setUser(data.user);
+      console.log('Usuario autenticado:', data.user);
       
       return true;
     } catch (error) {
@@ -108,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   }
+
 
   // Registrar usuario
   async function signUp(formData: {
