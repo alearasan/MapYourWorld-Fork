@@ -38,7 +38,7 @@ export class AuthRepository {
   async findWithPassword(email: string): Promise<User | null> {
     return this.repository.findOne({ 
       where: { email },
-      select: ['id', 'email', 'password']
+      select: ['id', 'email', 'password', 'is_active']
     });
   }
 

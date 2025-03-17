@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      Alert.alert('Error', 'No se pudo iniciar sesión. Intente nuevamente.');
+      window.alert(error);
       return false;
     } finally {
       setIsLoading(false);
@@ -153,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     } catch (error) {
       console.error('Error al registrar usuario:', error);
-      Alert.alert('Error', 'No se pudo registrar el usuario. Intente nuevamente.');
+      window.alert(error);
       return false;
     } finally {
       setIsLoading(false);

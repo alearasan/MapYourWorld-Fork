@@ -127,7 +127,6 @@ const RegisterScreen = () => {
         errorMessage = (error as { message: string }).message;
       }
 
-      Alert.alert('Registro fallido', errorMessage);
     } finally {
       setIsLoading(false);
     }

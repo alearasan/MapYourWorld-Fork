@@ -95,14 +95,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
     
-  } catch (error) {
+  }catch (error) {
     console.error('Error en login:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al iniciar sesión',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
-   
+  
+    // Si el error es lanzado desde el servicio, lo devolvemos con código 400
+    if (error instanceof Error) {
+      res.status(400).json({
+        success: false,
+        message: error.message, // Ahora el frontend verá el mensaje correcto
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Error desconocido en el servidor',
+      });
+    }
   }
 };
 
