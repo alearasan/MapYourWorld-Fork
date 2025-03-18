@@ -8,8 +8,8 @@ import * as UserAchievementService from '../services/userAchievement.service';
  */
 export const createAchievement = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userAchievementData = req.body;
-    const newAchievement = await UserAchievementService.createUserAchievement(userAchievementData);
+    const {userAchievementData, achievementId} = req.body;
+    const newAchievement = await UserAchievementService.createUserAchievement(userAchievementData, achievementId);
     res.status(201).json(newAchievement);
   } catch (error) {
     next(error);
