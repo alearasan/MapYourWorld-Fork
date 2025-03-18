@@ -250,8 +250,22 @@ export const unlockCollaborativeDistrict = async (
     }
     
     // 6. Desbloquear el distrito y asignar el usuario
+
+
+
     district.isUnlocked = true;
-    district.user = user;
+
+    const userdistrict = {
+      id:"pepe",
+      color: "none",
+      user_id:[user],
+      district_id: [district],
+      map_id:map
+
+    }
+
+    
+    district.userDistrict = userdistrict;
     await repo.updateDistrict(districtId, district);
     
     console.log(`Distrito ${districtId} desbloqueado por usuario ${userId} en mapa ${mapId}`);

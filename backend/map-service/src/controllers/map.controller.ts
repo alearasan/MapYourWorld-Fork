@@ -52,24 +52,12 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
       res.status(201).json({ 
         success: true, 
         message: 'Mapa colaborativo creado correctamente',
-        map: newMap
       });
     } catch (serviceError) {
       console.error('Error en el servicio al crear mapa:', serviceError);
       // Si hay un error específico del servicio, intentamos devolver un mapa simulado
       // para permitir que la aplicación continúe funcionando
-      res.status(200).json({ 
-        success: true, 
-        message: 'Mapa colaborativo simulado (fallback)',
-        map: {
-          id: `map-${Date.now()}`,
-          name: MapData.name || 'Mapa Colaborativo',
-          description: MapData.description || 'Mapa compartido para colaboración',
-          is_colaborative: true,
-          createdAt: new Date().toISOString(),
-          users_joined: [{ id: userId, username: 'Usuario Principal' }]
-        }
-      });
+
     }
   } catch (error) {
     console.error('Error al crear mapa colaborativo:', error);

@@ -65,7 +65,7 @@ const startServer = async () => {
     await initializeDatabase();
 
     // Poblar la base de datos con distritos
-    await createAllDistricts();
+    //await createAllDistricts();
 
     await createUsers();
 

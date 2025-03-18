@@ -9,8 +9,13 @@ import { Map } from '../models/map.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import MapRepository from '../repositories/map.repository';
 import { User } from '../../../auth-service/src/models/user.model';
+import { UserDistrictRepository } from '../repositories/user-district.repository';
+import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import { UserDistrict } from '../models/user-district.model';
 
 const repo = new MapRepository();
+const userDistrictRepo = new UserDistrictRepository();
+const userRepo = new AuthRepository();
 
 
 
@@ -58,37 +63,30 @@ export const createMap = async (
 
 export const createColaborativeMap = async (
   MapData: Omit<Map, 'id'>,
-  userId: string,
-  specificMapId?: string
+  userId: string,  
 ): Promise<Map> => {
-
-  try {
-
-    if (!MapData.name || !MapData.createdAt) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
-    }
-
-    // Pasamos el ID específico si existe
-    const newMap = specificMapId 
-      ? repo.createMapColaborativoWithId(MapData, userId, specificMapId)
-      : repo.createMapColaborativo(MapData, userId);
-
-    // // 5. Publicar evento de mapa creado
-    // await publishEvent('Map.created', {
-    //   MapId: createdMap.id,
-    //   name: createdMap.name,
-    //   description: createdMap.description,
-    //   timestamp: new Date()
-    // });
+  
+  const mapa_colaborativo =await repo.createMapColaborativo(MapData, userId);
 
 
-    console.log("mapa colaborativo creado correctamente:", newMap);
-    return newMap;
-
-  } catch (error) {
-    throw new Error("Error al crear el mapa colaborativo");
+  const creador = await userRepo.findById(userId)
+  if (!creador){
+    throw new Error(`No se encuentra un usuario con el id ${userId}`)
   }
 
+  const userDistrictData = {
+    color: "pepe",
+    user_id:[creador],
+    district_id:[],
+    map_id:mapa_colaborativo
+
+
+  }
+  const userDistrict = await userDistrictRepo.createUserDistrict(userDistrictData)
+
+
+  return mapa_colaborativo
+  //Crear el repo para poder guardar un UserDistrict
 
 
 };
