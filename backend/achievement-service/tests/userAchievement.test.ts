@@ -1,6 +1,7 @@
 import { createUserAchievement, getAchievementsByUser, getUsersByAchievement } from "../services/userAchievement.service";
 import { UserAchievementRepository } from "../repositories/userAchievement.repository";
 import { Role } from "../../auth-service/src/models/user.model";
+import { PlanType } from "../../payment-service/models/subscription.model";
 
 jest.mock('../repositories/userAchievement.repository', () => {
     const mockRepo = {
@@ -31,6 +32,7 @@ describe("Pruebas de userAchiements", () => {
     it("debe crear un nuevo usuario-logro", async () => {
 
 
+
         const userData = {
             id: 'user1',  // Asegúrate de que el id esté presente
             email: 'newuser@example.com',
@@ -45,9 +47,20 @@ describe("Pruebas de userAchiements", () => {
                 username: 'newuser', 
                 firstName: 'New', 
                 lastName: 'User' 
+            },
+            subscription:{
+              id:"suscripcion1",
+              plan: PlanType.FREE,
+              startDate: new Date('2024-01-01'),
+              endDate: new Date('2024-12-31'),
+              is_active: true,
+              autoRenew: false,
+              createdAt: new Date('2024-01-01'),
+              updatedAt: new Date('2024-03-18'),   
             }
-        };
-        
+        } as any;
+        userData.subscription.user = userData;
+
     
     
           const exampleAchievement = 
