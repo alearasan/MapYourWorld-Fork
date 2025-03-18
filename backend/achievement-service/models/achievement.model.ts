@@ -21,5 +21,5 @@ export class Achievement {
 
     //url de la imagen del logro
     @Column({ type: 'varchar', length: 255, nullable: false })
-    iconUrl!: Boolean;
+    iconUrl!: string;
 }
