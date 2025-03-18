@@ -94,12 +94,8 @@ export class User {
   @OneToOne(() => Subscription, (subscription) => subscription.user)
   subscription!: Subscription;
 
-
-  @ManyToOne(() => UserDistrict, (userdistrict) => userdistrict.user_id)
-  @JoinColumn({ name: 'user_id' })
-  userDistrict!: UserDistrict;
-
-
+  @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
+  userDistrict!: UserDistrict[];
 
   /**
    * Relación N:N (autorreferenciada) para "is friend of"

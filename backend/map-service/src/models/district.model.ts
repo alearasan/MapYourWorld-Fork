@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Geometry } from 'geojson';
 import { Map } from './map.model';
 import { User } from '../../../auth-service/src/models/user.model';
-import {UserDistrict} from "../models/user-district.model"
+import { UserDistrict } from "./user-district.model";
 
 @Entity('districts')
 export class District {
@@ -24,8 +24,8 @@ export class District {
     @ManyToOne(() => Map)
     map!: Map;
 
-    @ManyToOne(() => UserDistrict, (userdistrict) => userdistrict.user_id)
-    userDistrict!: UserDistrict;
+    @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.district)
+    userDistrict!: UserDistrict[];
 }
 
 

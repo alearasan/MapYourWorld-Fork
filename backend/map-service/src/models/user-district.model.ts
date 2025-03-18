@@ -12,16 +12,13 @@ export class UserDistrict {
     @Column({ type: 'varchar', length: 255, nullable: false })
     color!: string;
 
-    @OneToMany(() => User, (user) => user.userDistrict)
-    @JoinColumn({ name: 'user_id' })
-    user_id!: User[];
+    @ManyToOne(() => User, (user) => user.userDistrict)
+    @JoinColumn({ name: 'UsuarioColoreador' })
+    user!: User;
 
-    @OneToMany(() => District, (district) => district.userDistrict)
-    district_id!: District[];
-
-
-
-    
+    @ManyToOne(() => District, (district) => district.userDistrict)
+    @JoinColumn({ name: 'DistritoColoreado' })
+    district!: District;
 }
 
 

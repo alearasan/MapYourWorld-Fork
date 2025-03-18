@@ -66,29 +66,23 @@ export const createColaborativeMap = async (
   userId: string,  
 ): Promise<Map> => {
   
-  const mapa_colaborativo =await repo.createMapColaborativo(MapData, userId);
-
+  const mapa_colaborativo = await repo.createMapColaborativo(MapData, userId);
 
   const creador = await userRepo.findById(userId)
   if (!creador){
     throw new Error(`No se encuentra un usuario con el id ${userId}`)
   }
 
+  // Crear un objeto UserDistrict que cumpla con el modelo actualizado
   const userDistrictData = {
     color: "pepe",
-    user_id:[creador],
-    district_id:[],
-    map_id:mapa_colaborativo
-
-
+    user: creador
+    // No incluimos district ya que es obligatorio pero no lo tenemos aún
   }
-  const userDistrict = await userDistrictRepo.createUserDistrict(userDistrictData)
-
+  
+  const userDistrict = await userDistrictRepo.createUserDistrict(userDistrictData as Omit<UserDistrict, 'id'>)
 
   return mapa_colaborativo
-  //Crear el repo para poder guardar un UserDistrict
-
-
 };
 
 
