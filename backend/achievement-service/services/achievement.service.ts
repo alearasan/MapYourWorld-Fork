@@ -5,10 +5,11 @@
 
 //import { publishEvent } from '@shared/libs/rabbitmq';
 import {Achievement} from '../models/achievement.model';
-import AchievementRepository from '../repositories/achievement.repository';
+import {AchievementRepository} from '../repositories/achievement.repository';
+import { AppDataSource } from '../../database/appDataSource'; // Importa la instancia de conexión
 
 
-const repo = new AchievementRepository().achievementRepo;
+const repo = new AchievementRepository();
 
 /**
  * Crea un nuevo logro
@@ -16,28 +17,25 @@ const repo = new AchievementRepository().achievementRepo;
  */
 
 //crear logro
+
+
 export const createAchievement = async (
   AchievementData: Omit<Achievement, 'id'>,
-): Promise<Achievement> => {
+): Promise<void> => {
 
   try {
-    if (!AchievementData.name || !AchievementData.description || !AchievementData.points || !AchievementData.iconUrl) {
-      throw new Error("No pueden faltar datos de logro.")
-    }
-    const newAchievement = repo.create(AchievementData);
-
-    console.log("logro creado correctamente:", newAchievement);
-    return newAchievement;
+    repo.createAchievement(AchievementData)
 
   } catch (error) {
+    console.error("Error en createAchievement:", error);
     throw new Error("Error al crear el logro");
   }
 };
 
 //obtener todos los logros
-export const getAchievements = async (): Promise<Achievement[]> => {
+export const getAchievements = async (): Promise<Achievement[] | null> => {
   try {
-    const achievements = await repo.find();
+    const achievements = await repo.findAll();
     return achievements;
   } catch (error) {
     throw new Error("Error al obtener los logros");
@@ -47,8 +45,8 @@ export const getAchievements = async (): Promise<Achievement[]> => {
 //obtener logro por nombre
 export const getAchievementByName = async (name: string): Promise<Achievement | null> => {
   try {
-    const achievement = await repo.findOne({ where: { name } });
-    return achievement;
+    const a = await repo.findByName(name);
+    return a;
   } catch (error) {
     throw new Error("Error al obtener logro por nombre");
   }
