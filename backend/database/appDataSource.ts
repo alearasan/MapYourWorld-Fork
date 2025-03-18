@@ -7,11 +7,10 @@ import { Region } from '../map-service/src/models/region.model';
 import { User } from '../auth-service/src/models/user.model';
 import { PointOfInterest } from '../map-service/src/models/poi.model';
 import { Friend } from '../social-service/src/models/friend.model';
-import {Payment} from '../payment-service/models/payment.model'
+import {Payment} from '../payment-service/src/models/payment.model'
 import { Subscription } from '../payment-service/models/subscription.model';
 import { Achievement } from '../achievement-service/models/achievement.model';
 import { UserAchievement } from '../achievement-service/models/userAchievement.model';
-
 
 export const AppDataSource = new DataSource({
     type: 'postgres', // O el tipo de base de datos que uses (mysql, sqlite, etc.)

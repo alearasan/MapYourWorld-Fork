@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { Payment } from '../models/payment.model'; // Importa tu entidad
-import { AppDataSource } from '../../database/appDataSource'; // Importa la instancia de conexión
+import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 
 export default class PaymentRepository {
     private paymentRepo: Repository<Payment>;
