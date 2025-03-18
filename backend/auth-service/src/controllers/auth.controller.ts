@@ -370,3 +370,29 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;    
+    const user = await authService.getUserById(userId);
+    if (user) {      
+      res.status(200).json({
+        success: true,
+        message: 'Usuario encontrado',
+        user
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener usuario por ID',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
