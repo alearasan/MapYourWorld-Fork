@@ -11,12 +11,13 @@ import {
   JoinTable,
   ManyToOne,
 } from 'typeorm';
-import {UserProfile} from "../../../user-service/src/models/userProfile.model";
-import {Friend} from "../../../social-service/src/models/friend.model"
+import { UserProfile } from "../../../user-service/src/models/userProfile.model";
+import { Friend } from "../../../social-service/src/models/friend.model"
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
 //TODO Aún está pendiente de hacer y corregir la importación
 import { Map } from '../../../map-service/src/models/map.model';
+import { Subscription } from '../../../payment-service/models/subscription.model';
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Plan } from './Plan';
 
@@ -56,7 +57,7 @@ export class User {
    * Relación inversa de 1:1 con UserProfile.
    * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
    */
-  
+
   @OneToOne(() => UserProfile, (profile) => profile.id)
   profile!: UserProfile;
 
@@ -75,7 +76,7 @@ export class User {
    * Relación 1:N con Map
    * "Map belongs to User" => en la entidad Map habrá un @ManyToOne(...).
    */
-  @ManyToMany(() => Map, (map) => map.users_joined, {eager: true})
+  @ManyToMany(() => Map, (map) => map.users_joined, { eager: true })
   @JoinTable({
     name: 'user_maps_joined',
     joinColumn: {
@@ -89,8 +90,8 @@ export class User {
   })
   maps_joined!: Map[];
 
-
-
+  @OneToOne(() => Subscription, (subscription) => subscription.user)
+  subscription!: Subscription;
 
 
   /**

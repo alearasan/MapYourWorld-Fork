@@ -49,10 +49,22 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Error en registro:', error);
-    res.status(500).json({ 
+  
+    let statusCode = 500;
+    let message = 'Error al registrar usuario';
+  
+    if (error instanceof Error) {
+      message = error.message; //  Captura el mensaje exacto del service
+  
+      // Si el error es de validación o usuario ya existe, devolvemos un 400
+      if (message === 'Faltan campos requeridos' || message === 'El usuario ya existe con este email') {
+        statusCode = 400;
+      }
+    }
+  
+    res.status(statusCode).json({ 
       success: false, 
-      message: 'Error al registrar usuario',
-      error: error instanceof Error ? error.message : 'Error desconocido'
+      message //  Enviamos el mensaje exacto al frontend
     });
   }
 };
@@ -83,14 +95,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     });
     
-  } catch (error) {
+  }catch (error) {
     console.error('Error en login:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al iniciar sesión',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
-   
+  
+    // Si el error es lanzado desde el servicio, lo devolvemos con código 400
+    if (error instanceof Error) {
+      res.status(400).json({
+        success: false,
+        message: error.message, // Ahora el frontend verá el mensaje correcto
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Error desconocido en el servidor',
+      });
+    }
   }
 };
 
@@ -366,6 +385,32 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({
       success: false,
       message: 'Error al cerrar sesión',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+
+export const getUserById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;    
+    const user = await authService.getUserById(userId);
+    if (user) {      
+      res.status(200).json({
+        success: true,
+        message: 'Usuario encontrado',
+        user
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener usuario por ID',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }
