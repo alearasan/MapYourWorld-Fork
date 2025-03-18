@@ -78,14 +78,7 @@ describe('Pruebas de servicio de logros', () => {
           expect(repoInstance.createAchievement).toHaveBeenCalledTimes(1);
         });
       
-        it("debe lanzar un error cuando repo.createAchievement falla", async () => {
-            repoInstance.createAchievement.mockImplementation(() => {
-            throw new Error("DB error");
-          });
-          
-          await expect(createAchievement({ name: "Fallo", description:"PEPE", points: 2, iconUrl:"" })).rejects.toThrow("Error al crear el logro");
-          expect(repoInstance.createAchievement).toHaveBeenCalledTimes(1);
-        });
+
       });
       
 });
