@@ -23,8 +23,7 @@ export const AppDataSource = new DataSource({
     synchronize: true, // Solo para desarrollo, en producción usa migraciones
     dropSchema: false, // Asegúrate de que esto esté en false para no perder datos
     logging: true,
-    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map, Payment, Subscription], // Aquí van todas tus entidades
-    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map, Achievement, UserAchievement], // Aquí van todas tus entidades
+    entities: [District, UserProfile, User, Friend, Region, PointOfInterest, Map, Payment, Subscription,Achievement,UserAchievement], // Aquí van todas tus entidades
     migrations: [],
     subscribers: [],
     extra: {
