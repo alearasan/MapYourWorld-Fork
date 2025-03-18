@@ -13,6 +13,7 @@ import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
 import subscriptionRoutes from './payment-service/routes/subscription.routes';
+import { createAchievements } from './achievement-service/mocks/achievement_create';
 
 dotenv.config();
 
@@ -67,6 +68,9 @@ const startServer = async () => {
     await createAllDistricts();
 
     await createUsers();
+
+    // Poblar la base de datos con logros
+    await createAchievements();
 
     // Iniciar servidor
     app.listen(PORT, () => {
