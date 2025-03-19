@@ -8,7 +8,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes';
-
 import { initializeDatabase } from '../../database/appDataSource';
 
 
@@ -56,5 +55,10 @@ const startServer = async () => {
   }
 };
 
-startServer(); 
+// Solo iniciar el servidor si este archivo se ejecuta directamente
+if (require.main === module) {
+  startServer();
+}
+
+// Exportar la app para las pruebas
 export default app;
