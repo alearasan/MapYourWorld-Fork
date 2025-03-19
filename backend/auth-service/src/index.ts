@@ -9,8 +9,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes';
 //import  emailRouter  from './routes/email.routes';
-import { connectDB } from './config/db.config';
-import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
+import { initializeDatabase } from '../../database/appDataSource';
+
 
 // Cargar variables de entorno
 dotenv.config();
@@ -42,10 +42,9 @@ app.get('/health', (_req: Request, res: Response) => {
 const startServer = async () => {
   try {
     // Conectar a la base de datos
-    await connectDB();
+    await initializeDatabase();
     
     // Conectar a RabbitMQ
-    await connectRabbitMQ();
     
     // Iniciar servidor
     app.listen(PORT, () => {
