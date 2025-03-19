@@ -14,13 +14,16 @@ export const createFriendController = async (req: Request, res: Response): Promi
     res.status(201).json(newFriend); // Retornamos el nuevo amigo creado
 
   } catch (error) {
-    res.status(500).json({ message:'Error al crear amistad:', error });
+    res.status(500).json({ 
+      message: 'Error al crear amistad:', 
+      error: error instanceof Error ? error.message : error 
+    });
   }
 };
 
 export const listFriendsController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status } = req.query; // Obtenemos el estado de la solicitud de amistad (PENDING/ACCEPTED)
+    const { status } = req.params; // Obtenemos el estado de la solicitud de amistad (PENDING/ACCEPTED)
     const { userId } = req.params; // Obtenemos el ID del usuario de la URL
 
     if (!status || !userId) {
