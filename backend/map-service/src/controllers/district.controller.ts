@@ -10,14 +10,14 @@ import { UserDistrict } from '../models/user-district.model';
 
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { regionId, userId } = req.body;
+    const { mapId } = req.body;
 
-    if (!regionId || !userId) {
+    if (!mapId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    await DistrictService.createDistrict(userId, regionId);
+    await DistrictService.createDistricts(mapId);
     res.status(201).json({ success: true, message: 'Distritos creados correctamente' });
   } catch (error) {
     console.error('Error al crear distrito:', error);
@@ -184,11 +184,10 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
         console.log(`Controlador: No se encontraron distritos, creando distritos para el mapa ${mapId}`);
         
         // Usamos el mismo userId de ejemplo que en el mapa
-        const userId = "user-456";
         
         // Creamos distritos para el mapa
         try {
-          await DistrictService.createDistrict(mapId, userId);
+          await DistrictService.createDistricts(mapId);
           
           // Obtenemos los distritos recién creados
           const newDistricts = await DistrictService.getDistrictsByMapId(mapId);

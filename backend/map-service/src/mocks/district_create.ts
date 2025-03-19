@@ -1,4 +1,4 @@
-import { createDistrict } from "../services/district.service";
+import { createDistricts } from "../services/district.service";
 import { AppDataSource } from '../../../database/appDataSource';
 import { Geometry } from 'geojson';
 import * as fs from 'fs';
@@ -89,7 +89,7 @@ export async function createAllDistricts() {
         }
 
         //for (const districtData of districtsData) {
-        await createDistrict();
+        // await createDistrict();
         //     console.log(`✅ Distrito creado: ${districtData.name}`, result);
         // }
     } catch (error) {
