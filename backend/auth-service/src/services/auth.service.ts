@@ -13,9 +13,12 @@ import { UserProfileRepository } from '../../../user-service/src/repositories/us
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 import { createMap } from '../../../map-service/src/services/map.service';
 import { createDistricts } from '../../../map-service/src/services/district.service';
+import MapRepository from '../../../map-service/src/repositories/map.repository';
 
 const repo = new AuthRepository();
 const profileRepo = new UserProfileRepository()
+const mapRepo = new MapRepository();
+
 
 export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
@@ -65,13 +68,20 @@ export const registerUser = async (userData: any): Promise<User> => {
 
 
     const savedUser = await repo.save(newUser);
+    const verifiedUser = await repo.findById(savedUser.id);
+    if (!verifiedUser) {
+      throw new Error("Error al verificar el usuario en la base de datos");
+    }
 
-    const newMap = await createMap(savedUser.id);
+    const newMap = await createMap(verifiedUser.id);
     if (!newMap) {
       throw new Error('Error al crear el mapa');
     }
 
-    await createDistricts(newMap.id);
+
+    const savedMap = await mapRepo.getMapById(newMap.id);
+
+    await createDistricts(savedMap.id);
 
     await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
 

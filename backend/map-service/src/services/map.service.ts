@@ -48,10 +48,10 @@ export const createMap = async (
     newMap.user_created = user;
 
 
-    await repo.createMap(newMap);
+    const createdMap = await repo.createMap(newMap);
 
     console.log("mapa creado correctamente:", newMap);
-    return newMap;
+    return createdMap;
 
   } catch (error) {
     throw new Error("Error al crear el mapa");
