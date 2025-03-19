@@ -211,7 +211,7 @@ function sincronizarDependencias() {
       'chart.js': '4.4.8',
       'react-chartjs-2': '5.3.0',
       'lightningcss': '1.29.1',
-      'react-router-dom': '^7.2.0',
+      'react-router-dom': '7.3.0',
       '@expo/metro-runtime': '~4.0.1',
       'react-native-web': '~0.19.13',
       
@@ -256,7 +256,8 @@ function sincronizarDependencias() {
       'ts-node': '^10.9.2',
       'webpack': '^5.98.0',
       'webpack-cli': '^6.0.1',
-      'webpack-dev-server': '5.2.0'
+      'webpack-dev-server': '5.2.0',
+      "supertest": "7.0.0"
     };
     
     // Dependencias específicas para el backend
@@ -282,7 +283,6 @@ function sincronizarDependencias() {
       'cors': '2.8.5',
       'dotenv': '16.4.7',
       'helmet': '8.0.0',
-      'mongoose': '8.12.1',
       'sharp': '0.33.5',
       'compression': '1.8.0',
       'http-proxy-middleware': '3.0.3',
@@ -322,7 +322,8 @@ function sincronizarDependencias() {
       'nodemon': '3.1.9',
       'chalk': '5.4.1',
       'cross-env': '7.0.3',
-      'babel-plugin-module-resolver': '5.0.2'
+      'babel-plugin-module-resolver': '5.0.2',
+      "supertest": "7.0.0"
     };
     
     // Actualizar cada package.json encontrado

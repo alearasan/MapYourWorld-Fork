@@ -6,14 +6,14 @@ import * as RegionService from '../services/region.service';
  */
 export const createRegion = async (req: Request, res: Response): Promise<void> => {
   try {
-    const regionData = req.body;
+    const {regionData, mapaId} = req.body; // Pasar tambien el mapId en el cuerpo a la hora de crear una region (map_assignee)
 
-    if (!regionData || !regionData.name) {
+    if (!regionData || !regionData.name || !mapaId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    const newRegion = await RegionService.createRegion(regionData);
+    const newRegion = await RegionService.createRegion(regionData, mapaId);
     res.status(201).json({ success: true, message: 'Región creada correctamente', region: newRegion });
   } catch (error) {
     console.error('Error al crear la región:', error);
