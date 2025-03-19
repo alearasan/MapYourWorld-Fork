@@ -26,16 +26,16 @@ const RegisterScreen = () => {
   const [formData, setFormData] = useState({
     email: '',
     username:'',
-    lastName:'',
-    firstName:'',
+    lastname:'',
+    firstname:'',
     picture:'',
     password: '',
   });
   const [errors, setErrors] = useState({
     email: '',
     username:'',
-    lastName:'',
-    firstName:'',
+    lastname:'',
+    firstname:'',
     picture:'',
     password: '',
   });
@@ -57,15 +57,14 @@ const RegisterScreen = () => {
       newErrors.username = 'El nombre de usuario es obligatorio';
       isValid = false;
     }
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'El nombre es obligatorio';
+    if (!formData.firstname.trim()) {
+      newErrors.firstname = 'El nombre es obligatorio';
       isValid = false;
     }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'El apellido es obligatorio';
+    if (!formData.lastname.trim()) {
+      newErrors.lastname = 'El apellido es obligatorio';
       isValid = false;
     }
-
 
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electrónico es obligatorio';
@@ -92,13 +91,6 @@ const RegisterScreen = () => {
       isValid = false;
     } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) { // Al menos 1 carácter especial
       newErrors.password = 'La contraseña debe contener al menos un carácter especial';
-      isValid = false;
-    }
-
-    const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
-
-    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
-      newErrors.picture = 'Debe ser una URL válida';
       isValid = false;
     }
     
@@ -176,19 +168,19 @@ const RegisterScreen = () => {
             <TextInput
               label="Nombre"
               placeholder="Nombre"
-              value={formData.firstName}
-              onChangeText={(text) => handleChange('firstName', text)}
+              value={formData.firstname}
+              onChangeText={(text) => handleChange('firstname', text)}
               autoCapitalize="words"
-              error={errors.firstName}
+              error={errors.firstname}
               icon="user"
             />
             <TextInput
               label="Apellidos"
               placeholder="Apellidos"
-              value={formData.lastName}
-              onChangeText={(text) => handleChange('lastName', text)}
+              value={formData.lastname}
+              onChangeText={(text) => handleChange('lastname', text)}
               autoCapitalize="words"
-              error={errors.lastName}
+              error={errors.lastname}
               icon="user"
             />
 
@@ -199,16 +191,6 @@ const RegisterScreen = () => {
               onChangeText={(text) => handleChange('username', text)}
               autoCapitalize="words"
               error={errors.username}
-              icon="user"
-            />
-
-            <TextInput
-              label="URL avatar"
-              placeholder="URL avatar"
-              value={formData.picture}
-              onChangeText={(text) => handleChange('picture', text)}
-              autoCapitalize="words"
-              error={errors.picture}
               icon="user"
             />
             

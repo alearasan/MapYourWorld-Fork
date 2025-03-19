@@ -11,8 +11,6 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { API_URL } from '../../constants/config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 
 interface PuntoDeInteresFormProps {
@@ -127,12 +125,6 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
         mostrarAlerta('Categoría requerida', 'Por favor, selecciona una categoría para el punto de interés.');
         return;
       }
-
-      const token = await AsyncStorage.getItem('@MapYourWorld:token');
-      if (!token) {
-        mostrarAlerta('Error', 'No se encontró un token de autenticación.');
-        return;
-      }
       
       const poiForMarker = {
         name: pointOfInterest.name,
@@ -156,11 +148,9 @@ const PuntoDeInteresForm: React.FC<PuntoDeInteresFormProps> = ({
       delete formattedPoint.latitude;
       delete formattedPoint.longitude;
 
-      const response = await fetch(`${API_URL}/api/poi/`, {
+      const response = await fetch(`${API_URL}/api/poi/sin-token`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-         },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedPoint),
       });
 
