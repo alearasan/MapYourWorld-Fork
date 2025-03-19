@@ -59,7 +59,8 @@ export class User {
    * Como UserProfile es el dueño, aquí NO usamos @JoinColumn.
    */
 
-  @OneToOne(() => UserProfile, (profile) => profile.id)
+  @OneToOne(() => UserProfile, { eager: true })
+  @JoinColumn()
   profile!: UserProfile;
 
   /**

@@ -23,10 +23,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password } = req.body;
+    const { email, password, username, firstName, lastName, picture } = req.body;
     const user = await authService.registerUser({
       email,
       password,
+      username, firstName, lastName, picture,
       role: Role.USER
     });
 
@@ -94,6 +95,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: user.role
       }
     });
+
     
   }catch (error) {
     console.error('Error en login:', error);
@@ -121,53 +123,53 @@ export const verify = async (req: Request, res: Response): Promise<void> => {
     const { token } = req.body;
 
     if (!token) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Token no proporcionado' 
+      res.status(400).json({
+        success: false,
+        message: 'Token no proporcionado'
       });
       return;
     }
 
     // Usar el servicio para verificar el token con token_data
     const userData = await authService.verifyUserToken(token);
-    
+
     // Responder con éxito
     res.status(200).json({
       success: true,
       message: 'Token válido',
       user: userData
     });
-    
+
   } catch (error) {
     console.error('Error en verificación:', error);
-    
+
     // Manejamos errores específicos con códigos de estado apropiados
     if (error instanceof Error) {
       if (error.message === 'Token inválido o expirado') {
-        res.status(401).json({ 
-          success: false, 
-          message: error.message 
+        res.status(401).json({
+          success: false,
+          message: error.message
         });
         return;
-      } 
+      }
       else if (error.message === 'Usuario no encontrado') {
-        res.status(404).json({ 
-          success: false, 
-          message: error.message 
+        res.status(404).json({
+          success: false,
+          message: error.message
         });
         return;
       }
       else if (error.message === 'Sesión inválida. Por favor, inicie sesión nuevamente') {
-        res.status(401).json({ 
-          success: false, 
-          message: error.message 
+        res.status(401).json({
+          success: false,
+          message: error.message
         });
         return;
       }
     }
     // Error genérico
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al verificar token',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
@@ -187,44 +189,44 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     const { userId, newPassword } = req.body;
-    
+
     if (!userId) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
+      res.status(401).json({
+        success: false,
+        message: 'Usuario no encontrado'
       });
       return;
     }
     const user = await authService.getUserById(userId);
     if (!user) {
-      res.status(404).json({ 
-        success: false, 
-        message: 'Usuario no encontrado' 
+      res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
       });
       return;
     }
 
     if (!user.token_data) {
-      res.status(400).json({ 
-        success: false, 
-        message: 'Token no proporcionado' 
+      res.status(400).json({
+        success: false,
+        message: 'Token no proporcionado'
       });
       return;
     }
 
     const verifiedUser = await authService.verifyUserToken(user.token_data);
     if (!verifiedUser) {
-      res.status(401).json({ 
-        success: false, 
-        message: 'Usuario no autenticado' 
+      res.status(401).json({
+        success: false,
+        message: 'Usuario no autenticado'
       });
       return;
     }
 
     const currentPassword = user.password;
 
-   
-    
+
+
     // Cambiar contraseña 
     await authService.changePassword(verifiedUser.userId, currentPassword, newPassword);
 
@@ -238,31 +240,31 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Contraseña cambiada correctamente'
     });
-    
+
   } catch (error) {
     console.error('Error al cambiar contraseña:', error);
-    
+
     // Manejamos errores específicos
     if (error instanceof Error) {
       if (error.message === 'Credenciales incorrectas') {
-        res.status(401).json({ 
-          success: false, 
+        res.status(401).json({
+          success: false,
           message: error.message
         });
         return;
       }
       else if (error.message === 'Usuario no encontrado') {
-        res.status(404).json({ 
-          success: false, 
-          message: error.message 
+        res.status(404).json({
+          success: false,
+          message: error.message
         });
         return;
       }
     }
-    
+
     // Error genérico
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al cambiar contraseña',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
@@ -282,7 +284,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     }
 
     const { email } = req.body;
-    
+
     // Llamar al servicio para solicitar el reseteo de contraseña
     await authService.requestPasswordReset(email);
 
@@ -291,7 +293,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Si el email está registrado, recibirás instrucciones para restablecer tu contraseña'
     });
-    
+
   } catch (error) {
     console.error('Error al solicitar reseteo de contraseña:', error);
     // Por seguridad, no revelamos el error específico
@@ -299,7 +301,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       success: true,
       message: 'Se produjo un error al solicitar el reseteo de contraseña'
     });
-   
+
   }
 };
 
@@ -317,20 +319,20 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     const { token, password } = req.body;
     await authService.resetPassword(token, password);
-    
+
     res.status(200).json({
       success: true,
       message: 'Contraseña restablecida correctamente'
     });
-    
+
   } catch (error) {
     console.error('Error al restablecer contraseña:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Error al restablecer contraseña',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
-    
+
   }
 };
 
@@ -380,7 +382,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     }
   } catch (error) {
     console.error('Error en logout:', error);
-    
+
     // Error genérico
     res.status(500).json({
       success: false,
@@ -392,9 +394,9 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.params;    
+    const { userId } = req.params;
     const user = await authService.getUserById(userId);
-    if (user) {      
+    if (user) {
       res.status(200).json({
         success: true,
         message: 'Usuario encontrado',

@@ -9,8 +9,11 @@ import { Role, User } from '../models/user.model';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
 import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
 import { AuthRepository } from '../repositories/auth.repository';
+import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
+import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 const repo = new AuthRepository();
+const profileRepo = new UserProfileRepository()
 
 export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
@@ -22,9 +25,10 @@ export const getUserById = async (userId: string): Promise<User | null> => {
  */
 export const registerUser = async (userData: any): Promise<User> => {
   // 1. Validar datos de entrada
-  if (!userData.email || !userData.password) {
+  if (!userData.email || !userData.password || !userData.username || !userData.firstName || !userData.lastName) {
     throw new Error('Faltan campos requeridos');
   }
+
 
   // 2. Verificar que el email no existe en la base de datos
   const existingUser = await repo.findByEmail(userData.email);
@@ -34,6 +38,12 @@ export const registerUser = async (userData: any): Promise<User> => {
 
   // 3. Crear el usuario en la base de datos
   const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const newProfile = new UserProfile();
+  newProfile.username = userData.username;
+  newProfile.firstName = userData.firstName;
+  newProfile.lastName = userData.lastName;
+  newProfile.picture = userData.picture;
+  const savedProfile = await profileRepo.create(newProfile);
 
   // Creamos el usuario con las propiedades adecuadas según el modelo
   const newUser = new User();
@@ -48,7 +58,7 @@ export const registerUser = async (userData: any): Promise<User> => {
     createdAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
   });
-  newUser.profile = userData.profile;
+  newUser.profile = savedProfile;
 
   await repo.save(newUser);
   await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
