@@ -26,35 +26,36 @@ const userRepo = new AuthRepository();
  */
 
 export const createMap = async (
-  MapData: Omit<Map, 'id'>,
   userId: string
 ): Promise<Map> => {
 
   try {
+    
+    const user = await userRepo.findById(userId);
 
-    if (!MapData.name || !MapData.createdAt) {
-      throw new Error("No pueden faltar algunos datos importantes como el nombre o fecha.")
+    if (!user) {
+      throw new Error(`User with id ${userId} not found`);
     }
 
-    const newMap = repo.createMap(MapData, userId);
+    
+    const newMap = new Map();
 
-    // // 5. Publicar evento de mapa creado
-    // await publishEvent('Map.created', {
-    //   MapId: createdMap.id,
-    //   name: createdMap.name,
-    //   description: createdMap.description,
-    //   timestamp: new Date()
-    // });
+    newMap.name = "Mapa personal";
+    newMap.description = "Mapa para el usuario";
+    newMap.createdAt = new Date();
+    newMap.is_colaborative = false;
 
+    newMap.user_created = user;
+
+
+    const createdMap = await repo.createMap(newMap);
 
     console.log("mapa creado correctamente:", newMap);
-    return newMap;
+    return createdMap;
 
   } catch (error) {
     throw new Error("Error al crear el mapa");
   }
-
-
 
 };
 
