@@ -12,6 +12,8 @@ import { User } from '../../../auth-service/src/models/user.model';
 import { UserDistrictRepository } from '../repositories/user-district.repository';
 import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
 import { UserDistrict } from '../models/user-district.model';
+import { createDistricts } from '../../../map-service/src/services/district.service';
+
 
 const repo = new MapRepository();
 const userDistrictRepo = new UserDistrictRepository();
@@ -68,6 +70,8 @@ export const createColaborativeMap = async (
 ): Promise<Map> => {
   
   const mapa_colaborativo = await repo.createMapColaborativo(MapData, userId);
+
+  await createDistricts(mapa_colaborativo.id);
 
   const creador = await userRepo.findById(userId)
   if (!creador){
