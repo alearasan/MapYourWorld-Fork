@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Geometry } from 'geojson';
 import { Map } from './map.model';
 import { User } from '../../../auth-service/src/models/user.model';
+import { UserDistrict } from "./user-district.model";
 import { Region } from './region.model';
 
 @Entity('districts')
@@ -21,11 +22,14 @@ export class District {
     @Column({ type: 'boolean', default: false })
     isUnlocked!: boolean;
 
+    @ManyToOne(() => Map)
+    map!: Map;
+
     @ManyToOne(() => Region, (region) => region.id, { onDelete:"CASCADE"})
     region_assignee!: Region;
 
-    @ManyToOne(() => User, (user) => user.id)
-    user!: User;
+    @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.district)
+    userDistrict!: UserDistrict[];
 }
 
 

@@ -18,6 +18,7 @@ import { Friend } from "../../../social-service/src/models/friend.model"
 //TODO Aún está pendiente de hacer y corregir la importación
 import { Map } from '../../../map-service/src/models/map.model';
 import { Subscription } from '../../../payment-service/models/subscription.model';
+import { UserDistrict } from '../../../map-service/src/models/user-district.model';
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Plan } from './Plan';
 
@@ -93,6 +94,8 @@ export class User {
   @OneToOne(() => Subscription, (subscription) => subscription.user)
   subscription!: Subscription;
 
+  @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
+  userDistrict!: UserDistrict[];
 
   /**
    * Relación N:N (autorreferenciada) para "is friend of"
