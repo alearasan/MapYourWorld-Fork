@@ -18,14 +18,6 @@ export default class RegionRepository {
                 throw new Error(`Region no creada correctamente`);
             }
 
-            const mapa_encontrado = await this.mapRepo.findOne({where:{id:mapa_id}, relations:['users_joined', 'user_created']})
-
-            if(!mapa_encontrado){
-                throw new Error(`El mapa con id ${mapa_id} no ha sido encontrado`)
-            }
-
-            region.map_assignee = mapa_encontrado
-
             return await this.regionRepo.save(region);
     }
 

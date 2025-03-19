@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { createDistrict, getDistrictById, getAllDistricts, unlockDistrict, getUserUnlockedDistricts, findDistrictContainingLocation, updateDistrict, getDistrictsByMapId, unlockCollaborativeDistrict, simulateUserPassingByDistrict, getUserDistrictsWithColors } from '../controllers/district.controller';
+import { createDistricts } from '../services/district.service';
 
 const router: Router = Router();
 
-router.post('/create', createDistrict);
+router.post('/create', createDistricts);
 
 router.get('/:districtId', getDistrictById);
 

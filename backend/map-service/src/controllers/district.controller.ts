@@ -10,14 +10,14 @@ import { UserDistrict } from '../models/user-district.model';
 
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { regionId, userId } = req.body;
+    const { mapId } = req.body;
 
-    if (!regionId || !userId) {
+    if (!mapId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    await DistrictService.createDistrict(userId, regionId);
+    await DistrictService.createDistricts(mapId);
     res.status(201).json({ success: true, message: 'Distritos creados correctamente' });
   } catch (error) {
     console.error('Error al crear distrito:', error);

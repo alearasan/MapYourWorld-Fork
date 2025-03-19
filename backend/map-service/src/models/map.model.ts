@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../../auth-service/src/models/user.model';
 
 @Entity('maps')
@@ -6,7 +6,7 @@ export class Map {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+    @Column({ type: 'varchar', length: 255, nullable: false })
     name!: string;
 
     @Column({ type: 'text', nullable: true })
@@ -23,6 +23,7 @@ export class Map {
     users_joined!: User[];
 
     @ManyToOne(() => User, (user) => user.id)
+    @JoinColumn({ name: 'user_created' })
     user_created!: User; 
 
 }
