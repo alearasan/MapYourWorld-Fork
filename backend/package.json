@@ -55,7 +55,6 @@
     "jsonwebtoken": "9.0.2",
     "lightningcss": "1.29.1",
     "memory-cache": "0.2.0",
-    "mongoose": "8.12.1",
     "multer": "1.4.5-lts.1",
     "node-fetch": "3.3.2",
     "node-mocks-http": "1.16.2",
@@ -111,7 +110,6 @@
     "dotenv": "16.4.7",
     "express": "4.21.2",
     "jsonwebtoken": "9.0.2",
-    "mongodb": "5.9.2",
     "pg": "8.13.3",
     "typeorm": "0.3.21",
     "typescript": "5.8.2"

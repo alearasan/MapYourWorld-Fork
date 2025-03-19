@@ -282,7 +282,6 @@ function sincronizarDependencias() {
       'cors': '2.8.5',
       'dotenv': '16.4.7',
       'helmet': '8.0.0',
-      'mongoose': '8.12.1',
       'sharp': '0.33.5',
       'compression': '1.8.0',
       'http-proxy-middleware': '3.0.3',
