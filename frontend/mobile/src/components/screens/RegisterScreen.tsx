@@ -66,6 +66,7 @@ const RegisterScreen = () => {
       isValid = false;
     }
 
+
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electrónico es obligatorio';
       isValid = false;
@@ -91,6 +92,13 @@ const RegisterScreen = () => {
       isValid = false;
     } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) { // Al menos 1 carácter especial
       newErrors.password = 'La contraseña debe contener al menos un carácter especial';
+      isValid = false;
+    }
+
+    const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
+      newErrors.picture = 'Debe ser una URL válida';
       isValid = false;
     }
     
@@ -191,6 +199,16 @@ const RegisterScreen = () => {
               onChangeText={(text) => handleChange('username', text)}
               autoCapitalize="words"
               error={errors.username}
+              icon="user"
+            />
+
+            <TextInput
+              label="URL avatar"
+              placeholder="URL avatar"
+              value={formData.picture}
+              onChangeText={(text) => handleChange('picture', text)}
+              autoCapitalize="words"
+              error={errors.picture}
               icon="user"
             />
             

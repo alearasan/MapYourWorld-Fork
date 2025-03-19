@@ -581,8 +581,13 @@ const MapScreen = () => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+
       console.log("Obteniendo puntos de interés...");
-      const response = await fetch(`${API_URL}/api/poi/all`);
+      const response = await fetch(`${API_URL}/api/poi/map/${userMap.map.id}`);
       const data = await response.json();
       if (data.pois) {
         console.log(`Se obtuvieron ${data.pois.length} puntos de interés`);
