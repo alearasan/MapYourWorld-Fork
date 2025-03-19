@@ -30,6 +30,7 @@
     "@types/jsonwebtoken": "9.0.9",
     "@types/node": "22.13.9",
     "@types/nodemailer": "6.4.17",
+    "@types/supertest": "6.0.2",
     "@types/ws": "8.18.0",
     "chalk": "4.1.2",
     "cross-env": "7.0.3",
