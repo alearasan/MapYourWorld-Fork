@@ -12,6 +12,7 @@ interface Distrito {
   nombre: string;
   coordenadas: { latitude: number; longitude: number }[];
   isUnlocked: boolean;
+  regionId: string;
 }
 
 interface DistritoBackend {
@@ -20,6 +21,18 @@ interface DistritoBackend {
   description: string;
   boundaries: any;
   isUnlocked: boolean;
+  region_assignee?: { // ⬅ Agregar esta propiedad opcional
+    id: string;
+    name: string;
+    description: string;
+    map_assignee: {
+      id: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      is_colaborative: boolean;
+    };
+  };
 }
 
 interface POI {
@@ -263,6 +276,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
                 isUnlocked: distrito.isUnlocked,
+                regionId: distrito.region_assignee ? distrito.region_assignee.id : null, 
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -302,9 +316,12 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   };
 
   // Función para desbloquear un distrito si el usuario se encuentra dentro de él
-  const desbloquearDistrito = async (districtId: string) => {
+  const desbloquearDistrito = async (districtId: string, regionId:String) => {
     try {
-      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/1`, {
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${user.id}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isUnlocked: true }),
@@ -369,9 +386,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
         }
       }
       if (distritoEncontrado) {
-        const { id, nombre, isUnlocked } = distritoEncontrado;
+        const { id, nombre, isUnlocked, regionId } = distritoEncontrado;
         if (!isUnlocked) {
-          desbloquearDistrito(id);
+          desbloquearDistrito(id, regionId);
         }
         if (!distritosVisitados.has(nombre)) {
           setDistritosVisitados(new Set(distritosVisitados).add(nombre));

@@ -3,6 +3,8 @@ import { View, Text, Alert, ActivityIndicator, StyleSheet, Modal } from "react-n
 import { styled } from 'nativewind';
 import { API_URL } from "@/constants/config";
 import PuntoDeInteresForm from "../POI/PoiForm";
+import { useAuth } from '../../contexts/AuthContext';
+
 
 // Agregar logs para depuración
 console.log("Cargando MapScreen.web.tsx");
@@ -265,6 +267,7 @@ const LeafletMap = ({ location, distritos, pointsOfInterest, onMapClick }: any) 
 
 // Componente para versión web que usa react-leaflet
 const MapScreen = () => {
+  const { user } = useAuth();
   console.log("Renderizando MapScreen web");
   const [location, setLocation] = useState<[number,number]>([40.416775,-3.703790]);
   const [loading, setLoading] = useState(true);
@@ -500,13 +503,40 @@ const MapScreen = () => {
     }
   };
 
+    const fetchUserMap = async (userId: string): Promise<any> => {
+      const url = `${API_URL}/api/maps/principalMap/user/${userId}`;
+    
+      try {
+        const response = await fetch(url, {
+          method: "GET", // Cambia a "POST", "PUT", "DELETE" si es necesario
+          headers: {
+            "Content-Type": "application/json",
+            // Agrega otros headers si es necesario, como tokens de autenticación
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error(`Error en la solicitud: ${response.statusText}`);
+        }
+    
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Error en la petición:", error);
+        throw error;
+      }
+    };
+
   // Función para obtener los distritos desde el backend
   const fetchDistritos = async () => {
     try {
-      console.log("Obteniendo distritos...");
-      setLoading(true);
-      console.log("Fetching from:", `${API_URL}/api/districts`);
-      const response = await fetch(`${API_URL}/api/districts`);
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+            console.log("Datos recibidos del mapa del usuario:", userMap);
+            setLoading(true);
+            const response = await fetch(`${API_URL}/api/districts/map/${userMap.map.id}`);
       if (!response.ok) {
         throw new Error(`Error de red: ${response.status} ${response.statusText}`);
       }
