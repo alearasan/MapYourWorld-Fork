@@ -86,8 +86,8 @@ export const loginUser = async (email: string, password: string): Promise<{ user
   }
 
   // 3. Verificar que la cuenta esté activa
-  if (user.is_active === false) {
-    throw new Error('La cuenta no está activada. Por favor, verifica tu email');
+  if (!user.is_active) {
+    throw new Error('La cuenta no está activada. Por favor, verifica tu email.');
   }
 
   // 4. Generar token JWT

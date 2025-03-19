@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ImageBackground, Image, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, ImageBackground, Image, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
 import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
+import { API_URL } from '@/constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
+
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -20,13 +24,19 @@ type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList
 const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
+    username:'',
+    lastname:'',
+    firstname:'',
+    picture:'',
     password: '',
   });
   const [errors, setErrors] = useState({
-    fullName: '',
     email: '',
+    username:'',
+    lastname:'',
+    firstname:'',
+    picture:'',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -43,8 +53,16 @@ const RegisterScreen = () => {
     const newErrors = { ...errors };
     let isValid = true;
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'El nombre completo es obligatorio';
+    if (!formData.username.trim()) {
+      newErrors.username = 'El nombre de usuario es obligatorio';
+      isValid = false;
+    }
+    if (!formData.firstname.trim()) {
+      newErrors.firstname = 'El nombre es obligatorio';
+      isValid = false;
+    }
+    if (!formData.lastname.trim()) {
+      newErrors.lastname = 'El apellido es obligatorio';
       isValid = false;
     }
 
@@ -59,36 +77,65 @@ const RegisterScreen = () => {
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria';
       isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+      isValid = false;
+    } else if (!/[A-Z]/.test(formData.password)) { // Al menos 1 letra mayúscula
+      newErrors.password = 'La contraseña debe contener al menos una letra mayúscula';
+      isValid = false;
+    } else if (!/[a-z]/.test(formData.password)) { // Al menos 1 letra minúscula
+      newErrors.password = 'La contraseña debe contener al menos una letra minúscula';
+      isValid = false;
+    } else if (!/[0-9]/.test(formData.password)) { // Al menos 1 número
+      newErrors.password = 'La contraseña debe contener al menos un número';
+      isValid = false;
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) { // Al menos 1 carácter especial
+      newErrors.password = 'La contraseña debe contener al menos un carácter especial';
       isValid = false;
     }
+    
 
     setErrors(newErrors);
     return isValid;
   };
-
+  const { signUp } = useAuth();
   const handleRegister = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      // Aquí iría la lógica real de registro
-      // await authService.register(formData);
-
-      // Simulamos un delay para mostrar el spinner
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Navegar a la pantalla principal después del registro exitoso
+      // Llamada al método signUp del AuthContext
+      // signUp solo recibe (username, email, password) según tu implementación,
+      // por lo que se ignoran los demás campos o podrías modificar signUp para incluirlos.
+      const success = await signUp(formData);
+      
+      if (!success) {
+        throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
+      }
+      
+      // Registro exitoso, navegamos a la pantalla principal
       navigation.navigate('Map');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al registrarse:', error);
-      // Manejar errores
+
+      let errorMessage: string = 'Ocurrió un error inesperado';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      }
+
     } finally {
       setIsLoading(false);
     }
   };
+
+
+
+
+
 
   const goToLogin = () => {
     navigation.navigate('Login');
@@ -117,15 +164,36 @@ const RegisterScreen = () => {
               Comienza a documentar tus aventuras hoy mismo
             </Text>
 
+
             <TextInput
-              label="Nombre completo"
-              placeholder="Nombre completo"
-              value={formData.fullName}
-              onChangeText={(text) => handleChange('fullName', text)}
+              label="Nombre"
+              placeholder="Nombre"
+              value={formData.firstname}
+              onChangeText={(text) => handleChange('firstname', text)}
               autoCapitalize="words"
-              error={errors.fullName}
+              error={errors.firstname}
               icon="user"
             />
+            <TextInput
+              label="Apellidos"
+              placeholder="Apellidos"
+              value={formData.lastname}
+              onChangeText={(text) => handleChange('lastname', text)}
+              autoCapitalize="words"
+              error={errors.lastname}
+              icon="user"
+            />
+
+            <TextInput
+              label="Nombre usuario"
+              placeholder="Nombre usuario"
+              value={formData.username}
+              onChangeText={(text) => handleChange('username', text)}
+              autoCapitalize="words"
+              error={errors.username}
+              icon="user"
+            />
+            
 
             <TextInput
               label="Correo electrónico"
