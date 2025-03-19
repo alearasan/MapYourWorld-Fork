@@ -13,16 +13,17 @@ const repo = new RegionRepository();
  * @param regionData Datos de la región a crear
  */
 export const createRegion = async (
-  regionData: Omit<Region, 'id'>
-): Promise<Region> => {
+  regionData: Omit<Region, 'id'>,
+  mapaId: string
+): Promise<Region | null> => {
   try {
     // 1. Validar los datos de la región
-    if (!regionData.name || !regionData.description) {
-      throw new Error("Faltan datos importantes como el nombre o la descripción.");
+    if (!regionData.name || !regionData.description || !mapaId) {
+      throw new Error("Faltan datos importantes como el nombre, la descripción o el id del mapa a asignar.");
     }
 
     // 2. Crear y guardar la región correctamente
-    const newRegion = await repo.createRegion(regionData);
+    const newRegion = await repo.createRegion(regionData, mapaId);
 
     console.log("Región creada correctamente:", newRegion);
     return newRegion;
