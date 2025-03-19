@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes';
-//import  emailRouter  from './routes/email.routes';
+
 import { initializeDatabase } from '../../database/appDataSource';
 
 
