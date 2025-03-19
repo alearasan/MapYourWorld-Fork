@@ -184,11 +184,10 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
         console.log(`Controlador: No se encontraron distritos, creando distritos para el mapa ${mapId}`);
         
         // Usamos el mismo userId de ejemplo que en el mapa
-        const userId = "user-456";
         
         // Creamos distritos para el mapa
         try {
-          await DistrictService.createDistrict(mapId, userId);
+          await DistrictService.createDistricts(mapId);
           
           // Obtenemos los distritos recién creados
           const newDistricts = await DistrictService.getDistrictsByMapId(mapId);

@@ -11,6 +11,8 @@ import { generateToken, verifyToken } from '../../../../shared/config/jwt.config
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
+import { createMap } from '../../../map-service/src/services/map.service';
+import { createDistricts } from '../../../map-service/src/services/district.service';
 
 const repo = new AuthRepository();
 const profileRepo = new UserProfileRepository()
@@ -24,46 +26,59 @@ export const getUserById = async (userId: string): Promise<User | null> => {
  * @param userData Datos del usuario a registrar
  */
 export const registerUser = async (userData: any): Promise<User> => {
-  // 1. Validar datos de entrada
-  if (!userData.email || !userData.password || !userData.username || !userData.firstName || !userData.lastName) {
-    throw new Error('Faltan campos requeridos');
+  try {
+    // 1. Validar datos de entrada
+    if (!userData.email || !userData.password || !userData.username || !userData.firstName || !userData.lastName) {
+      throw new Error('Faltan campos requeridos');
+    }
+
+
+    // 2. Verificar que el email no existe en la base de datos
+    const existingUser = await repo.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error('El usuario ya existe con este email');
+    }
+
+    // 3. Crear el usuario en la base de datos
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const newProfile = new UserProfile();
+    newProfile.username = userData.username;
+    newProfile.firstName = userData.firstName;
+    newProfile.lastName = userData.lastName;
+    newProfile.picture = userData.picture;
+    const savedProfile = await profileRepo.create(newProfile);
+
+    // Creamos el usuario con las propiedades adecuadas según el modelo
+    const newUser = new User();
+    newUser.email = userData.email;
+    newUser.role = userData.role;
+    newUser.password = hashedPassword;
+    newUser.is_active = false;
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    newUser.token_data = JSON.stringify({
+      verificationType: 'email',
+      token: verificationToken,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
+    });
+    newUser.profile = savedProfile;
+
+
+    const savedUser = await repo.save(newUser);
+
+    const newMap = await createMap(savedUser.id);
+    if (!newMap) {
+      throw new Error('Error al crear el mapa');
+    }
+
+    await createDistricts(newMap.id);
+
+    await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
+
+    return newUser;
+  } catch (error) {
+    throw new Error('Error al registrar el usuario');
   }
-
-
-  // 2. Verificar que el email no existe en la base de datos
-  const existingUser = await repo.findByEmail(userData.email);
-  if (existingUser) {
-    throw new Error('El usuario ya existe con este email');
-  }
-
-  // 3. Crear el usuario en la base de datos
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-  const newProfile = new UserProfile();
-  newProfile.username = userData.username;
-  newProfile.firstName = userData.firstName;
-  newProfile.lastName = userData.lastName;
-  newProfile.picture = userData.picture;
-  const savedProfile = await profileRepo.create(newProfile);
-
-  // Creamos el usuario con las propiedades adecuadas según el modelo
-  const newUser = new User();
-  newUser.email = userData.email;
-  newUser.role = userData.role;
-  newUser.password = hashedPassword;
-  newUser.is_active = false;
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  newUser.token_data = JSON.stringify({
-    verificationType: 'email',
-    token: verificationToken,
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
-  });
-  newUser.profile = savedProfile;
-
-  await repo.save(newUser);
-  await sendVerificationEmail(newUser.email, userData.profile?.username || '', verificationToken);
-
-  return newUser;
 };
 
 /**

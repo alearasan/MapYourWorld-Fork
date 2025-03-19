@@ -33,43 +33,43 @@ const regionRepo = new RegionRepository();
 
 
 
-export const createDistrict = async (
-  userId?: string,
-  regionId?: string,
+// export const createDistrict = async (
+//   userId?: string,
+//   regionId?: string,
 
-): Promise<void> => {
-  var user: any = null;
-  var region: any = null;
-  try {
-    if (userId && regionId) {
-      user = await userRepo.findById(userId);
-      region = await regionRepo.getRegionById(regionId)
-      if (!region || !user) {
-        throw new Error("No se encontró la región o el usuario");
-      }
-    }
-    const districtData = geojsonData.features.map((feature: any, index: number) => ({
-      name: `Distrito ${index + 1}`, // Asigna un nombre genérico si no hay "properties"
-      description: 'Descripción genérica del distrito.', // Se puede personalizar
-      boundaries: {
-        type: feature.geometry.type,
-        coordinates: feature.geometry.coordinates
-      } as Geometry,
-      isUnlocked: false,
-      user: user,
-      region_assignee: region
-    }));
-
-
-    for (const district of districtData) {
-      await repo.createDistrict(district);
-    }
+// ): Promise<void> => {
+//   var user: any = null;
+//   var region: any = null;
+//   try {
+//     if (userId && regionId) {
+//       user = await userRepo.findById(userId);
+//       region = await regionRepo.getRegionById(regionId)
+//       if (!region || !user) {
+//         throw new Error("No se encontró la región o el usuario");
+//       }
+//     }
+//     const districtData = geojsonData.features.map((feature: any, index: number) => ({
+//       name: `Distrito ${index + 1}`, // Asigna un nombre genérico si no hay "properties"
+//       description: 'Descripción genérica del distrito.', // Se puede personalizar
+//       boundaries: {
+//         type: feature.geometry.type,
+//         coordinates: feature.geometry.coordinates
+//       } as Geometry,
+//       isUnlocked: false,
+//       user: user,
+//       region_assignee: region
+//     }));
 
 
-  } catch (error) {
-    console.log(error)
-  }
-};
+//     for (const district of districtData) {
+//       await repo.createDistrict(district);
+//     }
+
+
+//   } catch (error) {
+//     console.log(error)
+//   }
+// };
 
 export const createDistricts = async (
   mapaId: string
@@ -79,7 +79,7 @@ export const createDistricts = async (
     const totalDistricts = geojsonData.features.length;
     const numberOfRegions = Math.ceil(totalDistricts / districtsPerRegion);
 
-    const map = await mapRepo.getOnlyMapById(mapaId);
+    const map = await mapRepo.getMapById(mapaId);
 
     if (!map) {
       throw new Error('Mapa no encontrado.');
