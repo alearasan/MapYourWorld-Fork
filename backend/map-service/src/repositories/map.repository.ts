@@ -47,7 +47,7 @@ export default class MapRepository {
         await this.mapRepo.save(map);
 
         
-        const lista_mapas_unidos = []
+        const lista_mapas_unidos = user.maps_joined || [];
         lista_mapas_unidos.push(map);
         user.maps_joined = lista_mapas_unidos;
         await this.userRepo.save(user);
@@ -143,7 +143,7 @@ export default class MapRepository {
             // Para cada mapa, cargamos la información completa con los usuarios
             const mapsWithUsers = await Promise.all(
                 collaborativeMaps.map(async (map) => {
-                    return await this.mapRepo.findOne({ 
+                    return await this.mapRepo.find({ 
                         where: { id: map.id }, 
                         relations: ['users_joined', 'user_created'] 
                     });
@@ -151,7 +151,7 @@ export default class MapRepository {
             );
             
             // Filtramos los posibles nulos
-            return mapsWithUsers.filter((map): map is Map => map !== null);
+            return collaborativeMaps;
         } catch (error) {
             console.error(`Error al obtener mapas colaborativos para el usuario ${userId}:`, error);
             throw error;
