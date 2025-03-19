@@ -70,12 +70,9 @@ const LoginScreen = () => {
       if (success) {
         // Si el inicio de sesión fue exitoso, navegar a la pantalla principal
         navigation.navigate('Map');
-      } else {
-        Alert.alert('Error', 'No se pudo iniciar sesión. Verifica tus credenciales.');
-      }
+      } 
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      Alert.alert('Error', 'Ocurrió un error al intentar iniciar sesión.');
     } finally {
       setIsLoading(false);
     }

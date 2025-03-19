@@ -3,6 +3,7 @@ import { Geometry } from 'geojson';
 import { Map } from './map.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import { UserDistrict } from "./user-district.model";
+import { Region } from './region.model';
 
 @Entity('districts')
 export class District {
@@ -23,6 +24,9 @@ export class District {
 
     @ManyToOne(() => Map)
     map!: Map;
+
+    @ManyToOne(() => Region, (region) => region.id, { onDelete:"CASCADE"})
+    region_assignee!: Region;
 
     @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.district)
     userDistrict!: UserDistrict[];

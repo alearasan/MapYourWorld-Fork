@@ -10,14 +10,14 @@ import { UserDistrict } from '../models/user-district.model';
 
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { mapId, userId } = req.body;
+    const { regionId, userId } = req.body;
 
-    if (!mapId || !userId) {
+    if (!regionId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    await DistrictService.createDistrict(mapId, userId);
+    await DistrictService.createDistrict(userId, regionId);
     res.status(201).json({ success: true, message: 'Distritos creados correctamente' });
   } catch (error) {
     console.error('Error al crear distrito:', error);
@@ -94,12 +94,14 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
   try {
     const districtId  = req.params.districtId;
     const userId  = req.params.userId;
+    const regionId = req.params.regionId
+
     if (!districtId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
       return;
     }
 
-    const result = await DistrictService.unlockDistrict(districtId, userId);
+    const result = await DistrictService.unlockDistrict(districtId, userId, regionId);
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
       return;
@@ -239,6 +241,7 @@ export const unlockCollaborativeDistrict = async (req: Request, res: Response): 
     const districtId = req.params.districtId;
     const userId = req.params.userId;
     const mapId = req.params.mapId;
+    const regionId = req.params.regionId
     
     if (!districtId || !userId || !mapId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
@@ -247,7 +250,7 @@ export const unlockCollaborativeDistrict = async (req: Request, res: Response): 
 
     console.log(`Intentando desbloquear distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
     
-    const result = await DistrictService.unlockCollaborativeDistrict(districtId, userId, mapId);
+    const result = await DistrictService.unlockCollaborativeDistrict(districtId, userId, mapId, regionId);
     
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });

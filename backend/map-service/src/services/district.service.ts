@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { Geometry } from 'geojson';
 import {AuthRepository} from '../../../auth-service/src/repositories/auth.repository';
 import { UserDistrict } from '../models/user-district.model';
+import RegionRepository from '../repositories/region.repository';
 
 const filePath = 'database/map.geojson';
 const rawData = fs.readFileSync(filePath, 'utf-8');
@@ -21,6 +22,7 @@ const geojsonData = JSON.parse(rawData);
 const repo = new DistrictRepository();
 const mapRepo = new MapRepository();
 const userRepo = new AuthRepository();    
+const regionRepo = new RegionRepository();
 
 
 /**
@@ -32,17 +34,18 @@ const userRepo = new AuthRepository();
 
 
 export const createDistrict = async (
-  mapId?: string, 
-  userId?: string
+  userId?: string,
+  regionId?: string,
+  
 ): Promise<void> => {
-  var map: any = null;
   var user: any = null;
+  var region: any = null;
   try {
-    if (mapId && userId) {
-          map = await mapRepo.getMapById(mapId);
+    if ( userId && regionId) {
           user = await userRepo.findById(userId);
-      if (!map || !user) {
-        throw new Error("No se encontró el mapa o el usuario");
+          region = await regionRepo.getRegionById(regionId)
+      if (!region || !user) {
+        throw new Error("No se encontró la región o el usuario");
       }
   }
     const districtData = geojsonData.features.map((feature: any, index: number) => ({
@@ -53,8 +56,8 @@ export const createDistrict = async (
             coordinates: feature.geometry.coordinates
         } as Geometry,
         isUnlocked: false,
-        map: map,
-        user: user
+        user: user,
+        region_assignee:region
     }));
 
 
@@ -152,14 +155,15 @@ export const updateDistrict = async (
  */
 export const unlockDistrict = async (
   districtId: string,
-  userId: string
+  userId: string,
+  regionId:string
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
   // TODO: Implementar el desbloqueo de un distrito
   // 1. Verificar si el usuario puede desbloquear el distrito
-  const unlockedDistrict = await repo.unlockDistrict(districtId);
+  const unlockedDistrict = await repo.unlockDistrict(districtId,userId,regionId);
   // 3. Publicar evento de distrito desbloqueado
   if (unlockedDistrict.isUnlocked === true) {
     return { success: true, message: 'Distrito desbloqueado correctamente' };
@@ -214,11 +218,13 @@ export const getDistrictsByMapId = async (mapId: string): Promise<any[]> => {
  * @param districtId ID del distrito a desbloquear
  * @param userId ID del usuario que desbloquea el distrito
  * @param mapId ID del mapa colaborativo
+ * @param regionId ID de la región donde pertenecen los distritos
  */
 export const unlockCollaborativeDistrict = async (
   districtId: string,
   userId: string,
-  mapId: string
+  mapId: string,
+  regionId:string
 ): Promise<{ success: boolean; message: string; district?: any }> => {
   try {
     // 1. Verificar que el distrito existe y pertenece al mapa indicado
@@ -227,8 +233,8 @@ export const unlockCollaborativeDistrict = async (
       return { success: false, message: `Distrito con ID ${districtId} no encontrado` };
     }
     
-    // 2. Verificar que el distrito pertenece al mapa indicado
-    if (district.map?.id !== mapId) {
+    // 2. Verificar que el distrito pertenece a la región indicada
+    if (district.region_assignee?.id !== regionId) {
       return { success: false, message: `El distrito no pertenece al mapa indicado` };
     }
     
