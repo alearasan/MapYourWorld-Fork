@@ -28,14 +28,25 @@ import {
   
   describe('UserStat Service Tests', () => {
     let repoInstance: any;
+    let originalConsoleError: any;
   
     beforeEach(() => {
       jest.clearAllMocks();
+      // Guardar la implementación original de console.error
+      originalConsoleError = console.error;
+      // Reemplazar console.error con un mock vacío
+      console.error = jest.fn();
+      
       // Get the mocked repository instance
       const UserStatRepositoryMock = UserStatRepository as jest.Mock;
       // Create a new instance of the mock before each test
       new UserStatRepositoryMock();
       repoInstance = UserStatRepositoryMock.mock.results[0].value;
+    });
+  
+    afterEach(() => {
+      // Restaurar la implementación original de console.error
+      console.error = originalConsoleError;
     });
   
     describe('getAllUserStats', () => {
