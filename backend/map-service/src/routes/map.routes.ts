@@ -14,7 +14,7 @@ router.post('/invite', inviteUserToMap);
 // Ruta para obtener los mapas colaborativos de un usuario
 router.get('/collaborative/user/:userId', getCollaborativeMapsForUser);
 
-router.get('/:mapId', getMapById);
+router.get('/:MapId', getMapById);
 
 router.put('/update/:mapId', updateMap );
 

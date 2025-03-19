@@ -25,6 +25,7 @@ interface Distrito {
   isUnlocked: boolean;
   unlockedByUserId?: string;
   colorIndex?: number;
+  regionId: string;
 }
 
 interface DistritoBackend {
@@ -34,6 +35,18 @@ interface DistritoBackend {
   boundaries: any;
   isUnlocked: boolean;
   user?: { id: string };
+  region_assignee?: { 
+    id: string;
+    name: string;
+    description: string;
+    map_assignee: {
+      id: string;
+      name: string;
+      description: string;
+      createdAt: string;
+      is_colaborative: boolean;
+    };
+  };
 }
 
 interface MapUser {
@@ -207,7 +220,8 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 unlockedByUserId: distrito.user?.id,
                 colorIndex: distrito.user && mapUsers.length > 0 
                   ? mapUsers.find((u: { id: string; username: string; colorIndex: number }) => u.id === distrito.user?.id)?.colorIndex 
-                  : undefined
+                  : undefined,
+                regionId: distrito.region_assignee ? distrito.region_assignee.id : null
               };
             } catch (error) {
               console.error(`Error procesando distrito ${distrito.name}:`, error);
@@ -379,10 +393,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para desbloquear un distrito en el mapa colaborativo
-  const desbloquearDistrito = async (districtId: string) => {
+  const desbloquearDistrito = async (districtId: string, regionId: string) => {
     try {
       console.log(`Desbloqueando distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
-      const response = await fetch(`${API_URL}/api/districts/unlock/collaborative/${districtId}/${userId}/${mapId}`, {
+      const response = await fetch(`${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
       });
@@ -644,11 +658,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       }
       
       if (distritoEncontrado) {
-        const { id, nombre, isUnlocked, unlockedByUserId } = distritoEncontrado;
+        const { id, nombre, isUnlocked, unlockedByUserId, regionId } = distritoEncontrado;
         
         // Solo intentamos desbloquear si no está ya desbloqueado por otro usuario
         if (!isUnlocked) {
-          desbloquearDistrito(id);
+          desbloquearDistrito(id, regionId);
           if (!distritosVisitados.has(nombre)) {
             setDistritosVisitados(new Set(distritosVisitados).add(nombre));
             setDistritoActual(nombre);
