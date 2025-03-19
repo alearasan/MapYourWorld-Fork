@@ -203,11 +203,49 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
     }
   };
 
+  const fetchUserMap = async (userId: string): Promise<any> => {
+    const url = `${API_URL}/api/maps/principalMap/user/${userId}`;
+  
+    try {
+      const response = await fetch(url, {
+        method: "GET", // Cambia a "POST", "PUT", "DELETE" si es necesario
+        headers: {
+          "Content-Type": "application/json",
+          // Agrega otros headers si es necesario, como tokens de autenticación
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      throw error;
+    }
+  };
+  
+    
   // Función para obtener los distritos desde el backend
   const fetchDistritos = async () => {
+
+
     try {
+
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/districts`);
+
+    // Obtener userId del contexto
+    if (!user?.id) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    // Obtener el mapa del usuario
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+      console.log("Datos recibidos del mapa del usuario:", userMap);
+      setLoading(true);
+      const response = await fetch(`${API_URL}/api/districts/map/${userMap.map.id}`);
       const data = await response.json();
       
 
@@ -247,7 +285,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ distritos = [] }) => {
   // Función para obtener todos los POIs desde el backend
   const fetchPOIs = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/poi/all`);
+      if (!user?.id) {
+        throw new Error("Usuario no autenticado");
+      }
+      const userMap = await fetchUserMap(user.id); // Esperamos el resultado correctamente
+      const response = await fetch(`${API_URL}/api/poi/map/${userMap.map.id}`);
       const data = await response.json();
       if (data.pois) {  // Aquí se omite la validación de 'success'
         setPointsOfInterest(data.pois);
