@@ -22,9 +22,6 @@ export class District {
     @Column({ type: 'boolean', default: false })
     isUnlocked!: boolean;
 
-    @ManyToOne(() => Map)
-    map!: Map;
-
     @ManyToOne(() => Region, (region) => region.id, { onDelete:"CASCADE"})
     region_assignee!: Region;
 
