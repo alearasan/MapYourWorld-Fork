@@ -18,8 +18,8 @@ interface AuthContextData {
   signUp: (formData: {
     email: string;
     username: string;
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     picture?: string;
     password: string;
   }) => Promise<boolean>;
@@ -117,8 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   async function signUp(formData: {
     email: string;
     username: string;
-    firstname: string;
-    lastname: string;
+    firstName: string;
+    lastName: string;
     picture?: string;
     password: string;
   }): Promise<boolean> {
