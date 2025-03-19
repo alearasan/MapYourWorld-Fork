@@ -36,16 +36,16 @@ const RegisterScreen = () => {
   const [formData, setFormData] = useState({
     email: '',
     username:'',
-    lastname:'',
-    firstname:'',
+    lastName:'',
+    firstName:'',
     picture:'',
     password: '',
   });
   const [errors, setErrors] = useState({
     email: '',
     username:'',
-    lastname:'',
-    firstname:'',
+    lastName:'',
+    firstName:'',
     picture:'',
     password: '',
   });
@@ -67,12 +67,12 @@ const RegisterScreen = () => {
       newErrors.username = 'El nombre de usuario es obligatorio';
       isValid = false;
     }
-    if (!formData.firstname.trim()) {
-      newErrors.firstname = 'El nombre es obligatorio';
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'El nombre es obligatorio';
       isValid = false;
     }
-    if (!formData.lastname.trim()) {
-      newErrors.lastname = 'El apellido es obligatorio';
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'El apellido es obligatorio';
       isValid = false;
     }
 
@@ -104,6 +104,12 @@ const RegisterScreen = () => {
       isValid = false;
     }
     
+    const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+    if (formData.picture && !urlRegex.test(formData.picture.trim())) {
+      newErrors.picture = 'Debe ser una URL válida';
+      isValid = false;
+    }
 
     setErrors(newErrors);
     return isValid;
@@ -229,20 +235,20 @@ const RegisterScreen = () => {
                       <input
                         type="text"
                         placeholder="Nombre"
-                        value={formData.firstname}
-                        onChange={(e) => handleChange('firstname', e.target.value)}
+                        value={formData.firstName}
+                        onChange={(e) => handleChange('firstName', e.target.value)}
                         style={{ 
                           width: '100%',
                           paddingLeft: '35px',
                           paddingRight: '10px',
                           height: '44px',
-                          borderColor: errors.firstname ? '#e53e3e' : undefined
+                          borderColor: errors.firstName ? '#e53e3e' : undefined
                         }}
                       />
                     </div>
-                    {errors.firstname && (
+                    {errors.firstName && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.firstname}
+                        {errors.firstName}
                       </div>
                     )}
                   </div>
@@ -262,20 +268,20 @@ const RegisterScreen = () => {
                       <input
                         type="text"
                         placeholder="Apellidos"
-                        value={formData.lastname}
-                        onChange={(e) => handleChange('lastname', e.target.value)}
+                        value={formData.lastName}
+                        onChange={(e) => handleChange('lastName', e.target.value)}
                         style={{ 
                           width: '100%',
                           paddingLeft: '35px',
                           paddingRight: '10px',
                           height: '44px',
-                          borderColor: errors.lastname ? '#e53e3e' : undefined
+                          borderColor: errors.lastName ? '#e53e3e' : undefined
                         }}
                       />
                     </div>
-                    {errors.lastname && (
+                    {errors.lastName && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
-                        {errors.lastname}
+                        {errors.lastName}
                       </div>
                     )}
                   </div>
@@ -309,6 +315,39 @@ const RegisterScreen = () => {
                     {errors.username && (
                       <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
                         {errors.username}
+                      </div>
+                    )}
+                  </div>
+
+                  {/*URL de avatar */}
+                  <div className="input-container" style={{ marginBottom: 20 }}>
+                    <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
+                      URL de avatar
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="URL de avatar"
+                        value={formData.picture}
+                        onChange={(e) => handleChange('picture', e.target.value)}
+                        style={{ 
+                          width: '100%',
+                          paddingLeft: '35px',
+                          paddingRight: '10px',
+                          height: '44px',
+                          borderColor: errors.picture ? '#e53e3e' : undefined
+                        }}
+                      />
+                    </div>
+                    {errors.picture && (
+                      <div style={{ color: '#e53e3e', fontSize: '14px', marginTop: '4px', textAlign: 'left' }}>
+                        {errors.picture}
                       </div>
                     )}
                   </div>

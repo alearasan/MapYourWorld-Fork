@@ -203,7 +203,7 @@ npm run lint:fix
 
 ### Iniciar servicios externos con Docker
 
-Para iniciar servicios como MongoDB, PostgreSQL, Redis y RabbitMQ:
+Para iniciar servicios como PostgreSQL, Redis y RabbitMQ:
 
 ```bash
 npm run docker:backend-only
