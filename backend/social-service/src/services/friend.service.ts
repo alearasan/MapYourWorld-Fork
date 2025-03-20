@@ -1,9 +1,3 @@
-/**
- * Servicio de Amigos
- * Gestiona la creación, consulta, actualización y 
- * eliminación de solicitudes y relaciones de amistad entre usuarios.
- */
-
 import { Friend, FriendStatus } from '../models/friend.model';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
@@ -11,67 +5,72 @@ import { AppDataSource } from '../../../database/appDataSource';
 
 const repo = new FriendRepository();
 
-export const createFriend = async (
+/**
+ * Envía una solicitud de amistad.
+ * Valida que los datos sean correctos y que no exista ya una solicitud activa.
+ */
+export const sendRequestFriend = async (
   friendData: Omit<Friend, 'id'>
 ): Promise<Friend | { success: boolean; message: string }> => {
   try {
-    if (!friendData.recipient || !friendData.requester || !friendData.status) {
-      throw new Error("Los datos de receptor, solicitante y estado de la petición son necesarios.");
-    }
-
+    // Extraer IDs de los usuarios
     const requesterId = typeof friendData.requester === 'string' ? friendData.requester : friendData.requester.id;
     const recipientId = typeof friendData.recipient === 'string' ? friendData.recipient : friendData.recipient.id;
+
+    if (!requesterId || !recipientId) {
+      throw new Error("Se requieren tanto el receptor como el solicitante.");
+    }
 
     if (requesterId === recipientId) {
       throw new Error("El receptor y el solicitante deben ser distintos.");
     }
 
+    // Obtener repositorios
     const userRepository = AppDataSource.getRepository(User);
 
-    const requester = await userRepository.findOne({ where: { id: requesterId } });
-    if (!requester) {
-      throw new Error(`Usuario solicitante con ID ${requesterId} no encontrado`);
+    // Buscar usuarios en la base de datos
+    const [requester, recipient] = await Promise.all([
+      userRepository.findOne({ where: { id: requesterId } }),
+      userRepository.findOne({ where: { id: recipientId } })
+    ]);
+
+    if (!requester || !recipient) {
+      throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
     }
 
-    const recipient = await userRepository.findOne({ where: { id: recipientId } });
-    if (!recipient) {
-      throw new Error(`Usuario receptor con ID ${recipientId} no encontrado`);
-    }
-
-
+    // Verificar si ya existe una relación entre estos usuarios
     const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
-    
+
     if (existingFriendship) {
-      switch (existingFriendship.status) {
-        case FriendStatus.PENDING:
-          return { 
-            success: false, 
-            message: "Ya existe una solicitud de amistad pendiente entre estos usuarios." 
-          };
-        case FriendStatus.ACCEPTED:
-          return { 
-            success: false, 
-            message: "Estos usuarios ya son amigos." 
-          };
-        case FriendStatus.BLOCKED:
-          return { 
-            success: false, 
-            message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación." 
-          };
-        case FriendStatus.DELETED:
-          existingFriendship.status = FriendStatus.PENDING;
-          const updatedFriend = await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
-          return updatedFriend;
+      if (existingFriendship.status === FriendStatus.PENDING) {
+        return { success: false, message: "Ya existe una solicitud de amistad pendiente." };
+      }
+      if (existingFriendship.status === FriendStatus.ACCEPTED) {
+        return { success: false, message: "Estos usuarios ya son amigos." };
+      }
+      if (existingFriendship.status === FriendStatus.BLOCKED) {
+        return { success: false, message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación." };
+      }
+      if (existingFriendship.status === FriendStatus.DELETED) {
+        // Reactivar la amistad en estado pendiente
+        return await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
       }
     }
-    const newFriend = repo.createFriend(friendData);
+
+    // Crear la solicitud de amistad
+    const newFriend = await repo.createFriend({
+      ...friendData,
+    });
+
     console.log("Solicitud de amistad creada:", newFriend);
     return newFriend;
+
   } catch (error) {
-    console.log(error);
+    console.error("Error al crear solicitud de amistad:", error);
     throw error;
   }
 };
+
 
 /**
  * Lista las solicitudes de amistad de un usuario según el estado indicado.
@@ -96,7 +95,7 @@ export const listFriends = async (
  */
 export const findFriendById = async (friendId: string): Promise<Friend | null> => {
   const friend = await repo.getFriendById(friendId);
-  if (friend === null) {
+  if (!friend) {
     throw new Error(`Solicitud de amistad con ID ${friendId} no encontrada`);
   } else {
     return friend;
@@ -131,9 +130,11 @@ export const updateFriendStatus = async (
   message?: string;
 }> => {
   const updatedFriend = await repo.updateFriendStatus(friendId, status);
-  
-  switch (status) {
+  if (!updatedFriend) {
+    throw new Error('Error al actualizar el estado de la solicitud de amistad');
+  }
 
+  switch (updatedFriend.status) {
     case FriendStatus.ACCEPTED:
       if (updatedFriend.status === FriendStatus.ACCEPTED) {
         return { success: true, message: 'Solicitud de amistad aceptada correctamente' };
@@ -146,7 +147,6 @@ export const updateFriendStatus = async (
       } else {
         throw new Error('Error al actualizar el estado de la solicitud de amistad');
       }
-
     case FriendStatus.DELETED:
       if (updatedFriend.status === FriendStatus.DELETED) {
         return { success: true, message: 'Solicitud de amistad eliminada correctamente' };
@@ -156,4 +156,17 @@ export const updateFriendStatus = async (
     default:
       throw new Error('Error al actualizar el estado de la solicitud de amistad');
   }
+};
+
+/**
+ * Obtiene la lista de amigos (relaciones ACCEPTED) de un usuario.
+ *
+ * @param userId ID del usuario.
+ * @returns Lista de usuarios amigos.
+ */
+export const getFriends = async (
+  userId: string
+): Promise<User[]> => {
+  const friends = await repo.getFriends(userId);
+  return friends;
 };
