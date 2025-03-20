@@ -36,7 +36,6 @@ jobs:
           commit-message: Daily merge from develop to main
           committer: GitHub Actions <actions@github.com>
           author: GitHub Actions <actions@github.com>
-          branch: automated/daily-develop-to-main
           delete-branch: true
           base: main
           title: 'Daily: Merge develop into main'
