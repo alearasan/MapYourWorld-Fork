@@ -4,9 +4,6 @@ on:
   schedule:
     # runs every 1 minute for testing purpose
     - cron: '*/1 * * * *'
-  
-  # Allow manual triggering of the workflow
-  workflow_dispatch:
 
 jobs:
   create-pull-request:
