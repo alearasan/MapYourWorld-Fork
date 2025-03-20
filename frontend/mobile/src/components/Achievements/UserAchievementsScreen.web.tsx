@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { View, Text, Alert, StyleSheet, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getCurrentUser } from '@/services/auth.service';
+import { API_URL } from '@/constants/config';
 
 // Interfaz para los logros
 interface Achievement {
@@ -13,10 +14,17 @@ interface Achievement {
 }
 
 const UserAchievementsScreen = () => {
-  const { user } = useAuth();
+  const user = getCurrentUser();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Estado para el modal de creación de logros
+    const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+    const [achievementName, setAchievementName] = useState<string>("");
+    const [achievementDescription, setAchievementDescription] = useState<string>("");
+    const [achievementDate, setAchievementDate] = useState<string>("");
+    const [achievementIcon, setAchievementIcon] = useState<string>("https://example.com/icon1.png");
 
   useEffect(() => {
     const fetchAchievements = async () => {
@@ -27,12 +35,12 @@ const UserAchievementsScreen = () => {
           const storedUserId = await AsyncStorage.getItem("userId");
           if (storedUserId) {
             console.log("Usando ID temporal guardado:", storedUserId);
-            effectiveUser = { id: storedUserId, username: 'Usuario de Prueba' };
+            effectiveUser = { id: storedUserId, username: 'Usuario de Prueba', email: "mail@gmail.com", isPremium: true, createdAt: "2000-01-01" };
           } else {
             const temporalUserId = "user-456";
             console.log("Creando nuevo ID temporal:", temporalUserId);
             await AsyncStorage.setItem("userId", temporalUserId);
-            effectiveUser = { id: temporalUserId, username: 'Usuario de Prueba' };
+            effectiveUser = { id: temporalUserId, username: 'Usuario de Prueba', email: "mail@gmail.com", isPremium: true, createdAt: "2000-01-01" };
           }
         }
 
@@ -116,74 +124,332 @@ const UserAchievementsScreen = () => {
     );
   }
 
+  // Function to create a new achievement
+  const createAchievement = async () => {
+    if (!achievementName.trim()) {
+      Alert.alert("Error", "Por favor, ingresa un nombre para el logro");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      console.log("Creando logro:", {
+        nombre: achievementName,
+        descripción: achievementDescription,
+        fecha: achievementDate,
+        icono: achievementIcon,
+      });
+
+      // RN: Only premium users can create achievements
+      if (user ? user.isPremium : false) {
+        throw new Error("Solo los usuarios premium pueden crear logros");
+      }
+
+      const achievementData = {
+        name: achievementName,
+        description: achievementDescription || "Logro desbloqueado",
+        achievementDate: achievementDate || new Date().toISOString(),
+        icon: achievementIcon || "default_icon.png",
+      };
+
+      const userId = user ? user.id : null;
+      const response = await fetch(`${API_URL}/api/achievements/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          achievementData,
+          userId,
+        }),
+      });
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("La respuesta del servidor no es válida (no es JSON)");
+      }
+
+      const data = await response.json();
+      console.log("Respuesta del servidor:", data);
+
+      if (data.success) {
+        setAchievementName("");
+        setAchievementDescription("");
+        setAchievementDate(new Date().toISOString());
+        setAchievementIcon("default_icon.png");
+        setShowCreateModal(false);
+        Alert.alert("Éxito", "Logro creado correctamente");
+      } else {
+        throw new Error(data.message || "Error al crear el logro");
+      }
+    } catch (error) {
+      console.error("Error al crear logro:", error);
+      Alert.alert(
+        "Error",
+        `No se pudo crear el logro: ${error instanceof Error ? error.message : "Error desconocido"}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Modal for creating an achievement
+  const renderCreateAchievementModal = () => (
+    <Modal visible={showCreateModal} transparent={true} animationType="slide" onRequestClose={() => setShowCreateModal(false)}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          {user?.isPremium ? (
+            <>
+              <Text style={styles.modalTitle}>Crear Logro</Text>
+              <Text style={styles.inputLabel}>Nombre del logro*</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ej: Explorador Maestro"
+                value={achievementName}
+                onChangeText={setAchievementName}
+                maxLength={30}
+              />
+
+              <Text style={styles.inputLabel}>Descripción</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Descripción del logro"
+                value={achievementDescription}
+                onChangeText={setAchievementDescription}
+                multiline={true}
+                maxLength={100}
+              />
+
+              <Text style={styles.inputLabel}>Fecha del logro</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="YYYY-MM-DD"
+                value={achievementDate}
+                onChangeText={setAchievementDate}
+              />
+
+              <Text style={styles.inputLabel}>Ícono del logro</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="URL del icono"
+                value={achievementIcon}
+                onChangeText={setAchievementIcon}
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setShowCreateModal(false)}>
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.modalButton, styles.createButton]} onPress={createAchievement}>
+                  <Text style={styles.buttonText}>Crear</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.modalTitle}>Oops</Text>
+              <Text style={styles.inputLabel}>Tienes que ser usuario premium para desbloquear esta funcionalidad</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setShowCreateModal(false)}>
+                  <Text style={styles.buttonText}>Volver</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <div
       style={{
         backgroundColor: '#f9fafb',
-        padding: 16,
-        maxWidth: '800px',
         margin: '0 auto',
         minHeight: '100vh',
       }}
     >
-      <h2
+      {/* Cabecera */}
+      <div
         style={{
-          fontSize: 32,
-          fontWeight: 'bold',
-          color: '#1f2937',
-          marginBottom: 16,
-        }}
-      >
-        Logros
-      </h2>
-      {achievements.map((achievement, index) => (
-        <div
-          key={index}
+          padding: 10,
+          backgroundColor: '#2196F3',
+          display: 'flex',
+          flexDirection: 'row'
+        }}>
+        <h2
           style={{
-            backgroundColor: 'white',
-            borderRadius: 12,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            padding: 20,
-            marginBottom: 16,
-            display: 'flex',
-            alignItems: 'center',
+            color: 'white',
+            textAlign: 'left',
+            padding: 10,
+          }}>Logros</h2>
+        <button
+          style={{
+            width: '13vw',
+            padding: 10,
+            marginLeft: 'auto',
+            marginRight: 0,
+            backgroundColor: '#2196F3',
+            borderColor: 'white',
+            borderRadius: 25,
+            color: 'white',
+            fontSize: '1rem',
           }}
-        >
-          <img
-            src={achievement.iconUrl}
-            alt={achievement.name}
+          onClick={() => setShowCreateModal(true)}
+        >Crea un nuevo logro</button>
+      </div>
+      
+      {/* Lista de logros */}
+      <div
+        style={{
+          backgroundColor: 'rgb(234, 234, 234)',
+          padding: 15,
+          width: '100vw',
+          minHeight: '100vh',
+          display: 'grid',
+          gap: 10,
+          gridTemplateColumns: 'auto auto auto',
+        }}>
+        {achievements.map((achievement, index) => (
+          <div
+            key={index}
             style={{
-              width: 60,
-              height: 60,
-              marginRight: 15,
-              borderRadius: 8,
+              backgroundColor: 'white',
+              borderRadius: 12,
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              padding: 20,
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              height: '20vh',
             }}
-          />
-          <div style={{ flex: 1 }}>
-            <h3
+          >
+            <img
+              src={achievement.iconUrl}
+              alt={achievement.name}
               style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#0d9488',
-                marginBottom: 4,
+                width: 60,
+                height: 60,
+                marginRight: 15,
+                borderRadius: 8,
               }}
-            >
-              {achievement.name}
-            </h3>
-            <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 4 }}>
-              {achievement.description}
-            </p>
-            <p style={{ color: '#6b7280', fontSize: 14 }}>
-              Obtenido el: {achievement.dateEarned}
-            </p>
-            <p style={{ color: '#6b7280', fontSize: 14 }}>
-              Puntos: {achievement.points}
-            </p>
+            />
+            <div style={{ flex: 1 }}>
+              <h3
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: '#0d9488',
+                  marginBottom: 4,
+                }}
+              >
+                {achievement.name}
+              </h3>
+              <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 4 }}>
+                {achievement.description}
+              </p>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>
+                Obtenido el: {achievement.dateEarned}
+              </p>
+              <p style={{ color: '#6b7280', fontSize: 14 }}>
+                Puntos: {achievement.points}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* Modales */}
+      {renderCreateAchievementModal()}
     </div>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#2196F3",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    elevation: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+  },
+  createAchievementButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 20,
+    width: "85%",
+    maxWidth: 400,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: "top",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 8,
+  },
+  cancelButton: {
+    backgroundColor: "#f44336", // Rojo para botones de cancelar
+  },
+  createButton: {
+    backgroundColor: "#2196F3",
+  },
+  buttonText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "white",
+  },
+});
 
 export default UserAchievementsScreen;

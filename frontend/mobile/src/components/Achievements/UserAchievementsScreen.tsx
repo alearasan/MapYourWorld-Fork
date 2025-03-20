@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, Image, Alert, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -178,7 +177,7 @@ const UserAchievementsScreen = () => {
   };
 
   // Modal for creating an achievement
-  const renderCreateAchievementModal = () => (
+  const renderCreateAchievementModal = () => (user?.isPremium ? (
     <Modal
       visible={showCreateModal}
       transparent={true}
@@ -242,7 +241,30 @@ const UserAchievementsScreen = () => {
         </View>
       </View>
     </Modal>
-  );
+  ) : (
+    <Modal
+      visible={showCreateModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowCreateModal(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Oops</Text>
+  
+          <Text style={styles.inputLabel}>Tienes que ser usuario premium para desbloquear esta funcionalidad</Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setShowCreateModal(false)}
+            >
+              <Text style={[styles.buttonText, { color: "#fff" }]}>Volver</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  ));
 
   return (
     <ScrollView className="flex-1 bg-gray-50">
