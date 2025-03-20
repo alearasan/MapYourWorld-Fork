@@ -104,19 +104,32 @@ const SocialScreen = () => {
     }
   };
 
-  // Buscar usuarios
   const searchFriends = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/friends/search/${searchQuery}`);
+      console.log(`🔎 Buscando amigos con query: ${searchQuery}`);
+      const response = await fetch(`${API_URL}/api/friends/search/${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      if (data.success) {
-        setSearchResults(data.users);
+  
+      console.log("🔍 Respuesta del backend:", data); // Debug para verificar el formato
+  
+      if (Array.isArray(data)) {
+        // ✅ Transformamos los datos para que coincidan con el formato `{ id, name }`
+        setSearchResults(
+          data.map((user: { id: string; email: string }) => ({
+            id: user.id,
+            name: user.email, // Se usa `email` como `name`
+          }))
+        );
+      } else {
+        console.warn("⚠️ Formato inesperado en la respuesta de búsqueda:", data);
+        setSearchResults([]); // Limpia la lista si el formato es incorrecto
       }
     } catch (error) {
-      console.error("Error al buscar amigos:", error);
+      console.error("❌ Error al buscar amigos:", error);
+      setSearchResults([]); // Limpia la lista en caso de error
     }
   };
-
+  
   // Enviar solicitud de amistad
   const sendFriendRequest = async (friendId: string) => {
     try {

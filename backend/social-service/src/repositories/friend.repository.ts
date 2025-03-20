@@ -42,9 +42,9 @@ export default class FriendRepository {
   }
 
   async findAllUsersByName(nameData: string): Promise<User[]> {
-    const users = await this.userRepo.createQueryBuilder('user')
-      .where('user.profile.username LIKE :name', { username: `%${nameData}%` })
-      .getMany();
+    const users = await this.userRepo.find({
+      where: { profile: { username:nameData} },
+      relations: ['profile']})
 
     if (!users) {
       throw new Error(`There is not any user with the name ${nameData}`);

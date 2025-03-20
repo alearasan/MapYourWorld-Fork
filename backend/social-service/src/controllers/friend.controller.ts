@@ -69,7 +69,7 @@ export const findFriendByIdController = async (req: Request, res: Response): Pro
  */
 export const listSearchUserController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nameData } = req.query;
+    const nameData = req.params.nameData;
     if (!nameData) {
        res.status(400).json({ message: 'Falta el parámetro de búsqueda (nameData)' });
        return;
