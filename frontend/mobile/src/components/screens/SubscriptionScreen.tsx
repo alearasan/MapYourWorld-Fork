@@ -5,18 +5,23 @@ import { useNavigation } from '@react-navigation/native';  // Para la navegació
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { API_URL } from '../../constants/config';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
 
 const SubscriptionScreen = () => {
+   
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation<PaymentScreenNavigationProp>();  // Navegación a otras pantallas
 
+  const { user } = useAuth();
+  
+
   const fetchPaymentSheetParams = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/stripe/`, {
+      const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, { //Falta meter el user-Id para que funcione.
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

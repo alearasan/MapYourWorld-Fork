@@ -18,10 +18,10 @@ export class Subscription {
     @Column({ type: 'enum', enum: PlanType, default: PlanType.FREE })
     plan!: PlanType;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date' , nullable:true})
     startDate!: Date;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date' , nullable:true})
     endDate!: Date;
 
     @Column({ type: 'boolean', default : false })

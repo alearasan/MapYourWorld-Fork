@@ -69,6 +69,8 @@ export const updateSubscription = async (subscriptionId: string, subscriptionDat
         const effectiveStartDate = subscriptionData.startDate ? subscriptionData.startDate : existingSubscription.startDate;
         const effectiveEndDate = subscriptionData.endDate ? subscriptionData.endDate : existingSubscription.endDate;
 
+        
+
         subscriptionData.is_active =
             effectivePlan === PlanType.PREMIUM &&
             now >= effectiveStartDate &&
