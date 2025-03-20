@@ -122,3 +122,20 @@ export const getFriendsController = async (req: Request, res: Response): Promise
     });
   }
 };
+
+export const getPendingRequestsForRecipientController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      res.status(400).json({ message: 'Falta el parámetro userId.' });
+      return;
+    }
+    const pendingRequests = await FriendService.getPendingRequestsForRecipient(userId);
+    res.status(200).json(pendingRequests);
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error al obtener solicitudes pendientes para el destinatario:', 
+      error: error instanceof Error ? error.message : error 
+    });
+  }
+}

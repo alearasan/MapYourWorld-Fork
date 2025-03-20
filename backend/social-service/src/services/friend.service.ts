@@ -170,3 +170,10 @@ export const getFriends = async (
   const friends = await repo.getFriends(userId);
   return friends;
 };
+
+export const getPendingRequestsForRecipient = async (
+  userId: string
+): Promise<Friend[]> => {
+  const pendingRequests = await repo.getPendingRequestsForRecipient(userId);
+  return pendingRequests;
+};
