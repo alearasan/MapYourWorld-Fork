@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Alert, Text, Animated, Modal, TouchableOpacity, ScrollView, TextInput, FlatList } from "react-native";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import PuntoDeInteresForm from "../POI/PoiForm";
@@ -702,8 +702,16 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
     );
   };
 
-  // Modal para invitar amigos
   const renderInviteFriendsModal = () => {
+    // Lista estática de amigos (solo para vista visual)
+    const friends = [
+      "Amigo 1",
+      "Amigo 2",
+      "Amigo 3",
+      "Amigo 4",
+      "Amigo 5",
+    ];
+  
     return (
       <Modal
         visible={showInviteModal}
@@ -714,39 +722,38 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</Text>
-            
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Email del amigo"
-                value={friendEmail}
-                onChangeText={setFriendEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={styles.inviteButton} onPress={inviteFriend}>
-                <Text style={styles.inviteButtonText}>Invitar</Text>
+            <Text style={styles.modalSubtitle}>
+              Máximo 5 amigos (6 usuarios en total)
+            </Text>
+  
+            {/* Listado de Amigos (solo visual) */}
+            <FlatList
+              data={friends}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.invitedItem}>
+                  <Text style={styles.friendName}>{item}</Text>
+                  <TouchableOpacity style={styles.inviteButton} disabled>
+                    <Text style={styles.inviteButtonText}>Invitar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+  
+            {/* Sección de Amigos Invitados (solo visual, no funcional) */}
+            <Text style={styles.invitedTitle}>Amigos invitados:</Text>
+            <View style={styles.invitedItem}>
+              <Text style={styles.friendName}>Amigo 1</Text>
+              <TouchableOpacity disabled>
+                <Icon name="close" size={20} color="red" />
               </TouchableOpacity>
             </View>
-            
-            {invitedFriends.length > 0 && (
-              <>
-                <Text style={styles.invitedTitle}>Amigos invitados:</Text>
-                {invitedFriends.map((email, index) => (
-                  <View key={index} style={styles.invitedItem}>
-                    <Text>{email}</Text>
-                    <TouchableOpacity onPress={() => {
-                      setInvitedFriends(invitedFriends.filter((_, i) => i !== index));
-                    }}>
-                      <Icon name="close" size={20} color="red" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </>
-            )}
-            
-            <TouchableOpacity style={styles.closeButton} onPress={() => setShowInviteModal(false)}>
+  
+            {/* Botón para cerrar el modal */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowInviteModal(false)}
+            >
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -754,6 +761,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       </Modal>
     );
   };
+  
 
   // Botón para recargar los datos
   const renderReloadButton = () => {
@@ -1007,25 +1015,29 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#0096C7", // Tono medio para el botón
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
-    borderRadius: 5,
   },
   inviteButtonText: {
-    color: "white",
+    color: "#fff",
+    fontSize: 14,
     fontWeight: "bold",
   },
   closeButton: {
-    backgroundColor: "#f44336",
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
   },
   closeButtonText: {
-    color: "white",
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
   },
   invitedTitle: {
@@ -1040,6 +1052,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     paddingVertical: 8,
+  },
+  friendName: {
+    fontSize: 16,
+    color: "#023E8A",
+    flex: 1,
   },
   reloadButton: {
     position: "absolute",
