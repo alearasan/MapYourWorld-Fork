@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, Image, Alert, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/constants/config';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { getCurrentUser } from '@/services/auth.service';
 
 // Interfaz para los logros
@@ -13,6 +13,8 @@ interface Achievement {
   points: number;
   iconUrl: string;
 }
+
+const iconPlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQOuXSNhx4c8pKvcysPWidz4NibDU-xLeaJw&s";
 
 const UserAchievementsScreen = () => {
   const user = getCurrentUser();
@@ -25,9 +27,11 @@ const UserAchievementsScreen = () => {
   const [achievementName, setAchievementName] = useState<string>("");
   const [achievementDescription, setAchievementDescription] = useState<string>("");
   const [achievementDate, setAchievementDate] = useState<string>("");
-  const [achievementIcon, setAchievementIcon] = useState<string>("https://example.com/icon1.png");
+  const [achievementIcon, setAchievementIcon] = useState<string>(iconPlaceholder);
 
+  
   useEffect(() => {
+    console.log(user)
     const fetchAchievements = async () => {
       try {
         let effectiveUser = user;
@@ -49,6 +53,22 @@ const UserAchievementsScreen = () => {
               [{ text: "Entendido", style: "default" }]
             );
           }
+        } else {
+          setLoading(true);
+
+          const response = await fetch(`${API_URL}/api/user-achievements/user/${effectiveUser.id}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+      
+          if (!response.ok) {
+            throw new Error(`Error en la solicitud: ${response.statusText}`);
+          }
+      
+          const data = await response.json();
+          return data;
         }
 
         // Datos simulados para los logros
@@ -58,21 +78,21 @@ const UserAchievementsScreen = () => {
             description: "Has obtenido tu primer logro.",
             dateEarned: "2025-03-01",
             points: 10,
-            iconUrl: "https://example.com/icon1.png"
+            iconUrl: iconPlaceholder
           },
           {
             name: "Explorador",
             description: "Has visitado 10 lugares.",
             dateEarned: "2025-03-05",
             points: 20,
-            iconUrl: "https://example.com/icon2.png"
+            iconUrl: iconPlaceholder
           },
           {
             name: "Veterano",
             description: "Has acumulado 100 puntos.",
             dateEarned: "2025-03-10",
             points: 30,
-            iconUrl: "https://example.com/icon3.png"
+            iconUrl: iconPlaceholder
           }
         ];
 
@@ -132,18 +152,16 @@ const UserAchievementsScreen = () => {
         name: achievementName,
         description: achievementDescription || "Logro desbloqueado",
         achievementDate: achievementDate || new Date().toISOString(),
-        icon: achievementIcon || "default_icon.png",
+        icon: achievementIcon || iconPlaceholder,
       };
 
-      const userId = user ? user.id : null;
-      const response = await fetch(`${API_URL}/api/achievements/create`, {
+      const response = await fetch(`${API_URL}/api/achievements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           achievementData,
-          userId,
         }),
       });
 

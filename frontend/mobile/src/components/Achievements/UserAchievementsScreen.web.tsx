@@ -3,6 +3,7 @@ import { View, Text, Alert, StyleSheet, TouchableOpacity, Modal, TextInput, Acti
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUser } from '@/services/auth.service';
 import { API_URL } from '@/constants/config';
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 // Interfaz para los logros
 interface Achievement {
@@ -12,6 +13,8 @@ interface Achievement {
   points: number;
   iconUrl: string;
 }
+
+const iconPlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQOuXSNhx4c8pKvcysPWidz4NibDU-xLeaJw&s";
 
 const UserAchievementsScreen = () => {
   const user = getCurrentUser();
@@ -24,7 +27,7 @@ const UserAchievementsScreen = () => {
     const [achievementName, setAchievementName] = useState<string>("");
     const [achievementDescription, setAchievementDescription] = useState<string>("");
     const [achievementDate, setAchievementDate] = useState<string>("");
-    const [achievementIcon, setAchievementIcon] = useState<string>("https://example.com/icon1.png");
+    const [achievementIcon, setAchievementIcon] = useState<string>(iconPlaceholder);
 
   useEffect(() => {
     const fetchAchievements = async () => {
@@ -51,21 +54,21 @@ const UserAchievementsScreen = () => {
             description: "Has obtenido tu primer logro.",
             dateEarned: "2025-03-01",
             points: 10,
-            iconUrl: "https://example.com/icon1.png",
+            iconUrl: iconPlaceholder,
           },
           {
             name: "Explorador",
             description: "Has visitado 10 lugares distintos.",
             dateEarned: "2025-03-05",
             points: 20,
-            iconUrl: "https://example.com/icon2.png",
+            iconUrl: iconPlaceholder,
           },
           {
             name: "Veterano",
             description: "Has acumulado 100 puntos en total.",
             dateEarned: "2025-03-10",
             points: 30,
-            iconUrl: "https://example.com/icon3.png",
+            iconUrl: iconPlaceholder,
           },
         ];
 
@@ -150,11 +153,11 @@ const UserAchievementsScreen = () => {
         name: achievementName,
         description: achievementDescription || "Logro desbloqueado",
         achievementDate: achievementDate || new Date().toISOString(),
-        icon: achievementIcon || "default_icon.png",
+        icon: achievementIcon || iconPlaceholder,
       };
 
       const userId = user ? user.id : null;
-      const response = await fetch(`${API_URL}/api/achievements/create`, {
+      const response = await fetch(`${API_URL}/api/achievements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -263,6 +266,18 @@ const UserAchievementsScreen = () => {
     </Modal>
   );
 
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>Mapas Colaborativos</Text>
+      <TouchableOpacity
+        style={styles.createAchievementButton}
+        onPress={() => setShowCreateModal(true)}
+      >
+        <Icon name="add" size={24} color="white" />
+      </TouchableOpacity>
+      </View>
+  )
+
   return (
     <div
       style={{
@@ -272,34 +287,7 @@ const UserAchievementsScreen = () => {
       }}
     >
       {/* Cabecera */}
-      <div
-        style={{
-          padding: 10,
-          backgroundColor: '#2196F3',
-          display: 'flex',
-          flexDirection: 'row'
-        }}>
-        <h2
-          style={{
-            color: 'white',
-            textAlign: 'left',
-            padding: 10,
-          }}>Logros</h2>
-        <button
-          style={{
-            width: '13vw',
-            padding: 10,
-            marginLeft: 'auto',
-            marginRight: 0,
-            backgroundColor: '#2196F3',
-            borderColor: 'white',
-            borderRadius: 25,
-            color: 'white',
-            fontSize: '1rem',
-          }}
-          onClick={() => setShowCreateModal(true)}
-        >Crea un nuevo logro</button>
-      </div>
+      {renderHeader()}
       
       {/* Lista de logros */}
       <div
