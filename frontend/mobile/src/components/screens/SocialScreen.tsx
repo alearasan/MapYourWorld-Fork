@@ -1,129 +1,201 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { styled } from 'nativewind';
+import { API_URL } from '../../constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
+const StyledInput = styled(TextInput);
 
 const SocialScreen = () => {
-  const [friendRequests, setFriendRequests] = useState<string[]>([]);
-  const [friends, setFriends] = useState<string[]>([]);
+  const [friendRequests, setFriendRequests] = useState<{ id: string; name: string }[]>([]);
+  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
+  const [searchResults, setSearchResults] = useState<{ id: string; name: string }[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search'>('friends');
-
-  const handleAcceptRequest = (request: string) => {
-    setFriends((prevFriends) => [...prevFriends, request]);
-    setFriendRequests((prevRequests) => prevRequests.filter((r) => r !== request));
-    Alert.alert("Solicitud Aceptada", `${request} ahora es tu amigo.`);
-  };
-
-  const handleRejectRequest = (request: string) => {
-    setFriendRequests((prevRequests) => prevRequests.filter((r) => r !== request));
-    Alert.alert("Solicitud Rechazada", `${request} ha sido eliminado de las solicitudes.`);
-  };
+  const [userId, setUserId] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  // Verificamos el usuario con un console.log
+  useEffect(() => {
+    console.log("Usuario actual en Social:", user);
+  }, [user]);
 
   useEffect(() => {
-    setFriendRequests(["Amigo 1", "Amigo 2", "Amigo 3"]);
-    setFriends(["Amigo 4", "Amigo 5"]);
-  }, []);
+    if (user && user.id) {
+      console.log("Cargando amigos para el usuario:", user.id);
+      setUserId(user.id);
+      fetchFriends(user.id);
+      fetchFriendRequests(user.id);
+    }
+  }, [user]);
+
+  // Obtener lista de amigos
+  const fetchFriends = async (userId: string) => {
+    try {
+      console.log(`Solicitando amigos para el usuario: ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+      const data = await response.json();
+  
+      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+  
+      if (Array.isArray(data)) {
+        // Si la respuesta es directamente un array de usuarios, lo asignamos
+        setFriends(data.map((user) => ({
+          id: user.id,
+          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+        })));
+      } else {
+        console.warn("Formato inesperado en la respuesta de amigos:", data);
+      }
+    } catch (error) {
+      console.error("Error al obtener amigos:", error);
+    }
+  };
+
+  // Obtener solicitudes de amistad pendientes
+  const fetchFriendRequests = async (userId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/friends/list/PENDING/${userId}`);
+      const data = await response.json();
+      if (data.success) {
+        setFriendRequests(data.friends);
+      }
+    } catch (error) {
+      console.error("Error al obtener solicitudes:", error);
+    }
+  };
+
+  // Aceptar/Rechazar solicitud de amistad
+  const updateFriendStatus = async (friendId: string, status: 'ACCEPTED' | 'REJECTED') => {
+    try {
+      const response = await fetch(`${API_URL}/api/friends/update/${friendId}/${status}`, {
+        method: "PUT",
+      });
+      const data = await response.json();
+      if (data.success) {
+        if (status === 'ACCEPTED') {
+          setFriends([...friends, { id: friendId, name: data.name }]);
+          Alert.alert("Solicitud Aceptada", `${data.name} ahora es tu amigo.`);
+        } else {
+          Alert.alert("Solicitud Rechazada", `${data.name} ha sido eliminada.`);
+        }
+        setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
+      }
+    } catch (error) {
+      console.error(`Error al actualizar solicitud (${status}):`, error);
+    }
+  };
+
+  // Buscar usuarios
+  const searchFriends = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/friends/search/${searchQuery}`);
+      const data = await response.json();
+      if (data.success) {
+        setSearchResults(data.users);
+      }
+    } catch (error) {
+      console.error("Error al buscar amigos:", error);
+    }
+  };
+
+  // Enviar solicitud de amistad
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ senderId: userId, receiverId: friendId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+      }
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
 
   const renderFriends = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
-      {friends.map((friend, index) => (
-        <StyledView
-          key={index}
-          className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2"
-        >
-          <StyledText className="text-lg text-gray-800 font-semibold">{friend}</StyledText>
-          <TouchableOpacity>
-            <StyledText className="text-[#2196F3] font-medium">Ver perfil</StyledText>
-          </TouchableOpacity>
-        </StyledView>
-      ))}
+      {friends.length > 0 ? (
+        friends.map((friend) => (
+          <StyledView key={friend.id} className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2">
+            <StyledText className="text-lg text-gray-800 font-semibold">{friend.name}</StyledText>
+          </StyledView>
+        ))
+      ) : (
+        <StyledText className="text-gray-500 text-center">Aún no tienes amigos</StyledText>
+      )}
     </StyledView>
   );
 
   const renderRequests = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       {friendRequests.length > 0 ? (
-        friendRequests.map((request, index) => (
-          <StyledView
-            key={index}
-            className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2"
-          >
-            <StyledText className="text-lg text-gray-800 font-semibold">{request}</StyledText>
+        friendRequests.map((request) => (
+          <StyledView key={request.id} className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2">
+            <StyledText className="text-lg text-gray-800 font-semibold">{request.name}</StyledText>
             <StyledView className="flex-row">
-              <TouchableOpacity onPress={() => handleAcceptRequest(request)} className="mr-4">
+              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'ACCEPTED')} className="mr-4">
                 <StyledText className="text-[#2196F3] font-medium">Aceptar</StyledText>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleRejectRequest(request)}>
+              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'REJECTED')}>
                 <StyledText className="text-red-500 font-medium">Rechazar</StyledText>
               </TouchableOpacity>
             </StyledView>
           </StyledView>
         ))
       ) : (
-        <StyledText className="text-gray-500 text-center">
-          No tienes solicitudes pendientes
-        </StyledText>
+        <StyledText className="text-gray-500 text-center">No tienes solicitudes pendientes</StyledText>
       )}
     </StyledView>
   );
 
   const renderSearch = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
-      <TouchableOpacity>
-        <StyledText className="text-[#2196F3] font-medium text-center">
-          Buscar y enviar solicitudes
-        </StyledText>
+      <StyledInput
+        className="border p-2 mb-4 rounded-lg"
+        placeholder="Buscar amigos..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+      <TouchableOpacity onPress={searchFriends}>
+        <StyledText className="text-[#2196F3] font-medium text-center">Buscar</StyledText>
       </TouchableOpacity>
+
+      {searchResults.map((user) => (
+        <StyledView key={user.id} className="flex-row items-center justify-between mt-4">
+          <StyledText className="text-lg text-gray-800">{user.name}</StyledText>
+          <TouchableOpacity onPress={() => sendFriendRequest(user.id)}>
+            <StyledText className="text-[#2196F3] font-medium">Agregar</StyledText>
+          </TouchableOpacity>
+        </StyledView>
+      ))}
     </StyledView>
   );
 
   return (
-    <StyledScrollView className="flex-1 p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-
-
+    <StyledScrollView className="flex-1 p-6 bg-gray-100">
       {/* Tabs */}
       <StyledView className="flex-row justify-around mb-8">
-        <TouchableOpacity
-          onPress={() => setActiveTab('friends')}
-          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
-            activeTab === 'friends' ? 'bg-[#2196F3]' : 'bg-white'
-          }`}
-        >
-          <StyledText className={`text-center font-medium ${activeTab === 'friends' ? 'text-white' : 'text-[#2196F3]'}`}>
-            Amigos
-          </StyledText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab('requests')}
-          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
-            activeTab === 'requests' ? 'bg-[#2196F3]' : 'bg-white'
-          }`}
-        >
-          <StyledText className={`text-center font-medium ${activeTab === 'requests' ? 'text-white' : 'text-[#2196F3]'}`}>
-            Solicitudes
-          </StyledText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab('search')}
-          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
-            activeTab === 'search' ? 'bg-[#2196F3]' : 'bg-white'
-          }`}
-        >
-          <StyledText className={`text-center font-medium ${activeTab === 'search' ? 'text-white' : 'text-[#2196F3]'}`}>
-            Buscar
-          </StyledText>
-        </TouchableOpacity>
+        {['friends', 'requests', 'search'].map((tab) => (
+          <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}
+            className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${activeTab === tab ? 'bg-[#2196F3]' : 'bg-white'}`}>
+            <StyledText className={`text-center font-medium ${activeTab === tab ? 'text-white' : 'text-[#2196F3]'}`}>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </StyledText>
+          </TouchableOpacity>
+        ))}
       </StyledView>
 
-      {/* Contenido según pestaña activa */}
-      <StyledView className="mb-8">
-        {activeTab === 'friends' && renderFriends()}
-        {activeTab === 'requests' && renderRequests()}
-        {activeTab === 'search' && renderSearch()}
-      </StyledView>
+      {activeTab === 'friends' && renderFriends()}
+      {activeTab === 'requests' && renderRequests()}
+      {activeTab === 'search' && renderSearch()}
     </StyledScrollView>
   );
 };
