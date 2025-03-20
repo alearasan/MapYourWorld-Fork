@@ -2,8 +2,8 @@ name: Daily Pull Request
 
 on:
   schedule:
-    # Runs at 8:00 AM UTC every day
-    - cron: '0 8 * * *'
+    # Runs at 21:24 Spain time
+    - cron: '24 21 * * *'
   
   # Allow manual triggering of the workflow
   workflow_dispatch:
