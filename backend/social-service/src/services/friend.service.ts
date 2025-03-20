@@ -11,16 +11,9 @@ import { AppDataSource } from '../../../database/appDataSource';
 
 const repo = new FriendRepository();
 
-/**
- * Crea una nueva solicitud de amistad.
- * Valida que se proporcionen los datos obligatorios: receptor, solicitante y estado de la solicitud.
- *
- * @param friendData Datos de la solicitud de amistad (excluyendo el ID)
- * @returns La solicitud de amistad creada
- */
 export const createFriend = async (
   friendData: Omit<Friend, 'id'>
-): Promise<Friend> => {
+): Promise<Friend | { success: boolean; message: string }> => {
   try {
     if (!friendData.recipient || !friendData.requester || !friendData.status) {
       throw new Error("Los datos de receptor, solicitante y estado de la petición son necesarios.");
@@ -45,6 +38,32 @@ export const createFriend = async (
       throw new Error(`Usuario receptor con ID ${recipientId} no encontrado`);
     }
 
+
+    const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
+    
+    if (existingFriendship) {
+      switch (existingFriendship.status) {
+        case FriendStatus.PENDING:
+          return { 
+            success: false, 
+            message: "Ya existe una solicitud de amistad pendiente entre estos usuarios." 
+          };
+        case FriendStatus.ACCEPTED:
+          return { 
+            success: false, 
+            message: "Estos usuarios ya son amigos." 
+          };
+        case FriendStatus.BLOCKED:
+          return { 
+            success: false, 
+            message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación." 
+          };
+        case FriendStatus.DELETED:
+          existingFriendship.status = FriendStatus.PENDING;
+          const updatedFriend = await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
+          return updatedFriend;
+      }
+    }
     const newFriend = repo.createFriend(friendData);
     console.log("Solicitud de amistad creada:", newFriend);
     return newFriend;
@@ -66,9 +85,6 @@ export const listFriends = async (
   userId: string
 ): Promise<Friend[]> => {
   const friends = await repo.findAllByIdAndStatus(userId, status);
-  if (friends.length === 0) {
-    throw new Error(`No se encontraron solicitudes de amistad para el usuario con ID ${userId}`);
-  }
   return friends;
 };
 
@@ -104,27 +120,40 @@ export const listSearchUser = async (
  * Actualiza el estado de una solicitud de amistad.
  *
  * @param friendId ID de la solicitud de amistad a actualizar
+ * @param status Nuevo estado de la solicitud de amistad
  * @returns Objeto con el resultado de la actualización
  */
 export const updateFriendStatus = async (
   friendId: string,
+  status: FriendStatus,
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
-  const updatedFriend = await repo.updateFriendStatus(friendId);
-  if (updatedFriend.status === FriendStatus.ACCEPTED) {
-    return { success: true, message: 'Solicitud de amistad aceptada correctamente' };
-  } else {
-    throw new Error('Error al actualizar el estado de la solicitud de amistad');
-  }
-};
+  const updatedFriend = await repo.updateFriendStatus(friendId, status);
+  
+  switch (status) {
 
-/**
- * Elimina una solicitud de amistad.
- *
- * @param friendId ID de la solicitud de amistad a eliminar
- */
-export const deleteFriend = async (friendId: string): Promise<void> => {
-  await repo.deleteFriend(friendId);
+    case FriendStatus.ACCEPTED:
+      if (updatedFriend.status === FriendStatus.ACCEPTED) {
+        return { success: true, message: 'Solicitud de amistad aceptada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+    case FriendStatus.BLOCKED:
+      if (updatedFriend.status === FriendStatus.BLOCKED) {
+        return { success: true, message: 'Solicitud de amistad bloqueada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+
+    case FriendStatus.DELETED:
+      if (updatedFriend.status === FriendStatus.DELETED) {
+        return { success: true, message: 'Solicitud de amistad eliminada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+    default:
+      throw new Error('Error al actualizar el estado de la solicitud de amistad');
+  }
 };
