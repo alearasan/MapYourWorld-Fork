@@ -15,43 +15,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: develop
           fetch-depth: 0
       
-      - name: Check for changes
-        id: check_changes
-        run: |
-          git diff --quiet origin/develop origin/main || echo "has_changes=true" >> $GITHUB_OUTPUT
-
-      - name: Setup Git Identity
-        run: |
-          git config user.name 'GitHub Actions'
-          git config user.email 'actions@github.com'
-      
       - name: Create Pull Request
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          commit-message: Daily merge from develop to main
-          committer: GitHub Actions <actions@github.com>
-          author: GitHub Actions <actions@github.com>
-          branch: automated/daily-develop-to-main
-          delete-branch: true
-          base: main
-          title: 'Daily: Merge develop into main'
-          body: |
-            ## Automated Daily Pull Request
-            
-            This PR was automatically created to merge changes from `develop` into the `main` branch.
-            
-            Please review the changes and merge if appropriate.
-          draft: false
-          
-      - name: PR Result
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: echo "Pull Request created successfully!"
-      
-      - name: No changes
-        if: steps.check_changes.outputs.has_changes != 'true'
-        run: echo "No changes detected between develop and main. Skipping PR creation."
+        run: gh pr create -B main -H develop --title 'Automatic scheduled PR' --body 'Created by Github action'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
