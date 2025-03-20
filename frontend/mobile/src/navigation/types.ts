@@ -23,4 +23,5 @@ export type RootStackParamList = {
   // Otras pantallas
   POIDetail: { poiId: string };
   Settings: undefined;
+  Payment: undefined;
 }; 
