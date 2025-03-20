@@ -19,7 +19,7 @@ jobs:
         id: check_changes
         run: |
           git diff --quiet origin/develop origin/main || echo "has_changes=true" >> $GITHUB_OUTPUT
-      
+          echo "Status: $has_changes"
       - name: Setup Git Identity
         run: |
           git config user.name 'GitHub Actions'
