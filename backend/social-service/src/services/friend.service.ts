@@ -1,104 +1,172 @@
-/**
- * Servicio de Distritos
- * Gestiona la creación, consulta y desbloqueo de distritos del mapa
- */
-
-//import { publishEvent } from '@shared/libs/rabbitmq';
 import { Friend, FriendStatus } from '../models/friend.model';
-import { AppDataSource } from '../../../database/appDataSource';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
+import { AppDataSource } from '../../../database/appDataSource';
 
 const repo = new FriendRepository();
 
-
-
-export const createFriend = async (
-  friendData: Omit<Friend, 'id'>,
-): Promise<Friend> => {
-
+/**
+ * Envía una solicitud de amistad.
+ * Valida que los datos sean correctos y que no exista ya una solicitud activa.
+ */
+export const sendRequestFriend = async (
+  friendData: Omit<Friend, 'id'>
+): Promise<Friend | { success: boolean; message: string }> => {
   try {
-    if (!friendData.recipient || !friendData.requester || !friendData.status) {
-      throw new Error("Los datos de receptor, solicitante y estado de la petición son necesarios.")
-    }  
-    const newFriend = repo.createFriend(friendData);
-    console.log("Entrada de solicitud de amistad realizada", newFriend);
+    // Extraer IDs de los usuarios
+    const requesterId = typeof friendData.requester === 'string' ? friendData.requester : friendData.requester.id;
+    const recipientId = typeof friendData.recipient === 'string' ? friendData.recipient : friendData.recipient.id;
+
+    if (!requesterId || !recipientId) {
+      throw new Error("Se requieren tanto el receptor como el solicitante.");
+    }
+
+    if (requesterId === recipientId) {
+      throw new Error("El receptor y el solicitante deben ser distintos.");
+    }
+
+    // Obtener repositorios
+    const userRepository = AppDataSource.getRepository(User);
+
+    // Buscar usuarios en la base de datos
+    const [requester, recipient] = await Promise.all([
+      userRepository.findOne({ where: { id: requesterId } }),
+      userRepository.findOne({ where: { id: recipientId } })
+    ]);
+
+    if (!requester || !recipient) {
+      throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
+    }
+
+    // Verificar si ya existe una relación entre estos usuarios
+    const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
+
+    if (existingFriendship) {
+      if (existingFriendship.status === FriendStatus.PENDING) {
+        return { success: false, message: "Ya existe una solicitud de amistad pendiente." };
+      }
+      if (existingFriendship.status === FriendStatus.ACCEPTED) {
+        return { success: false, message: "Estos usuarios ya son amigos." };
+      }
+      if (existingFriendship.status === FriendStatus.BLOCKED) {
+        return { success: false, message: "No se puede enviar solicitud porque uno de los usuarios ha bloqueado la relación." };
+      }
+      if (existingFriendship.status === FriendStatus.DELETED) {
+        // Reactivar la amistad en estado pendiente
+        return await repo.updateFriendStatus(existingFriendship.id, FriendStatus.PENDING);
+      }
+    }
+
+    // Crear la solicitud de amistad
+    const newFriend = await repo.createFriend({
+      ...friendData,
+    });
+
+    console.log("Solicitud de amistad creada:", newFriend);
     return newFriend;
 
   } catch (error) {
-    console.log(error)
+    console.error("Error al crear solicitud de amistad:", error);
+    throw error;
   }
-  throw new Error('Método no implementado');
 };
 
 
+/**
+ * Lista las solicitudes de amistad de un usuario según el estado indicado.
+ *
+ * @param status Estado de la solicitud de amistad (PENDING, ACCEPTED, BLOCKED)
+ * @param userId ID del usuario
+ * @returns Lista de solicitudes de amistad
+ */
 export const listFriends = async (
-  status:FriendStatus,
+  status: FriendStatus,
   userId: string
 ): Promise<Friend[]> => {
   const friends = await repo.findAllByIdAndStatus(userId, status);
-  if (friends.length === 0) {
-    throw new Error(`No se encontraron solicitudes de amistad para el usuario con ID ${userId}`);
-  }
   return friends;
-
-};
-
- 
-
-export const findFriendById = async (friendId: string): Promise<Friend | null> => {
-  // TODO: Implementar la obtención de un distrito por ID
-  // 1. Buscar el distrito en la base de datos
-  const friend = await repo.getFriendById(friendId);
-
-
-  // 2. Retornar null si no se encuentra
-  if (friend === null) {
-    throw new Error(`Distrito con ID ${friendId} no encontrado`);
-  }
-  else {
-    return friend;
-  }
-
 };
 
 /**
- * Obtiene todos los distritos
- * @param includeInactive Indica si se deben incluir distritos inactivos
+ * Obtiene una solicitud de amistad por su ID.
+ *
+ * @param friendId ID de la solicitud de amistad
+ * @returns La solicitud de amistad encontrada o lanza un error si no existe
+ */
+export const findFriendById = async (friendId: string): Promise<Friend | null> => {
+  const friend = await repo.getFriendById(friendId);
+  if (!friend) {
+    throw new Error(`Solicitud de amistad con ID ${friendId} no encontrada`);
+  } else {
+    return friend;
+  }
+};
+
+/**
+ * Busca usuarios por nombre para facilitar la selección de amigos.
+ *
+ * @param nameData Texto de búsqueda del nombre del usuario
+ * @returns Lista de usuarios que coinciden con el criterio de búsqueda
  */
 export const listSearchUser = async (
   nameData: string
 ): Promise<User[]> => {
-  // TODO: Implementar la obtención de todos los distritos
-  // 1. Consultar todos los distritos en la base de datos
   const users = await repo.findAllUsersByName(nameData);
   return users;
 };
 
 /**
- * Actualiza un distrito existente
- * @param districtId ID del distrito a actualizar
- * @param updateData Datos a actualizar del distrito
- * @param userId ID del usuario administrador que realiza la actualización
+ * Actualiza el estado de una solicitud de amistad.
+ *
+ * @param friendId ID de la solicitud de amistad a actualizar
+ * @param status Nuevo estado de la solicitud de amistad
+ * @returns Objeto con el resultado de la actualización
  */
 export const updateFriendStatus = async (
   friendId: string,
+  status: FriendStatus,
 ): Promise<{
   success: boolean;
   message?: string;
 }> => {
-
-  const updatedFriend = await repo.updateFriendStatus(friendId);
-  // 3. Publicar evento de distrito desbloqueado
-  if (updatedFriend.status === FriendStatus.ACCEPTED) {
-    return { success: true, message: 'Solicitud de amistad aceptada correctamente' };
-  } else {
-    throw new Error('Error al aceptar la solicitud de amistad');
+  const updatedFriend = await repo.updateFriendStatus(friendId, status);
+  if (!updatedFriend) {
+    throw new Error('Error al actualizar el estado de la solicitud de amistad');
   }
 
+  switch (updatedFriend.status) {
+    case FriendStatus.ACCEPTED:
+      if (updatedFriend.status === FriendStatus.ACCEPTED) {
+        return { success: true, message: 'Solicitud de amistad aceptada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+    case FriendStatus.BLOCKED:
+      if (updatedFriend.status === FriendStatus.BLOCKED) {
+        return { success: true, message: 'Solicitud de amistad bloqueada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+    case FriendStatus.DELETED:
+      if (updatedFriend.status === FriendStatus.DELETED) {
+        return { success: true, message: 'Solicitud de amistad eliminada correctamente' };
+      } else {
+        throw new Error('Error al actualizar el estado de la solicitud de amistad');
+      }
+    default:
+      throw new Error('Error al actualizar el estado de la solicitud de amistad');
+  }
 };
 
-export const deleteFriend = async (friendId: string): Promise<void> => {
-  await repo.deleteFriend(friendId);
+/**
+ * Obtiene la lista de amigos (relaciones ACCEPTED) de un usuario.
+ *
+ * @param userId ID del usuario.
+ * @returns Lista de usuarios amigos.
+ */
+export const getFriends = async (
+  userId: string
+): Promise<User[]> => {
+  const friends = await repo.getFriends(userId);
+  return friends;
 };
-
