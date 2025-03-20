@@ -3,7 +3,7 @@ import { Photo } from '../models/photo.model'; // Importa tu entidad
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 import { PointOfInterest } from '../../../map-service/src/models/poi.model'
 
-export default class PhotoRepository {
+export class PhotoRepository {
     private photoRepo: Repository<Photo>;
     private poiRepo: Repository<PointOfInterest>;
     constructor() {

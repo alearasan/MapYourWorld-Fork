@@ -1,4 +1,4 @@
-import PhotoRepository from '../repositories/photo.repository';
+import {PhotoRepository} from '../repositories/photo.repository';
 import { Photo } from '../models/photo.model';
 
 const photoRepo = new PhotoRepository();
