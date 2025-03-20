@@ -11,14 +11,14 @@ export const createMap = async (req: Request, res: Response): Promise<void> => {
   try {
 
     console.log("req.body", req.body); 
-    const {MapData, userId} = req.body;
+    const {userId} = req.body;
 
-    if (!MapData) {
+    if (!userId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    const newMap = await MapService.createMap(MapData, userId);
+    const newMap = await MapService.createMap(userId);
     res.status(201).json({ success: true, message: 'mapa creado correctamente', Map: newMap });
   } catch (error) {
     console.error('Error al crear mapa:', error);
@@ -52,24 +52,12 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
       res.status(201).json({ 
         success: true, 
         message: 'Mapa colaborativo creado correctamente',
-        map: newMap
       });
     } catch (serviceError) {
       console.error('Error en el servicio al crear mapa:', serviceError);
       // Si hay un error específico del servicio, intentamos devolver un mapa simulado
       // para permitir que la aplicación continúe funcionando
-      res.status(200).json({ 
-        success: true, 
-        message: 'Mapa colaborativo simulado (fallback)',
-        map: {
-          id: `map-${Date.now()}`,
-          name: MapData.name || 'Mapa Colaborativo',
-          description: MapData.description || 'Mapa compartido para colaboración',
-          is_colaborative: true,
-          createdAt: new Date().toISOString(),
-          users_joined: [{ id: userId, username: 'Usuario Principal' }]
-        }
-      });
+
     }
   } catch (error) {
     console.error('Error al crear mapa colaborativo:', error);
@@ -361,6 +349,40 @@ export const inviteUserToMap = async (req: Request, res: Response): Promise<void
     });
   }
 };
+
+export const getPrincipalMapForUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId;
+    console.log(`Obteniendo mapa individual para el usuario ${userId}`);
+
+    if (!userId) {
+      res.status(400).json({ success: false, message: 'Falta el ID del usuario' });
+      return;
+    }
+    
+    try {
+      // Obtener el mapa individual del usuario 
+      const map = await MapService.getPrincipalMapForUser(userId);
+      res.status(200).json({ success: true, map});
+    } catch (error) {
+      console.error(`Error al obtener el mapa principal del usuario ${userId}:`, error);
+            
+        res.status(200).json({ 
+        success: false, 
+        isExample: true
+      });
+    }
+  } catch (error) {
+    console.error('Error al obtener el mapa principal del usuario:', error);
+
+    
+    res.status(200).json({ 
+      success: false, 
+      isExample: true
+    });
+  }
+};
+
 
 /**
  * Obtiene todos los mapas colaborativos en los que participa un usuario

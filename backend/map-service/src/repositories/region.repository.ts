@@ -1,16 +1,23 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../../../database/appDataSource';
 import { Region } from '../models/region.model';
+import { Map } from '../models/map.model';
 
 export default class RegionRepository {
     private regionRepo: Repository<Region>;
+    private mapRepo: Repository<Map>
 
     constructor() {
         this.regionRepo = AppDataSource.getRepository(Region);
+        this.mapRepo= AppDataSource.getRepository(Map)
     }
 
-    async createRegion(regionData: Omit<Region, 'id'>): Promise<Region> {
+    async createRegion(regionData: Omit<Region, 'id'>, mapa_id: string): Promise<Region | null> {
             const region = this.regionRepo.create(regionData);
+            if(!region){
+                throw new Error(`Region no creada correctamente`);
+            }
+
             return await this.regionRepo.save(region);
     }
 
