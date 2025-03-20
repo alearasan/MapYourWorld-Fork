@@ -13,17 +13,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       
-    - name: Enable Corepack (for workspace support)
-      run: corepack enable
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: 'npm'
+    - name: Install Node.js manually
+      run: |
+        curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+        node -v
+        npm -v
         
     - name: Install dependencies
-      run: npm install --workspaces --legacy-peer-deps 
+      run: npm install --legacy-peer-deps 
       
     - name: Run tests
-      run: npm run test --workspaces
+      run: npm run test
