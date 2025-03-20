@@ -5,6 +5,6 @@ import {
 
 const router = Router();
 
-router.post("/", createPaymentIntent);
+router.post("/:userId", createPaymentIntent);
 
 export default router;

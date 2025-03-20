@@ -27,14 +27,7 @@ export class Subscription {
     @Column({ type: 'boolean', default : false })
     is_active!: boolean;
 
-    @Column({ type: 'boolean', default : false })
-    autoRenew!: boolean;
 
-    @Column({ type: 'date'})
-    createdAt!: Date;
-
-    @Column({ type: 'date'})
-    updatedAt!: Date;
 
     @OneToOne(() => User, (user) => user.subscription)
     @JoinColumn()

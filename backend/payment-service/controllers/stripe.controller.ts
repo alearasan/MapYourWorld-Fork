@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import path from "path";
 
+import * as subscriptionService from "../services/subscription.service";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 
 export const createPaymentIntent = async (req: Request, res: Response) => {
     try {
+      const userId = req.params.userId; 
       const { amount } = req.body; // Monto en centavos (€10.00 = 1000)
   
       const paymentIntent = await stripe.paymentIntents.create({
@@ -22,7 +24,9 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
         currency: "eur",
         automatic_payment_methods: { enabled: true },
       });
-  
+      
+      await subscriptionService.incrementarSuscripcion(userId)
+
       res.json({ paymentIntent: paymentIntent.client_secret });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
