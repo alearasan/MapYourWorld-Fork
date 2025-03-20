@@ -91,4 +91,14 @@ export default class FriendRepository {
     });
     return friends;
   }
+
+  async getPendingRequestsForRecipient(userId: string): Promise<Friend[]> {
+    return this.friendRepo
+      .createQueryBuilder('friend')
+      .where('friend.recipientId = :userId', { userId })
+      .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
+      .leftJoinAndSelect('friend.requester', 'requester')
+      .getMany();
+  }
+  
 }
