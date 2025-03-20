@@ -4,6 +4,8 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { useNavigation } from '@react-navigation/native';  // Para la navegación
 import { RootStackParamList } from '../../navigation/types';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { API_URL } from '../../constants/config';
+
 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
 
@@ -13,19 +15,35 @@ const SubscriptionScreen = () => {
   const navigation = useNavigation<PaymentScreenNavigationProp>();  // Navegación a otras pantallas
 
   const fetchPaymentSheetParams = async () => {
-    console.log('Fetching PaymentSheet params...');
-    const response = await fetch('https://tu-backend.com/payments/create-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const { clientSecret } = await response.json();
-    return clientSecret;
+    try {
+      const response = await fetch(`${API_URL}/api/stripe/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount: 100 }),
+      });
+  
+      if (!response.ok) {
+        // Imprimir detalles de la respuesta de error
+        const errorData = await response.json();
+        console.error('Error en la respuesta del servidor:', errorData);
+        throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
+      }
+  
+      const { paymentIntent } = await response.json();
+      console.log('Client Secret:', paymentIntent);
+      return paymentIntent;
+    } catch (error) {
+      console.error('Error al hacer el fetch:', error);
+    }
   };
+  
+  
 
   const openPaymentSheet = async () => {
     setLoading(true);
-    const clientSecret = "await fetchPaymentSheetParams()";
+    const clientSecret = await fetchPaymentSheetParams();
 
     if (!clientSecret) {
       console.error('Error: clientSecret no recibido');
