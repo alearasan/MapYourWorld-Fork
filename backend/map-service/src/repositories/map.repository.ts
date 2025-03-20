@@ -12,19 +12,13 @@ export default class MapRepository {
         this.userRepo = AppDataSource.getRepository(User);
     }
 
-    async createMap(mapData: Omit<Map, 'id'>, userId: string): Promise<Map> {
+    async createMap(mapData: Omit<Map, 'id'>): Promise<Map> {
         const map = this.mapRepo.create(mapData);
 
         if (!map) {
             throw new Error(`Mapa no enviado correctamente`);
         }
 
-        const user = await this.userRepo.findOne({ where: { id: userId }, relations: ['maps_joined'] });
-        if (!user) {
-            throw new Error(`User with id ${userId} not found`);
-        }
-
-        map.user_created = user;
         return await this.mapRepo.save(map);
     }
 
@@ -44,7 +38,7 @@ export default class MapRepository {
         const lista_usuarios_unidos = []
         lista_usuarios_unidos.push(user);
         map.users_joined = lista_usuarios_unidos;
-         await this.mapRepo.save(map);
+        await this.mapRepo.save(map);
 
         
         const lista_mapas_unidos = []
@@ -92,6 +86,23 @@ export default class MapRepository {
         return map;
     }
 
+    async getOnlyMapById(mapId: string): Promise<Map> {
+        const map = await this.mapRepo
+            .createQueryBuilder("map")
+            .leftJoinAndSelect("map.users_joined", "users_joined") // Si necesitas los usuarios
+            .leftJoinAndSelect("map.user_created", "user_created") // Si necesitas el creador del mapa
+            .where("map.id = :mapId", { mapId })
+            .select(["map.id", "map.name", "map.description", "map.is_colaborative"]) // Selecciona solo lo necesario
+            .getOne();
+    
+        if (!map) {
+            throw new Error(`Mapa con id ${mapId} no encontrado.`);
+        }
+        
+        return map;
+    }
+    
+
     async getMapById(mapId: string): Promise<Map> {
         const map = await this.mapRepo.findOne({ where: { id: mapId }, relations: ['users_joined'] });
         if (!map) {
@@ -123,6 +134,30 @@ export default class MapRepository {
     async deleteMap(mapId: string): Promise<void> {
         const map = await this.getMapById(mapId);
         await this.mapRepo.remove(map);
+    }
+
+    async getPrincipalMapForUser(userId: string): Promise<Map> {
+        try {
+            // Buscar al usuario
+            const user = await this.userRepo.findOne({ 
+                where: { id: userId }, 
+            });
+            
+            if (!user) {
+                throw new Error("No se encuentra el usuario")
+            }
+            
+            // Filtramos solo los mapas colaborativos
+            const principalMap = await this.mapRepo.findOne({ where: { user_created: {id: userId}, is_colaborative:false }, relations: ['user_created'] });
+            if (!principalMap){
+                throw new Error("No se encuentra el mapa principal del usuario")
+            }
+            
+            return principalMap
+        } catch (error) {
+            console.error(`Error al obtener mapas colaborativos para el usuario ${userId}:`, error);
+            throw error;
+        }
     }
 
     async getCollaborativeMapsForUser(userId: string): Promise<Map[]> {

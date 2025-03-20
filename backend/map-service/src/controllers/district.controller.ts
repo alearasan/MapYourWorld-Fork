@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import * as DistrictService from '../services/district.service';
+import { AppDataSource } from '../../../database/appDataSource';
+import { UserDistrict } from '../models/user-district.model';
 
 /**
  * Crea un nuevo distrito
@@ -8,14 +10,14 @@ import * as DistrictService from '../services/district.service';
 
 export const createDistrict = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { mapId, userId } = req.body;
+    const { mapId } = req.body;
 
-    if (!mapId || !userId) {
+    if (!mapId) {
       res.status(400).json({ success: false, message: 'Faltan datos necesarios' });
       return;
     }
 
-    await DistrictService.createDistrict(mapId, userId);
+    await DistrictService.createDistricts(mapId);
     res.status(201).json({ success: true, message: 'Distritos creados correctamente' });
   } catch (error) {
     console.error('Error al crear distrito:', error);
@@ -92,12 +94,14 @@ export const unlockDistrict = async (req: Request, res: Response): Promise<void>
   try {
     const districtId  = req.params.districtId;
     const userId  = req.params.userId;
+    const regionId = req.params.regionId
+
     if (!districtId || !userId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
       return;
     }
 
-    const result = await DistrictService.unlockDistrict(districtId, userId);
+    const result = await DistrictService.unlockDistrict(districtId, userId, regionId);
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
       return;
@@ -180,11 +184,10 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
         console.log(`Controlador: No se encontraron distritos, creando distritos para el mapa ${mapId}`);
         
         // Usamos el mismo userId de ejemplo que en el mapa
-        const userId = "user-456";
         
         // Creamos distritos para el mapa
         try {
-          await DistrictService.createDistrict(mapId, userId);
+          await DistrictService.createDistricts(mapId);
           
           // Obtenemos los distritos recién creados
           const newDistricts = await DistrictService.getDistrictsByMapId(mapId);
@@ -237,6 +240,7 @@ export const unlockCollaborativeDistrict = async (req: Request, res: Response): 
     const districtId = req.params.districtId;
     const userId = req.params.userId;
     const mapId = req.params.mapId;
+    const regionId = req.params.regionId
     
     if (!districtId || !userId || !mapId) {
       res.status(400).json({ success: false, message: 'Faltan datos para desbloquear el distrito' });
@@ -245,7 +249,7 @@ export const unlockCollaborativeDistrict = async (req: Request, res: Response): 
 
     console.log(`Intentando desbloquear distrito ${districtId} por usuario ${userId} en mapa ${mapId}`);
     
-    const result = await DistrictService.unlockCollaborativeDistrict(districtId, userId, mapId);
+    const result = await DistrictService.unlockCollaborativeDistrict(districtId, userId, mapId, regionId);
     
     if (!result.success) {
       res.status(400).json({ success: false, message: result.message });
@@ -258,3 +262,81 @@ export const unlockCollaborativeDistrict = async (req: Request, res: Response): 
     res.status(500).json({ success: false, message: 'Error al desbloquear distrito' });
   }
 };
+
+/**
+ * Simula que un usuario ha pasado por un distrito y le asigna un color
+ */
+export const simulateUserPassingByDistrict = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId, districtId } = req.params;
+    const { color, mapId } = req.body;
+    
+    if (!userId || !districtId) {
+      res.status(400).json({ success: false, message: 'Faltan datos necesarios (userId, districtId)' });
+      return;
+    }
+    
+    const colorToUse = color || "pepe"; // Si no se proporciona color, se usa "pepe" por defecto
+    
+    const result = await DistrictService.simulateUserPassingByDistrict(userId, districtId, colorToUse, mapId);
+    
+    if (!result.success) {
+      res.status(400).json({ success: false, message: result.message });
+      return;
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      message: result.message,
+      userDistrict: result.userDistrict
+    });
+  } catch (error) {
+    console.error('Error al simular paso de usuario por distrito:', error);
+    res.status(500).json({ success: false, message: 'Error al simular paso de usuario por distrito' });
+  }
+};
+
+/**
+ * Obtiene los distritos con colores para un usuario
+ */
+export const getUserDistrictsWithColors = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    
+    if (!userId) {
+      res.status(400).json({ success: false, message: 'Falta el ID del usuario' });
+      return;
+    }
+    
+    const userDistricts = await DistrictService.getUserDistrictsWithColors(userId);
+    
+    res.status(200).json({ 
+      success: true, 
+      userDistricts: userDistricts.map(ud => {
+        // Verificamos que el district existe antes de acceder a sus propiedades
+        if (!ud || !ud.district) {
+          console.log("Advertencia: Se encontró un registro sin distrito asociado", ud);
+          return {
+            id: ud?.id || 'unknown',
+            color: ud?.color || 'unknown',
+            districtId: null,
+            districtName: 'Distrito no disponible',
+            isUnlocked: false
+          };
+        }
+        
+        return {
+          id: ud.id,
+          districtId: ud.district.id,
+          districtName: ud.district.name,
+          color: ud.color,
+          isUnlocked: ud.district.isUnlocked
+        };
+      })
+    });
+  } catch (error) {
+    console.error('Error al obtener distritos con colores:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener distritos con colores' });
+  }
+};
+

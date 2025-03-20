@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
+import { Map } from './map.model';
 
 @Entity('regions')
 export class Region {
@@ -10,4 +11,7 @@ export class Region {
 
     @Column({ type: 'varchar', length: 255, nullable: false })
     description!: string;
+
+    @ManyToOne(() => Map, (map) => map.id ,{nullable: false, onDelete: 'CASCADE'}) 
+    map_assignee!: Map; 
 }
