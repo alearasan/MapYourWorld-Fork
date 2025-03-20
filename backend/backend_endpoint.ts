@@ -15,6 +15,7 @@ import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
 import subscriptionRoutes from './payment-service/routes/subscription.routes';
 import { createAchievements } from './achievement-service/mocks/achievement_create';
+import statisticsRoutes from './stat-service/routes/userStat.routes';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/maps', mapRoutes)
 app.use('/api/collabMap', collabMapRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/statistics', statisticsRoutes);
 
 
 // Interfaz para los servicios
