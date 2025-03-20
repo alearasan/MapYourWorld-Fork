@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 // TODO: Importar la entidad PointOfInterest cuando esté implementada
-// import { PointOfInterest } from '../../../point-of-interest-service/src/models/point-of-interest.model';
+import { PointOfInterest } from '../../../map-service/src/models/poi.model'
 
 @Entity('photos')
 export class Photo {
@@ -17,8 +17,8 @@ export class Photo {
 
     // TODO: Hacer cuando esté implementada
     // Relación con la entidad PointOfInterest
-    // @ManyToOne(() => PointOfInterest, (poi) => poi.photos)
-    // poi!: PointOfInterest;
+    @ManyToOne(() => PointOfInterest, (poi) => poi.images)
+    poi!: PointOfInterest;
 
     @Column({ type: 'text' })
     image!: string; // Datos o URL de la imagen
