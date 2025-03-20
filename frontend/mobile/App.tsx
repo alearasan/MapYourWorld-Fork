@@ -187,7 +187,7 @@ const AppContent = () => {
                   source={require('./src/assets/images/logo.png')} 
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">Amigos de MapYourWorld</StyledText>
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Amigos</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,

@@ -28,12 +28,15 @@ const SocialScreen = () => {
   }, []);
 
   const renderFriends = () => (
-    <StyledView className="bg-white p-4 rounded-lg shadow-md">
+    <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       {friends.map((friend, index) => (
-        <StyledView key={index} className="flex-row items-center justify-between mb-4">
-          <StyledText className="text-lg text-gray-700">{friend}</StyledText>
+        <StyledView
+          key={index}
+          className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2"
+        >
+          <StyledText className="text-lg text-gray-800 font-semibold">{friend}</StyledText>
           <TouchableOpacity>
-            <StyledText className="text-teal-500 font-medium">Ver</StyledText>
+            <StyledText className="text-[#2196F3] font-medium">Ver perfil</StyledText>
           </TouchableOpacity>
         </StyledView>
       ))}
@@ -41,14 +44,17 @@ const SocialScreen = () => {
   );
 
   const renderRequests = () => (
-    <StyledView className="bg-white p-4 rounded-lg shadow-md">
+    <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       {friendRequests.length > 0 ? (
         friendRequests.map((request, index) => (
-          <StyledView key={index} className="flex-row items-center justify-between mb-4">
-            <StyledText className="text-lg text-gray-700">{request}</StyledText>
+          <StyledView
+            key={index}
+            className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2"
+          >
+            <StyledText className="text-lg text-gray-800 font-semibold">{request}</StyledText>
             <StyledView className="flex-row">
               <TouchableOpacity onPress={() => handleAcceptRequest(request)} className="mr-4">
-                <StyledText className="text-teal-500 font-medium">Aceptar</StyledText>
+                <StyledText className="text-[#2196F3] font-medium">Aceptar</StyledText>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleRejectRequest(request)}>
                 <StyledText className="text-red-500 font-medium">Rechazar</StyledText>
@@ -57,52 +63,62 @@ const SocialScreen = () => {
           </StyledView>
         ))
       ) : (
-        <StyledText className="text-gray-500 text-center">No tienes solicitudes pendientes</StyledText>
+        <StyledText className="text-gray-500 text-center">
+          No tienes solicitudes pendientes
+        </StyledText>
       )}
     </StyledView>
   );
 
   const renderSearch = () => (
-    <StyledView className="bg-white p-4 rounded-lg shadow-md">
+    <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       <TouchableOpacity>
-        <StyledText className="text-teal-500 font-medium text-center">Buscar y enviar solicitudes</StyledText>
+        <StyledText className="text-[#2196F3] font-medium text-center">
+          Buscar y enviar solicitudes
+        </StyledText>
       </TouchableOpacity>
     </StyledView>
   );
 
   return (
-    <StyledScrollView className="flex-1 p-6 bg-gray-100">
-      {/* Header */}
-      <StyledView className="flex-row items-center justify-between mb-6">
-        <StyledText className="text-2xl font-bold text-gray-800">Red Social</StyledText>
-        <TouchableOpacity>
-          <StyledText className="text-teal-500 font-medium">Perfil</StyledText>
-        </TouchableOpacity>
-      </StyledView>
+    <StyledScrollView className="flex-1 p-6 bg-gradient-to-br from-gray-100 to-gray-200">
+
 
       {/* Tabs */}
-      <StyledView className="flex-row justify-between mb-6">
+      <StyledView className="flex-row justify-around mb-8">
         <TouchableOpacity
           onPress={() => setActiveTab('friends')}
-          className={`flex-1 text-center py-2 rounded-lg ${activeTab === 'friends' ? 'bg-teal-500 text-white' : 'bg-white text-teal-500 border'}`}
+          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
+            activeTab === 'friends' ? 'bg-[#2196F3]' : 'bg-white'
+          }`}
         >
-          <StyledText className="font-medium">Amigos</StyledText>
+          <StyledText className={`text-center font-medium ${activeTab === 'friends' ? 'text-white' : 'text-[#2196F3]'}`}>
+            Amigos
+          </StyledText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('requests')}
-          className={`flex-1 text-center py-2 rounded-lg ${activeTab === 'requests' ? 'bg-teal-500 text-white' : 'bg-white text-teal-500 border'}`}
+          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
+            activeTab === 'requests' ? 'bg-[#2196F3]' : 'bg-white'
+          }`}
         >
-          <StyledText className="font-medium">Solicitudes</StyledText>
+          <StyledText className={`text-center font-medium ${activeTab === 'requests' ? 'text-white' : 'text-[#2196F3]'}`}>
+            Solicitudes
+          </StyledText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('search')}
-          className={`flex-1 text-center py-2 rounded-lg ${activeTab === 'search' ? 'bg-teal-500 text-white' : 'bg-white text-teal-500 border'}`}
+          className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${
+            activeTab === 'search' ? 'bg-[#2196F3]' : 'bg-white'
+          }`}
         >
-          <StyledText className="font-medium">Buscar</StyledText>
+          <StyledText className={`text-center font-medium ${activeTab === 'search' ? 'text-white' : 'text-[#2196F3]'}`}>
+            Buscar
+          </StyledText>
         </TouchableOpacity>
       </StyledView>
 
-      {/* Active Tab Content */}
+      {/* Contenido según pestaña activa */}
       <StyledView className="mb-8">
         {activeTab === 'friends' && renderFriends()}
         {activeTab === 'requests' && renderRequests()}
