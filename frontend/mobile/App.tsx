@@ -21,6 +21,7 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import SubscriptionScreen from '@/components/screens/SubscriptionScreen';
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -95,6 +96,18 @@ const ForgotPasswordScreenWrapper = (props: any) => {
     return <ForgotPasswordScreenWeb {...props} />;
   } else {
     return <ForgotPasswordScreenMobile {...props} />;
+  }
+};
+
+const SubscriptionScreenWrapper = (props: any) => {
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    return ;
+  } else {
+    return (
+      <StripeProvider publishableKey='pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro'>
+    <SubscriptionScreen {...props} />
+    </StripeProvider>)
   }
 };
 
@@ -211,7 +224,7 @@ const AppContent = () => {
 
         <Stack.Screen 
           name="Payment" 
-          component={SubscriptionScreen}
+          component={SubscriptionScreenWrapper}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

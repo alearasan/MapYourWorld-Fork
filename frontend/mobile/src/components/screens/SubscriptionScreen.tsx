@@ -21,7 +21,7 @@ const SubscriptionScreen = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: 100 }),
+        body: JSON.stringify({ amount: 550 }),
       });
   
       if (!response.ok) {
@@ -64,7 +64,7 @@ const SubscriptionScreen = () => {
       } else {
         // Navegar a una pantalla de éxito si el pago es exitoso
         console.log('Pago exitoso!');
-        navigation.navigate('Welcome');  // Redirigir a la pantalla de éxito
+        navigation.navigate('Map');  // Redirigir a la pantalla de éxito
       }
     } else {
       console.log('Error al abrir PaymentSheet:', error);
