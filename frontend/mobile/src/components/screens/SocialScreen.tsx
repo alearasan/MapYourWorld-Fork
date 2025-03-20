@@ -32,6 +32,12 @@ const SocialScreen = () => {
       fetchFriendRequests(user.id);
     }
   }, [user]);
+  // Actualizar lista de amigos
+    useEffect(() => {
+      if (user && user.id) {
+        fetchFriends(user.id);
+      }
+    }, [friendRequests]);
 
   // Obtener lista de amigos
   const fetchFriends = async (userId: string) => {
@@ -59,10 +65,17 @@ const SocialScreen = () => {
   // Obtener solicitudes de amistad pendientes
   const fetchFriendRequests = async (userId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/friends/list/PENDING/${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/request/${userId}`);
       const data = await response.json();
-      if (data.success) {
-        setFriendRequests(data.friends);
+      if (Array.isArray(data)) {
+        setFriendRequests(
+          data.map((friend) => ({
+            id: friend.id,
+            name: friend.requester.email, // O usar otra propiedad según lo que devuelva el backend
+          }))
+        );
+      } else {
+        console.warn("Formato inesperado de la respuesta:", data);
       }
     } catch (error) {
       console.error("Error al obtener solicitudes:", error);
@@ -70,16 +83,17 @@ const SocialScreen = () => {
   };
 
   // Aceptar/Rechazar solicitud de amistad
-  const updateFriendStatus = async (friendId: string, status: 'ACCEPTED' | 'REJECTED') => {
+  const updateFriendStatus = async (friendId: string, status: 'ACCEPTED' | 'DELETED') => {
     try {
       const response = await fetch(`${API_URL}/api/friends/update/${friendId}/${status}`, {
         method: "PUT",
       });
       const data = await response.json();
       if (data.success) {
-        if (status === 'ACCEPTED') {
+        if (status === 'ACCEPTED' && user) {
           setFriends([...friends, { id: friendId, name: data.name }]);
           Alert.alert("Solicitud Aceptada", `${data.name} ahora es tu amigo.`);
+          fetchFriends(user.id);
         } else {
           Alert.alert("Solicitud Rechazada", `${data.name} ha sido eliminada.`);
         }
@@ -144,7 +158,7 @@ const SocialScreen = () => {
               <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'ACCEPTED')} className="mr-4">
                 <StyledText className="text-[#2196F3] font-medium">Aceptar</StyledText>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'REJECTED')}>
+              <TouchableOpacity onPress={() => updateFriendStatus(request.id, 'DELETED')}>
                 <StyledText className="text-red-500 font-medium">Rechazar</StyledText>
               </TouchableOpacity>
             </StyledView>
