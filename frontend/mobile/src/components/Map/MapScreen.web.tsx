@@ -510,10 +510,10 @@ const MapScreen = () => {
           
           if (status !== 'granted') {
             console.warn("Permiso de ubicación denegado");
-            setError("No se concedió permiso para acceder a tu ubicación. Simulando ubicación.");
+            setError("No se concedió permiso para acceder a tu ubicación. Usando coordenadas de respaldo.");
             
-            // Usamos las coordenadas EXACTAS del distrito
-            console.log("Usando ubicación EXACTA del distrito:", EXACT_COORDS);
+            // Usamos las coordenadas EXACTAS del distrito como respaldo
+            console.log("Usando ubicación EXACTA del distrito como respaldo:", EXACT_COORDS);
             setLocation(EXACT_COORDS);
             
             // Esperamos a que los distritos se carguen antes de verificar
@@ -527,27 +527,52 @@ const MapScreen = () => {
             return;
           }
           
-          console.log("Permiso de ubicación concedido, pero ignorando ubicación real");
+          console.log("Permiso de ubicación concedido, intentando obtener la ubicación real...");
           
-          // SIEMPRE usamos las coordenadas exactas del distrito para pruebas
-          console.log("Usando ubicación EXACTA del distrito:", EXACT_COORDS);
-          setLocation(EXACT_COORDS);
-          
-          // Esperamos un poco para que los distritos se carguen
-          setTimeout(() => {
-            if (distritos.length > 0) {
-              console.log("Verificando distrito después de timeout...");
-              checkDistrictUnlock(EXACT_COORDS);
-            }
-          }, 2000);
+          // Intentamos obtener la ubicación real
+          try {
+            const location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High
+            });
+            
+            // Si tenemos éxito, usamos la ubicación real
+            const userLocation: [number, number] = [
+              location.coords.latitude,
+              location.coords.longitude
+            ];
+            
+            console.log("Ubicación real obtenida:", userLocation);
+            setLocation(userLocation);
+            
+            // Esperamos un poco para que los distritos se carguen
+            setTimeout(() => {
+              if (distritos.length > 0) {
+                console.log("Verificando distrito con ubicación real...");
+                checkDistrictUnlock(userLocation);
+              }
+            }, 2000);
+            
+          } catch (locationError) {
+            console.warn("Error al obtener la ubicación real:", locationError);
+            console.log("Usando ubicación EXACTA del distrito como respaldo:", EXACT_COORDS);
+            setLocation(EXACT_COORDS);
+            
+            // Esperamos un poco para que los distritos se carguen
+            setTimeout(() => {
+              if (distritos.length > 0) {
+                console.log("Verificando distrito con ubicación de respaldo...");
+                checkDistrictUnlock(EXACT_COORDS);
+              }
+            }, 2000);
+          }
           
           setLoading(false);
           
         } catch (err) {
           console.error("Error al configurar la ubicación:", err);
-          setError("Error de configuración. Usando ubicación del distrito.");
+          setError("Error de configuración. Usando ubicación del distrito como respaldo.");
           
-          // Siempre usamos las coordenadas exactas del distrito
+          // Siempre usamos las coordenadas exactas del distrito como respaldo
           console.log("Fallback a ubicación EXACTA:", EXACT_COORDS);
           setLocation(EXACT_COORDS);
           
@@ -569,17 +594,17 @@ const MapScreen = () => {
   useEffect(() => {
     if (distritos.length > 0 && !loading) {
       console.log("Distritos cargados, verificando ubicación...");
-      checkDistrictUnlock(EXACT_COORDS);
+      checkDistrictUnlock(location);
       
       // Configuramos un timer para repetir la verificación periódicamente
       const timer = setInterval(() => {
         console.log("Verificación periódica de distrito...");
-        checkDistrictUnlock(EXACT_COORDS);
+        checkDistrictUnlock(location);
       }, 10000); // Cada 10 segundos
       
       return () => clearInterval(timer);
     }
-  }, [distritos, loading]);
+  }, [distritos, loading, location]);
 
   // Función para verificar si la ubicación está dentro de algún distrito y desbloquearlo
   const checkDistrictUnlock = (userLocation: [number, number]) => {
