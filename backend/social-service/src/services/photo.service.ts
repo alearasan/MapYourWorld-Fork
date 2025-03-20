@@ -1,4 +1,4 @@
-import {PhotoRepository} from '../repositories/photo.repository';
+import { PhotoRepository } from '../repositories/photo.repository';
 import { Photo } from '../models/photo.model';
 
 const photoRepo = new PhotoRepository();
@@ -9,22 +9,22 @@ const photoRepo = new PhotoRepository();
  * @param poiId ID del Point of Interest al que asociar la foto
  */
 export const uploadPhotoToPoi = async (photoData: Omit<Photo, 'id'>, poiId: string): Promise<Photo> => {
-    return await photoRepo.createPhoto({ ...photoData},poiId);
+  return await photoRepo.createPhoto({ ...photoData}, poiId );
 };
 
 /**
  * Obtiene una foto por su ID
  * @param id ID de la foto
  */
-export const findPhotoById = async (id: string): Promise<Photo> => {
-    return await photoRepo.getById(id);
+export const findPhotoById = async (id: string): Promise<Photo | null> => {
+  return await photoRepo.getById(id);
 };
 
 /**
  * Obtiene todas las fotos
  */
 export const findAllPhotos = async (): Promise<Photo[]> => {
-    return await photoRepo.getAll();
+  return await photoRepo.getAll();
 };
 
 /**
@@ -32,8 +32,8 @@ export const findAllPhotos = async (): Promise<Photo[]> => {
  * @param id ID de la foto a actualizar
  * @param updateData Datos a actualizar de la foto
  */
-export const updatePhoto = async (id: string, updateData: Partial<Photo>): Promise<Photo> => {
-    return await photoRepo.updatePhoto(id, updateData);
+export const updatePhoto = async (id: string, updateData: Partial<Photo>): Promise<Photo | null> => {
+  return await photoRepo.updatePhoto(id, updateData);
 };
 
 /**
@@ -41,14 +41,13 @@ export const updatePhoto = async (id: string, updateData: Partial<Photo>): Promi
  * @param id ID de la foto a eliminar
  */
 export const deletePhoto = async (id: string): Promise<boolean> => {
-    return await photoRepo.deletePhoto(id);
+  return await photoRepo.deletePhoto(id);
 };
 
 /**
  * Obtiene todas las fotos asociadas a un POI específico
  * @param poiId ID del Point of Interest
  */
-
 export const getPhotosByPoiId = async (poiId: string): Promise<Photo[]> => {
-    return await photoRepo.getByPoiId(poiId);
+  return await photoRepo.getByPoiId(poiId);
 };
