@@ -81,6 +81,7 @@ export const registerUser = async (userData: any): Promise<User> => {
     const now = new Date();
     suscriptionUserData.plan = PlanType.FREE
     suscriptionUserData.user = newUser
+    suscriptionUserData.is_active = true
 
     await subscriptionsRepo.create(suscriptionUserData)
 

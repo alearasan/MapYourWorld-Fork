@@ -17,8 +17,8 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#3B82F6',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 26,
+    paddingVertical: 15,
     borderRadius: 8,
     marginTop: 20,
   },
@@ -75,6 +75,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     color: '#2B3A67',
+  },
+  premiumContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 2,
+  },
+  premiumTitle: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#3B82F6', 
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  premiumDescription: {
+    fontSize: 20,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 40,
   },
 });
 

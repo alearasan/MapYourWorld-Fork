@@ -47,7 +47,7 @@ const HamburgerMenu = () => {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Pago</Text>
+              <Text style={styles.menuItemText}>Suscripción</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
