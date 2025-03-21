@@ -2,41 +2,31 @@ import { Friend, FriendStatus } from '../models/friend.model';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
+import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
 
 const repo = new FriendRepository();
+const userRepo = new AuthRepository();
 
 /**
  * Envía una solicitud de amistad.
  * Valida que los datos sean correctos y que no exista ya una solicitud activa.
  */
 export const sendRequestFriend = async (
-  friendData: Omit<Friend, 'id'>
+
+  requesterId:string,
+  recipientId:string
+
 ): Promise<Friend | { success: boolean; message: string }> => {
   try {
-    // Extraer IDs de los usuarios
-    const requesterId = typeof friendData.requester === 'string' ? friendData.requester : friendData.requester.id;
-    const recipientId = typeof friendData.recipient === 'string' ? friendData.recipient : friendData.recipient.id;
+    
+    
 
-    if (!requesterId || !recipientId) {
-      throw new Error("Se requieren tanto el receptor como el solicitante.");
-    }
 
     if (requesterId === recipientId) {
       throw new Error("El receptor y el solicitante deben ser distintos.");
     }
 
-    // Obtener repositorios
-    const userRepository = AppDataSource.getRepository(User);
-
-    // Buscar usuarios en la base de datos
-    const [requester, recipient] = await Promise.all([
-      userRepository.findOne({ where: { id: requesterId } }),
-      userRepository.findOne({ where: { id: recipientId } })
-    ]);
-
-    if (!requester || !recipient) {
-      throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
-    }
+    
 
     // Verificar si ya existe una relación entre estos usuarios
     const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
@@ -57,10 +47,17 @@ export const sendRequestFriend = async (
       }
     }
 
+    const requester = await userRepo.findById(requesterId);
+    const recipient = await userRepo.findById(recipientId);
+    if (!requester || !recipient) {
+      throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
+    }
     // Crear la solicitud de amistad
-    const newFriend = await repo.createFriend({
-      ...friendData,
-    });
+    const newFriend = new Friend();
+    newFriend.requester = requester;
+    newFriend.recipient = recipient;
+    newFriend.createdAt = new Date();
+    newFriend.updatedAt = new Date();
 
     console.log("Solicitud de amistad creada:", newFriend);
     return newFriend;

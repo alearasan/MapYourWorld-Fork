@@ -4,6 +4,7 @@ import { styled } from 'nativewind';
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
+import { request } from 'http';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -136,7 +137,7 @@ const SocialScreen = () => {
       const response = await fetch(`${API_URL}/api/friends/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ senderId: userId, receiverId: friendId }),
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId }),
       });
       const data = await response.json();
       if (data.success) {

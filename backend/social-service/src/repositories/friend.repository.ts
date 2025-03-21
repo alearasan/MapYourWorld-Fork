@@ -30,6 +30,9 @@ export default class FriendRepository {
    */
   async createFriend(friendData: Omit<Friend, 'id'>): Promise<Friend> {
     const friend = this.friendRepo.create(friendData);
+    if (!friend) {
+      throw new Error('Friend not created');
+    }
     return await this.friendRepo.save(friend);
   }
 
