@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput, Button } from 'react-native';
 import { styled } from 'nativewind';
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,7 +16,7 @@ const SocialScreen = () => {
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
   const [searchResults, setSearchResults] = useState<{ id: string; name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search'>('friends');
+  const [activeTab, setActiveTab] = useState<'amigos' | 'solicitudes' | 'buscar'>('amigos');
   const [userId, setUserId] = useState<string | null>(null);
   const { user } = useAuth();
   
@@ -134,12 +134,15 @@ const SocialScreen = () => {
   // Enviar solicitud de amistad
   const sendFriendRequest = async (friendId: string) => {
     try {
+      
       const response = await fetch(`${API_URL}/api/friends/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ requesterId: user?.id, receiverId: friendId }),
       });
+      console.log("Respuesta del backend:", response);
       const data = await response.json();
+      
       if (data.success) {
         Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
       }
@@ -211,7 +214,7 @@ const SocialScreen = () => {
     <StyledScrollView className="flex-1 p-6 bg-gray-100">
       {/* Tabs */}
       <StyledView className="flex-row justify-around mb-8">
-        {['friends', 'requests', 'search'].map((tab) => (
+        {['amigos', 'solicitudes', 'buscar'].map((tab) => (
           <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}
             className={`flex-1 mx-1 py-3 rounded-full border border-[#2196F3] ${activeTab === tab ? 'bg-[#2196F3]' : 'bg-white'}`}>
             <StyledText className={`text-center font-medium ${activeTab === tab ? 'text-white' : 'text-[#2196F3]'}`}>
@@ -221,9 +224,9 @@ const SocialScreen = () => {
         ))}
       </StyledView>
 
-      {activeTab === 'friends' && renderFriends()}
-      {activeTab === 'requests' && renderRequests()}
-      {activeTab === 'search' && renderSearch()}
+      {activeTab === 'amigos' && renderFriends()}
+      {activeTab === 'solicitudes' && renderRequests()}
+      {activeTab === 'buscar' && renderSearch()}
     </StyledScrollView>
   );
 };

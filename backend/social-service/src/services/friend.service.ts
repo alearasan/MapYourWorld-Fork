@@ -59,8 +59,10 @@ export const sendRequestFriend = async (
     newFriend.createdAt = new Date();
     newFriend.updatedAt = new Date();
 
+    const savedFriend = await repo.createFriend(newFriend);
+
     console.log("Solicitud de amistad creada:", newFriend);
-    return newFriend;
+    return savedFriend;
 
   } catch (error) {
     console.error("Error al crear solicitud de amistad:", error);
