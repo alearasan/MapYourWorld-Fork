@@ -75,6 +75,7 @@ export const createDistricts = async (
   mapaId: string
 ): Promise<void> => {
   try {
+    console.log(geojsonData.region_name)
     const districtsPerRegion = 5;
     const totalDistricts = geojsonData.features.length;
     const numberOfRegions = Math.ceil(totalDistricts / districtsPerRegion);
@@ -87,7 +88,7 @@ export const createDistricts = async (
 
 
     for (let i = 0; i < numberOfRegions; i++) {
-      const regionName = `Región ${i + 1}`;
+      const regionName = geojsonData.region_name;
       const regionData = {
         name: regionName,
         description: `Región generada para ${regionName}`,
@@ -122,6 +123,8 @@ export const createDistricts = async (
         // Crea el distrito con la información anterior
         await repo.createDistrict(districtData);
       }
+
+      
     }
   } catch (error) {
     console.error("Error al crear distritos y regiones:", error);
