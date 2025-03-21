@@ -1,41 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useStripe } from '@stripe/stripe-react-native';
-import { useNavigation } from '@react-navigation/native';  // Para la navegación
-import { RootStackParamList } from '../../navigation/types';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 import { API_URL } from '../../constants/config';
 import { useAuth } from '@/contexts/AuthContext';
+import PricingTable from '../UI/PricingTable';  
+import styles from '../../assets/styles/pricingStyle'; 
 
 
 type PaymentScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Payment'>;
 
 const SubscriptionScreen = () => {
-   
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation<PaymentScreenNavigationProp>();  // Navegación a otras pantallas
-
+  const navigation = useNavigation<PaymentScreenNavigationProp>();
   const { user } = useAuth();
-  
 
   const fetchPaymentSheetParams = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, { //Falta meter el user-Id para que funcione.
+      const response = await fetch(`${API_URL}/api/stripe/${user?.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ amount: 550 }),
       });
-  
+
       if (!response.ok) {
-        // Imprimir detalles de la respuesta de error
         const errorData = await response.json();
         console.error('Error en la respuesta del servidor:', errorData);
         throw new Error(`Error en la solicitud: ${response.status} - ${response.statusText}`);
       }
-  
+
       const { paymentIntent } = await response.json();
       console.log('Client Secret:', paymentIntent);
       return paymentIntent;
@@ -43,8 +41,6 @@ const SubscriptionScreen = () => {
       console.error('Error al hacer el fetch:', error);
     }
   };
-  
-  
 
   const openPaymentSheet = async () => {
     setLoading(true);
@@ -62,14 +58,12 @@ const SubscriptionScreen = () => {
     });
 
     if (!error) {
-      // Presentar el PaymentSheet de Stripe
       const { error: paymentError } = await presentPaymentSheet();
       if (paymentError) {
         console.log('Error al procesar el pago:', paymentError);
       } else {
-        // Navegar a una pantalla de éxito si el pago es exitoso
         console.log('Pago exitoso!');
-        navigation.navigate('Map');  // Redirigir a la pantalla de éxito
+        navigation.navigate('Map');
       }
     } else {
       console.log('Error al abrir PaymentSheet:', error);
@@ -78,17 +72,18 @@ const SubscriptionScreen = () => {
   };
 
   return (
-    <View className="flex-1 justify-center items-center">
-      <Text className="text-xl font-bold">Suscribirse a Premium</Text>
-      <TouchableOpacity 
-        onPress={openPaymentSheet} 
-        className="bg-blue-500 px-4 py-2 rounded-lg mt-4"
-        disabled={loading}
-      >
-        <Text className="text-white">{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
-      </TouchableOpacity>
-    </View>
+    <StripeProvider publishableKey="pk_test_51R4l53COc5nj88VcYd6SLzaAhHazLwG2eu4s7HcQOqYB7H1BolfivjPrFzeedbiZuJftKEZYdozfe6Dmo7wCP5lA00rN9xJSro">
+      <View style={styles.screenContainer}>
+        {/* Tabla de comparación de planes */}
+        <PricingTable />
+        <Text style={styles.title}>Suscríbete a Premium</Text>
+        <TouchableOpacity style={styles.button} onPress={openPaymentSheet} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Pagar con Stripe'}</Text>
+        </TouchableOpacity>
+      </View>
+    </StripeProvider>
   );
 };
+
 
 export default SubscriptionScreen;
