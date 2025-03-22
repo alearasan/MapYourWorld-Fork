@@ -79,9 +79,12 @@ jest.mock('../services/email.service', () => ({
 }));
 
 // Simulamos la configuración JWT
-jest.mock('../../../../shared/config/jwt.config', () => ({
+jest.mock('../../../../shared/security/jwt', () => ({
   generateToken: jest.fn(() => 'testToken'),
-  verifyToken: jest.fn(() => ({ userId: 'user1', email: 'test@example.com' }))
+  verifyToken: jest.fn(() => ({ 
+    valid: true, 
+    payload: { sub: 'user1', email: 'test@example.com' } 
+  }))
 }));
 
 // Simulamos bcrypt para que el hash se genere de forma determinista
