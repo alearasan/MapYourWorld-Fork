@@ -143,7 +143,7 @@ Se han propuesto las siguientes taras en respuesta a las estadisticas resultante
 |Navegabilidad y feedback visual en la app en general| (link cuando se cree)|(poner cuando se cree)|Frontend|media|
 
 
-## 2.5. Nota final y conclusiones
+## 3.5. Nota final y conclusiones
 
 Viendo los resultados y siendo la nota de satisfaccion un 4.67+2.34=7.01, significa que el resultado de la encuesta en global es mejorable, lo que indica que debemo mejorar y esperamos que con las tareas que se asignen se puedan mejorar estas metricas
 
