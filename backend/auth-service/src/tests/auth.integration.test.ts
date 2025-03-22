@@ -82,6 +82,23 @@ afterAll(async () => {
     throw error;
   }
 });
+const mockProfile = {
+  id: 'mocked-profile-id',
+  username: 'usu1',
+  firstName: 'Usuario',
+  lastName: 'Prueba'
+};
+
+// Crear mock de usuario
+const mockUser = {
+  id: 'mocked-user-id',
+  email: 'usuario.prueba@example.com',
+  password: 'Pa5sWorD!!1',
+  is_active: true,
+  role: Role.USER,
+  token_data: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhcGktdGVzdC1jbGllbnQiLCJ',
+  profile: mockProfile
+};
 
 describe('Auth Service - Pruebas de Endpoints', () => {
   let testUserToken: string;
@@ -89,6 +106,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
     mockUserRepo.findOneBy = jest.fn().mockResolvedValue(null);
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -116,22 +134,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       mockUserRepo.findOneBy.mockResolvedValueOnce(null); // El email no está en uso
       
       // Crear mock de perfil
-      const mockProfile = {
-        id: 'mocked-profile-id',
-        username: 'usu1',
-        firstName: 'Usuario',
-        lastName: 'Prueba'
-      };
       
-      // Crear mock de usuario
-      const mockUser = {
-        id: 'mocked-user-id',
-        email: 'usuario.prueba@example.com',
-        password: 'Pa5sWorD!!1',
-        is_active: true,
-        role: Role.USER,
-        profile: mockProfile
-      };
       
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockProfileRepo.create.mockReturnValueOnce(mockProfile);
@@ -264,6 +267,18 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.token).toBeDefined();
+
+      /*const response2 = await request(app)
+        .post('/api/auth/verify')
+        .send({
+          token: response.body.token
+        });
+        
+      console.log('Respuesta de VERIFY:', response2.body);
+      expect(response2.status).toBe(200);
+      expect(response2.body.success).toBe(true);*/
     });
-  });
+  },
+);
+
 });
