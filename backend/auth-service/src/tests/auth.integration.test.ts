@@ -10,27 +10,6 @@ const mockUserRepo = mock<Repository<any>>();
 const mockProfileRepo = mock<Repository<any>>();
 const mockMapRepo = mock<any>();
 
-// Mock para JWT
-jest.mock('../../../../shared/security/jwt', () => ({
-  generateToken: jest.fn((payload, secret, options) => {
-    // Retorna un token de prueba que incluye el ID del usuario en formato legible
-    return `mock-token-${payload.sub || payload.userId || 'unknown'}`;
-  }),
-  verifyToken: jest.fn((token) => {
-    // Simular que el token es válido y extraer el ID del formato que generamos arriba
-    const userId = token.split('-')[2];
-    return { 
-      valid: true, 
-      payload: {
-        userId: userId,
-        sub: userId,
-        email: 'usuario_prueba@example.com'
-      }
-    };
-  })
-}));
-
-
 // Mock de los módulos antes de importar app
 jest.mock('../../../database/appDataSource', () => ({
   AppDataSource: {
@@ -153,9 +132,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOneBy.mockResolvedValueOnce(null); // El email no está en uso
       
-      // Crear mock de perfil
-      
-      
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockProfileRepo.create.mockReturnValueOnce(mockProfile);
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -260,12 +236,11 @@ describe('Auth Service - Pruebas de Endpoints', () => {
 
   describe('POST /api/auth/login', () => {
     it('debe iniciar sesión correctamente con credenciales válidas', async () => {
-      // Configurar el mock para el login
-      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
-      mockUserRepo.findOne.mockResolvedValueOnce({
+      // Crear un usuario mock que se usará tanto para login como para verificación
+      const mockUser = {
         id: 'mocked-user-id',
         email: 'usuario_prueba@example.com',
-        password: 'hashed-password', // el mock de bcrypt ignorará esto
+        password: 'hashed-password',
         is_active: true,
         role: Role.USER,
         token_data: '',
@@ -273,22 +248,41 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           id: 'mocked-profile-id',
           username: 'usuario_prueba'
         }
-      });
-
-      const response = await request(app)
+      };
+      
+      // Mock para el login
+      mockUserRepo.findOne.mockResolvedValueOnce(mockUser);
+      
+      // Realizar la petición de login
+      const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({
           email: 'usuario_prueba@example.com',
           password: 'Password1!'
         });
       
-      console.log('Respuesta de login:', response.body);
+      console.log('Respuesta de login:', loginResponse.body);
       
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.token).toBeDefined();
+      expect(loginResponse.status).toBe(200);
+      expect(loginResponse.body.success).toBe(true);
+      expect(loginResponse.body.token).toBeDefined();
+      
+      // Importante: hacer mock del repositorio de usuario otra vez para el endpoint de verificación
+      // Esto debe coincidir con el método que tu endpoint de verify usa para buscar al usuario
+      mockUserRepo.findOne.mockResolvedValueOnce(mockUser);
+      // Si tu endpoint usa findOneBy u otro método, también se debe mockear
+      mockUserRepo.findOneBy.mockResolvedValueOnce(mockUser);
+      
+      // Realizar la petición al endpoint de verificación
+      const verifyResponse = await request(app)
+        .post('/api/auth/verify')
+        .send({
+          token: loginResponse.body.token
+        });
+        
+      console.log('Respuesta de VERIFY:', verifyResponse.body);
+      expect(verifyResponse.status).toBe(200);
+      expect(verifyResponse.body.success).toBe(true);
     });
-  },
-);
-
+  });
 });
