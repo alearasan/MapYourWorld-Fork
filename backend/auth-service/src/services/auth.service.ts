@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { Role, User } from '../models/user.model';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
-import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
+import { generateToken, verifyToken } from '../../../../shared/security/jwt';
 import { AuthRepository } from '../repositories/auth.repository';
 import { UserProfileRepository } from '../../../user-service/src/repositories/userProfile.repository';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
@@ -63,10 +63,25 @@ export const registerUser = async (userData: any): Promise<User> => {
     // Guardar el usuario en la base de datos
     let savedUser = await repo.save(newUser);
 
-    const token = generateToken({
-      userId: newUser.id,
-      email: newUser.email
-    });
+    const secret = process.env.JWT_SECRET || 'your_development_jwt_secret';
+
+    // Crear el payload según la interfaz JWTPayload
+    const payload = {
+      sub: savedUser.id, // El ID de usuario en el campo 'sub' como espera JWTPayload
+      userId: savedUser.id,
+      email: savedUser.email,
+      role: savedUser.role
+    };
+
+    // Opciones del token, puedes personalizar según necesites
+    const options = {
+      expiresIn: process.env.JWT_EXPIRATION || '24h',
+      issuer: 'mapyourworld-api',
+      audience: 'mapyourworld-client'
+    };
+
+    // Generar el token con los tres parámetros
+    const token = generateToken(payload, secret, options);
     
     savedUser.token_data = token;
     savedUser = await repo.save(savedUser);
@@ -118,10 +133,19 @@ export const loginUser = async (email: string, password: string): Promise<{ user
     }
 
     // 4. Generar token JWT
-    const token = generateToken({
+    const secret = process.env.JWT_SECRET || 'your_development_jwt_secret';
+    const payload = {
+      sub: user.id,
       userId: user.id,
-      email: user.email
-    });
+      email: user.email,
+      role: user.role
+    };
+    const options = {
+      expiresIn: process.env.JWT_EXPIRATION || '24h',
+      issuer: 'mapyourworld-api',
+      audience: 'mapyourworld-client'
+    };
+    const token = generateToken(payload, secret, options);
     
     // 5. Guardar el token en el campo token_data
     user.token_data = token;
@@ -150,13 +174,14 @@ export const verifyUserToken = async (token: string): Promise<{
 }> => {
   try {
     // 1. Verificar firma y expiración del token
-    const decoded = verifyToken(token);
-    if (!decoded) {
+    const secret = process.env.JWT_SECRET || 'your_development_jwt_secret';
+    const verifyResult = verifyToken(token, secret);
+    if (!verifyResult.valid || !verifyResult.payload) {
       throw new Error('Token inválido o expirado');
     }
-    
-    // 2. Obtener información actualizada del usuario
-    const user = await repo.findById(decoded.userId);
+
+    // Y luego en la línea donde se usa decoded.userId, reemplázala con:
+    const user = await repo.findById(verifyResult.payload.sub || verifyResult.payload.userId);
     if (!user) {
       throw new Error('Usuario no encontrado');
     }

@@ -10,6 +10,27 @@ const mockUserRepo = mock<Repository<any>>();
 const mockProfileRepo = mock<Repository<any>>();
 const mockMapRepo = mock<any>();
 
+// Mock para JWT
+jest.mock('../../../../shared/security/jwt', () => ({
+  generateToken: jest.fn((payload, secret, options) => {
+    // Retorna un token de prueba que incluye el ID del usuario en formato legible
+    return `mock-token-${payload.sub || payload.userId || 'unknown'}`;
+  }),
+  verifyToken: jest.fn((token) => {
+    // Simular que el token es válido y extraer el ID del formato que generamos arriba
+    const userId = token.split('-')[2];
+    return { 
+      valid: true, 
+      payload: {
+        userId: userId,
+        sub: userId,
+        email: 'usuario_prueba@example.com'
+      }
+    };
+  })
+}));
+
+
 // Mock de los módulos antes de importar app
 jest.mock('../../../database/appDataSource', () => ({
   AppDataSource: {
@@ -106,7 +127,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
     mockUserRepo.findOneBy = jest.fn().mockResolvedValue(null);
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -267,16 +287,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.token).toBeDefined();
-
-      /*const response2 = await request(app)
-        .post('/api/auth/verify')
-        .send({
-          token: response.body.token
-        });
-        
-      console.log('Respuesta de VERIFY:', response2.body);
-      expect(response2.status).toBe(200);
-      expect(response2.body.success).toBe(true);*/
     });
   },
 );

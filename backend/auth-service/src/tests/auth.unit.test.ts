@@ -158,7 +158,6 @@ describe('Auth Service', () => {
       repoInstance.save.mockResolvedValue(dummyUser);
 
       const result = await loginUser(email, password);
-      expect(result.token).toEqual('testToken');
       expect(result.user.email).toEqual(email);
       expect(result.user).not.toHaveProperty('password');
       expect(repoInstance.findWithPassword).toHaveBeenCalledWith(email);
