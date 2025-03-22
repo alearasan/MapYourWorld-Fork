@@ -4,7 +4,6 @@ import { UserProfile } from '../../../user-service/src/models/userProfile.model'
 import { mock } from 'jest-mock-extended';
 import { Repository } from 'typeorm';
 
-// Mocks para repositorios y servicios externos
 // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
 const mockUserRepo = mock<Repository<any>>();
 // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -85,15 +84,11 @@ afterAll(async () => {
 });
 
 describe('Auth Service - Pruebas de Endpoints', () => {
-  // Variables globales para almacenar datos del usuario de prueba
   let testUserToken: string;
   let testUserId: string;
 
   beforeEach(() => {
-    // Reiniciar mocks antes de cada prueba
     jest.clearAllMocks();
-    
-    // Configurar comportamiento base de los mocks
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
     mockUserRepo.findOneBy = jest.fn().mockResolvedValue(null);
     // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -117,14 +112,13 @@ describe('Auth Service - Pruebas de Endpoints', () => {
 
   describe('POST /api/auth/register', () => {
     it('debe registrar un usuario nuevo y retornar token y datos mínimos', async () => {
-      // Configurar el mock para simular la creación de usuario
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOneBy.mockResolvedValueOnce(null); // El email no está en uso
       
       // Crear mock de perfil
       const mockProfile = {
         id: 'mocked-profile-id',
-        username: 'usuario_prueba',
+        username: 'usu1',
         firstName: 'Usuario',
         lastName: 'Prueba'
       };
@@ -132,14 +126,13 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       // Crear mock de usuario
       const mockUser = {
         id: 'mocked-user-id',
-        email: 'usuario_prueba@example.com',
-        password: 'hashed-password',
+        email: 'usuario.prueba@example.com',
+        password: 'Pa5sWorD!!1',
         is_active: true,
         role: Role.USER,
         profile: mockProfile
       };
       
-      // Configurar respuestas de los mocks
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockProfileRepo.create.mockReturnValueOnce(mockProfile);
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
@@ -150,15 +143,14 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.save.mockResolvedValueOnce(mockUser);
 
-      // Ejecutar el test
       const response = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'usuario_prueba@example.com',
-          password: 'Password1!',
-          username: 'usuario_prueba',
-          firstName: 'Usuario',
-          lastName: 'Prueba'
+          email: mockUser.email,  
+          password: mockUser.password,
+          username: mockUser.profile.username,
+          firstName: mockUser.profile.firstName,
+          lastName: mockUser.profile.lastName
         });
 
       // Para depuración
@@ -169,7 +161,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       expect(response.body.success).toBe(true);
       expect(response.body).toHaveProperty('token');
       expect(response.body.user).toHaveProperty('id');
-      expect(response.body.user.email).toBe('usuario_prueba@example.com');
+      expect(response.body.user.email).toBe(mockUser.email);
 
       // Guardamos valores para otras pruebas
       testUserToken = response.body.token;
@@ -189,6 +181,57 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
       expect(response.body.errors).toBeDefined();
+    });
+
+    it('no debe registrar por intentar hacerse template injection', async () => {
+      mockUserRepo.findOneBy.mockResolvedValueOnce(null); 
+      
+      const mockProfile = {
+        id: 'mocked-profile-id',
+        username: 'usuario_prueba',
+        firstName: 'Usuario',
+        lastName: 'Prueba'
+      };
+      
+      // Crear mock de usuario
+      const mockUser = {
+        id: 'mocked-user-id',
+        email: 'usuario_prueba@example.com',
+        password: 'hashed-password',
+        is_active: true,
+        role: Role.USER,
+        profile: mockProfile
+      };
+    
+      mockProfileRepo.create.mockReturnValueOnce(mockProfile);
+      mockProfileRepo.save.mockResolvedValueOnce(mockProfile);
+      mockUserRepo.create.mockReturnValueOnce(mockUser);
+      mockUserRepo.save.mockResolvedValueOnce(mockUser);
+
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'usuario_prueba@example.com',
+          password: 'Password1!',
+          username: '{{7*7}}',
+          firstName: 'Usuario',
+          lastName: 'Prueba'
+        });
+
+      console.log('Respuesta de registro:', response.body);
+      console.log('Hack trial: ', response.body.username);
+
+      // Validar la respuesta
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body).toHaveProperty('token');
+      expect(response.body.user).toHaveProperty('id');
+      expect(response.body.username).not.toBe(49);
+      expect(response.body.user.email).toBe('usuario_prueba@example.com');
+
+      // Guardamos valores para otras pruebas
+      testUserToken = response.body.token;
+      testUserId = response.body.user.id;
     });
   });
 

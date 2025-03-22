@@ -64,7 +64,7 @@ export const registerUser = async (userData: any): Promise<User> => {
     let savedUser = await repo.save(newUser);
 
     const token = generateToken({
-      userId: newUser.id.toString(),
+      userId: newUser.id,
       email: newUser.email
     });
     
@@ -119,7 +119,7 @@ export const loginUser = async (email: string, password: string): Promise<{ user
 
     // 4. Generar token JWT
     const token = generateToken({
-      userId: user.id.toString(),
+      userId: user.id,
       email: user.email
     });
     
@@ -167,7 +167,7 @@ export const verifyUserToken = async (token: string): Promise<{
     }
     
     return {
-      userId: user.id.toString(),
+      userId: user.id,
       email: user.email,
       role: user.role
     };
