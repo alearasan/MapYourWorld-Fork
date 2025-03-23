@@ -1,8 +1,11 @@
+// First import all external dependencies
 import request from 'supertest';
 import { Server } from 'http';
-import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 import { mock } from 'jest-mock-extended';
 import { Repository } from 'typeorm';
+import { logout } from '../../../auth-service/src/services/auth.service';
+import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository'; 
+import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
 const mockUserRepo = mock<Repository<any>>();
@@ -54,10 +57,10 @@ let server: Server;
 
 beforeAll(async () => {
   try {
-    // Configurar comportamiento del mock de MapRepository
+    // Configure MockMapRepository behavior
     mockMapRepo.getMapById = jest.fn().mockResolvedValue({ id: 'mock-map-id' });
 
-    // Iniciar el servidor para las pruebas
+    // Start server for tests
     server = app.listen(3001);
     console.log('Servidor en ejecución en puerto 3001 para tests');
   } catch (error) {
@@ -68,7 +71,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    // Cerrar el servidor
+    // Close server
     if (server) {
       await new Promise<void>((resolve) => {
         server.close(() => {
@@ -82,6 +85,7 @@ afterAll(async () => {
     throw error;
   }
 });
+
 const mockProfile = {
   id: 'mocked-profile-id',
   username: 'usu1',
@@ -89,7 +93,7 @@ const mockProfile = {
   lastName: 'Prueba'
 };
 
-// Crear mock de usuario
+// Create user mock
 const mockUser = {
   id: 'mocked-user-id',
   email: 'usuario.prueba@example.com',
@@ -183,6 +187,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
     });
 
     it('no debe registrar por intentar hacerse template injection', async () => {
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOneBy.mockResolvedValueOnce(null); 
       
       const mockProfile = {
@@ -202,9 +207,13 @@ describe('Auth Service - Pruebas de Endpoints', () => {
         profile: mockProfile
       };
     
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockProfileRepo.create.mockReturnValueOnce(mockProfile);
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockProfileRepo.save.mockResolvedValueOnce(mockProfile);
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.create.mockReturnValueOnce(mockUser);
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.save.mockResolvedValueOnce(mockUser);
 
       const response = await request(app)
@@ -251,6 +260,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       };
       
       // Mock para el login
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOne.mockResolvedValueOnce(mockUser);
       
       // Realizar la petición de login
@@ -269,8 +279,10 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       
       // Importante: hacer mock del repositorio de usuario otra vez para el endpoint de verificación
       // Esto debe coincidir con el método que tu endpoint de verify usa para buscar al usuario
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOne.mockResolvedValueOnce(mockUser);
       // Si tu endpoint usa findOneBy u otro método, también se debe mockear
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
       mockUserRepo.findOneBy.mockResolvedValueOnce(mockUser);
       
       // Realizar la petición al endpoint de verificación
@@ -283,6 +295,60 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       console.log('Respuesta de VERIFY:', verifyResponse.body);
       expect(verifyResponse.status).toBe(200);
       expect(verifyResponse.body.success).toBe(true);
+    });
+  });
+
+  describe('Tests de integración - logout', () => {
+    const userId = 'user-123';
+    let mockUser: any;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Definimos un usuario mock con token_data asignado
+      mockUser = {
+        id: userId,
+        token_data: 'valid-token'
+      };
+    });
+  
+    it('debería lanzar error si el usuario no se encuentra', async () => {
+      // Usamos spyOn para sobreescribir findById y simular que no se encuentra al usuario
+      jest.spyOn(AuthRepository.prototype, 'findById').mockResolvedValueOnce(null);
+  
+      await expect(logout(userId, 'valid-token')).rejects.toThrow('Usuario no encontrado');
+      expect(AuthRepository.prototype.findById).toHaveBeenCalledWith(userId);
+    });
+  
+    it('debería invalidar el token y retornar true si se especifica un token que coincide', async () => {
+      jest.spyOn(AuthRepository.prototype, 'findById').mockResolvedValueOnce(mockUser);
+      const saveSpy = jest.spyOn(AuthRepository.prototype, 'save').mockResolvedValueOnce({ ...mockUser, token_data: '' });
+  
+      const result = await logout(userId, 'valid-token');
+  
+      expect(AuthRepository.prototype.findById).toHaveBeenCalledWith(userId);
+      expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ token_data: '' }));
+      expect(result).toBe(true);
+    });
+  
+    it('debería invalidar todas las sesiones y retornar true si no se especifica token', async () => {
+      jest.spyOn(AuthRepository.prototype, 'findById').mockResolvedValueOnce(mockUser);
+      const saveSpy = jest.spyOn(AuthRepository.prototype, 'save').mockResolvedValueOnce({ ...mockUser, token_data: '' });
+  
+      const result = await logout(userId);
+  
+      expect(AuthRepository.prototype.findById).toHaveBeenCalledWith(userId);
+      expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ token_data: '' }));
+      expect(result).toBe(true);
+    });
+  
+    it('debería retornar false si se especifica un token que no coincide', async () => {
+      jest.spyOn(AuthRepository.prototype, 'findById').mockResolvedValueOnce(mockUser);
+  
+      const result = await logout(userId, 'wrong-token');
+  
+      expect(AuthRepository.prototype.findById).toHaveBeenCalledWith(userId);
+      // No se debe llamar a 'save' ya que el token no coincide
+      expect(result).toBe(false);
     });
   });
 });
