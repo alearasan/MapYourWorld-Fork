@@ -71,7 +71,7 @@ export const registerUser = async (userData: any): Promise<User> => {
 
     // Enviar mail que requiere de verificación por seguridad
     try{
-      await sendVerificationEmail(savedUser.email, savedUser.profile?.username || '');
+      await sendVerificationEmail(savedUser.email, savedUser.profile?.username || '', token);
       console.log(`Email de verificación enviado a ${savedUser.email}`);
     } catch(error) {
       console.error('Error al enviar el correo de verificación:', error);

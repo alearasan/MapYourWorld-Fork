@@ -107,8 +107,7 @@ export const sendEmail = async (options: EmailOptions): Promise<EmailResult> => 
     }
     return {
       success: false,
-      error: error as Error,
-      message: errorMessage
+      error: error as Error
     };
   }
 };
