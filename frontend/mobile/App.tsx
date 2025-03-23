@@ -21,6 +21,7 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import SocialScreen from './src/components/screens/SocialScreen';
+import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
 
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
@@ -116,7 +117,14 @@ const SubscriptionScreenWrapper = (props: any) => {
   }
 };
 
-
+const UserAchievementsScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const WebUserAchievementsScreen = require('./src/components/Achievements/UserAchievementsScreen.web').default;
+    return <WebUserAchievementsScreen {...props} />;
+  } else {
+    return <UserAchievementsScreen {...props} />;
+  }
+};
 
 // Componente principal de la aplicación
 const AppContent = () => {
@@ -244,10 +252,13 @@ const AppContent = () => {
             ),
           }} 
         />
-
+        
         <Stack.Screen 
           name="Payment" 
           component={SubscriptionScreenWrapper}
+        <Stack.Screen 
+          name="UserAchievementsScreen" 
+          component={UserAchievementsScreenWrapper}
           options={{
             headerTitle: () => (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -259,6 +270,13 @@ const AppContent = () => {
               </View>
             ),
           }} 
+
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Logros</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }}
+
         />
       </Stack.Navigator>
 
