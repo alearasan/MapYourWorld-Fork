@@ -136,11 +136,11 @@ El 46.7% son un exito, otro 46.7% son mejorables, y 6.7% son un fracaso
 
 Se han propuesto las siguientes taras en respuesta a las estadisticas resultantes, y se validaran y pondran en marcha por los coordinadores de cada grupo
 
-| Cosa que se debe mejorar | Tarea creada | Número de issue (si procede) | Equipo | Prioridad |
-|--------------------------|--------------|-------------------------------|--------|-----------|
-|Claridad, diseño visual, curva de aprendizaje y funcionalidad en la pantalla de mapas colaborativos| (link cuando se cree)|(poner cuando se cree)|Frontend y Backend(si es necesario)|media|
-|Claridad, diseño visual en la pantalla de mapas| (link cuando se cree)|(poner cuando se cree)|Frontend|media|
-|Navegabilidad y feedback visual en la app en general| (link cuando se cree)|(poner cuando se cree)|Frontend|media|
+| Cosa que se debe mejorar | Tarea creada | Número de issue (si procede) | Equipo | Prioridad | Descripcion |
+|--------------------------|--------------|-------------------------------|--------|-----------|-------------------|
+|Claridad, diseño visual, curva de aprendizaje y funcionalidad en la pantalla de mapas colaborativos| (link cuando se cree)|(poner cuando se cree)|Frontend y Backend(si es necesario)|media| Unificar estilos con el resto de la app, tomando de referencia los mock ups o pantalla de inicio, buscando entre otras cosas suavizar los colores|
+|Claridad, diseño visual en la pantalla de mapas| (link cuando se cree)|(poner cuando se cree)|Frontend|media| Hacer que los puntos de interes tengan un estilo visual mas atractivo|
+|Navegabilidad y feedback visual en la app en general| (link cuando se cree)|(poner cuando se cree)|Frontend|media|Implementar animaciones y tutoriales de primer uso (si da tiempo)|
 
 
 ## 3.5. Nota final y conclusiones
