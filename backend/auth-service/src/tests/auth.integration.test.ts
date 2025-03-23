@@ -429,7 +429,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
   
     beforeEach(() => {
       jest.clearAllMocks();
-      // Definimos un usuario mock con token_data asignado
       mockUser = {
         id: userId,
         token_data: 'valid-token'
