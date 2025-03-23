@@ -26,6 +26,10 @@ const WelcomeScreen = () => {
   const handleLoginPress = () => {
     navigation.navigate('Login');
   };
+
+  const handleAdvertisementFormPress = () => {
+    navigation.navigate('AdvertisementForm');
+  };
   
   return (
     <ImageBackground
@@ -65,6 +69,14 @@ const WelcomeScreen = () => {
                 <Text style={styles.secondaryButtonText}>Iniciar sesión</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Advertisment form */}
+            <TouchableOpacity 
+                style={styles.tertiaryButton}
+                onPress={handleAdvertisementFormPress}
+              >
+                <Text style={styles.tertiaryButtonText}>Publicítate con nosotros</Text>
+              </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -105,6 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#1e293b',
+    textAlign: 'center',
   },
   titleMain: {
     color: '#1e293b',
@@ -147,6 +160,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  tertiaryButton: {
+    marginTop: 12,
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  tertiaryButtonText: {
+    color: '#334155',
+    fontSize: 14,
+  }
 });
 
 export default WelcomeScreen; 
