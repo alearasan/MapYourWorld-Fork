@@ -86,7 +86,6 @@ router.post(
 // Ruta para cambiar contraseña (usuario autenticado)
 router.post(
   '/change-password',
-  authMiddleware(),
   [
     body('currentPassword').notEmpty().withMessage('La contraseña actual es obligatoria'),
     body('newPassword')
