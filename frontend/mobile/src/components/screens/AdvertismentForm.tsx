@@ -1,7 +1,8 @@
 import { RootStackParamList } from "@/navigation/types";
 import { useNavigation } from "@react-navigation/native";
+import { API_URL } from '@/constants/config';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, Platform, ScrollView } from "react-native";
+import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, ScrollView, Alert, Modal } from "react-native";
 import TextInput from '../UI/TextInput';
 import { styles as globalStyles } from '../../assets/styles/styles';
 import React, { useState } from 'react';
@@ -11,16 +12,18 @@ type AdvertisementFormNavigationProp = NativeStackNavigationProp<RootStackParamL
 interface AdvertisementPoint {
     email: string,
     name: string,
-    description?: string,
+    description: string,
     longitude: string,
     latitude: string,
 }
+
+const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
 
 const AdvertisementForm = () => {
     const [ point, setPoint ] = useState<AdvertisementPoint>({
         email:'',
         name:'',
-        description:undefined,
+        description:'',
         longitude:'',
         latitude:''
         })
@@ -32,6 +35,9 @@ const AdvertisementForm = () => {
         latitude:'',
         });
     const [loading, setLoading] = useState(false);
+    const [isSent, setIsSent] = useState(false);
+
+    const navigation = useNavigation<AdvertisementFormNavigationProp>();
 
     const validateForm = () => {
         const newErrors = { ...errors };
@@ -85,125 +91,152 @@ const AdvertisementForm = () => {
         setLoading(true);
 
         const subject = `Solicitud de punto publicitario: ${point.name}`
-        const body = `Solicitud de punto publicitario con los siguientes datos:`
-            + `\nNombre del punto: ${point.name}`
-            + `\n${point.description ?? `Descripción del punto: ${point.description}`}`
-            + `\nCoordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
-            + `\nEmail de contacto: ${point.email}`
-            + `\nFecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`;
+        const body = `<p>Solicitud de punto publicitario con los siguientes datos:`
+            + `<br>Nombre del punto: ${point.name}`
+            + `${point.description ?? `<br>Descripción del punto: ${point.description}`}`
+            + `<br>Coordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
+            + `<br>Email de contacto: ${point.email}`
+            + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}</p>`;
 
-        try {
-            
-        }  catch (error: unknown) {
-            console.error('Error al registrarse:', error);
-
-            let errorMessage: string = 'Ocurrió un error inesperado';
-
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            } else if (error && typeof error === 'object' && 'message' in error) {
-                errorMessage = (error as { message: string }).message;
-            }
-
-        } finally {
+        const response = await fetch(`${API_URL}/api/email/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from: MAIL_ADDRESS,
+                to: MAIL_ADDRESS,
+                subject: subject,
+                html: body,
+            }),
+        });
+    
+        const data = await response.json();
+        
+        if (response.ok) {
+            setIsSent(true);
+        } else {
+            Alert.alert('Error', data.message || 'Lo sentimos, no pudimos procesar la solicitud en estos momentos.');
             setLoading(false);
         }
         
     };
+
+    const renderSentModal = () => (
+        <Modal visible={isSent} transparent={true} animationType="slide">
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)", }}>
+            <View style={{ backgroundColor: "white", borderRadius: 12, padding: 20, width: "85%", maxWidth: 400, elevation: 5, }}>
+            <Text style={{ fontSize: 20, marginBottom: 20, textAlign: "center", }}>Solicitud enviada correctamente</Text>
+            <Text style={{ fontSize: 16, textAlign: 'center', }}>En breves nos pondremos en contacto con vosotros.</Text>
+                <View>
+                    <TouchableOpacity 
+                        style={{ paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#2bbbad", marginTop: 20, }} 
+                        onPress={() => navigation.navigate('Welcome')}
+                    >
+                        <Text style={{ fontWeight: "bold", fontSize: 16, color: "white", }}>Volver al inicio</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+          </View>
+        </Modal>
+    );
     
     return (
         <ImageBackground
-        source={require('../../assets/images/login_background.webp')}
-        style={styles.background}
-        resizeMode="cover"
-        >
-        <View style={globalStyles.semi_transparent_overlay} />
-        <ScrollView style={styles.container}>
-            {/* Content */}
-            <View style={styles.content}>
-            <View style={styles.contentContainer}>
-                <Text style={styles.title}>
-                    <Text style={styles.titleHighlight}>Publicítate</Text>
-                <Text style={styles.titleMain}> con nosotros</Text>
-                </Text>
-                
-                <Text style={styles.description}>
-                Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
-                </Text>
-                
-                {/* Form */}
-                <View>
-                    <Text>Email</Text>
-                    <TextInput
-                    placeholder="Email de contacto"
-                    value={point.email}
-                    error={errors.email}
-                    onChangeText={(text) =>
-                        setPoint({ ...point, email: text })
-                    }
-                    />
-                </View>
-                <View>
-                    <Text>Nombre</Text>
-                    <TextInput
-                    placeholder="Nombre"
-                    value={point.name}
-                    error={errors.name}
-                    onChangeText={(text) =>
-                        setPoint({ ...point, name: text })
-                    }
-                    />
-                </View>
-                <View>
-                    <Text>Descripción</Text>
-                    <TextInput
-                    placeholder="Descripción"
-                    value={point.description}
-                    error={errors.description}
-                    multiline
-                    onChangeText={(text) =>
-                        setPoint({ ...point, description: text })
-                    }
-                    />
-                </View>
-                <Text>Coordenadas</Text>
-                <View style={styles.coordinatesInput}>
-                    <View style={styles.coordinateInput}>
-                        <Text style={styles.secondaryText}>Longitud</Text>
+            source={require('../../assets/images/login_background.webp')}
+            style={styles.background}
+            resizeMode="cover"
+            >
+            <View style={globalStyles.semi_transparent_overlay} />
+            <ScrollView style={styles.container}>
+                {/* Content */}
+                <View style={styles.content}>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.title}>
+                        <Text style={styles.titleHighlight}>Publicítate</Text>
+                    <Text style={styles.titleMain}> con nosotros</Text>
+                    </Text>
+                    
+                    <Text style={styles.description}>
+                    Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
+                    </Text>
+                    
+                    {/* Form */}
+                    <View>
+                        <Text>Email</Text>
                         <TextInput
-                        placeholder="Longitud"
-                        keyboardType = 'numeric'
-                        value={point.longitude}
-                        error={errors.longitude}
+                        placeholder="Email de contacto"
+                        value={point.email}
+                        error={errors.email}
                         onChangeText={(text) =>
-                            setPoint({ ...point, longitude: text })
+                            setPoint({ ...point, email: text })
                         }
                         />
                     </View>
-                    <View style={styles.coordinateInput}>
-                        <Text style={styles.secondaryText}>Latitud</Text>
+                    <View>
+                        <Text>Nombre</Text>
                         <TextInput
-                        placeholder="Latitud"
-                        keyboardType = 'numeric'
-                        value={point.latitude}
-                        error={errors.latitude}
+                        placeholder="Nombre"
+                        value={point.name}
+                        error={errors.name}
                         onChangeText={(text) =>
-                            setPoint({ ...point, latitude: text })
+                            setPoint({ ...point, name: text })
                         }
                         />
                     </View>
-                </View>
+                    <View>
+                        <Text>Descripción</Text>
+                        <TextInput
+                        placeholder="Descripción"
+                        value={point.description}
+                        error={errors.description}
+                        onChangeText={(text) =>
+                            setPoint({ ...point, description: text })
+                        }
+                        />
+                    </View>
+                    <Text>Coordenadas</Text>
+                    <View style={styles.coordinatesInput}>
+                        <View style={styles.coordinateInput}>
+                            <Text style={styles.secondaryText}>Longitud</Text>
+                            <TextInput
+                            placeholder="Longitud"
+                            keyboardType = 'numeric'
+                            value={point.longitude}
+                            error={errors.longitude}
+                            onChangeText={(text) =>
+                                setPoint({ ...point, longitude: text })
+                            }
+                            />
+                        </View>
+                        <View style={styles.coordinateInput}>
+                            <Text style={styles.secondaryText}>Latitud</Text>
+                            <TextInput
+                            placeholder="Latitud"
+                            keyboardType = 'numeric'
+                            value={point.latitude}
+                            error={errors.latitude}
+                            onChangeText={(text) =>
+                                setPoint({ ...point, latitude: text })
+                            }
+                            />
+                        </View>
+                    </View>
 
-                {/* Submit button */}
-                <TouchableOpacity
-                    onPress={handleSubmit}
-                    style={styles.primaryButton}
-                >
-                    <Text className="text-white text-base font-semibold">Enviar</Text>
-                </TouchableOpacity>
-            </View>
-            </View>
-        </ScrollView>
+                    {/* Submit button */}
+                    <TouchableOpacity
+                        onPress={handleSubmit}
+                        style={styles.primaryButton}
+                    >
+                        <Text className="text-white text-base font-semibold">
+                            {loading ? 'Cargando...' : 'Enviar'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                </View>
+            </ScrollView>
+            {/* Modales */}
+            {renderSentModal()}
         </ImageBackground>
     );
 };

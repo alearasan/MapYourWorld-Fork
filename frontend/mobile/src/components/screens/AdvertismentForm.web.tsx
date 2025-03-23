@@ -1,9 +1,10 @@
 import { RootStackParamList } from "@/navigation/types";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, Platform, TextInput, ScrollView } from "react-native";
+import { ImageBackground, View, TouchableOpacity, StyleSheet, Text, Platform, TextInput, ScrollView, Alert, Modal } from "react-native";
 import { styles } from '../../assets/styles/styles';
 import React, { useState } from "react";
+import { API_URL } from "@/constants/config";
 
 type AdvertisementFormNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AdvertisementForm'>;
 
@@ -14,6 +15,8 @@ interface AdvertisementPoint {
     longitude: string,
     latitude: string,
 }
+
+const MAIL_ADDRESS = 'mapyourworld.group7@gmail.com'
 
 const AdvertisementForm = () => {
   const [ point, setPoint ] = useState<AdvertisementPoint>({
@@ -31,6 +34,7 @@ const AdvertisementForm = () => {
     latitude:'',
   });
   const [loading, setLoading] = useState(false);
+  const [isSent, setIsSent] = useState(false);
     
   const navigation = useNavigation<AdvertisementFormNavigationProp>();
 
@@ -94,28 +98,33 @@ const AdvertisementForm = () => {
     setLoading(true);
 
     const subject = `Solicitud de punto publicitario: ${point.name}`
-    const body = `Solicitud de punto publicitario con los siguientes datos:`
-        + `\nNombre del punto: ${point.name}`
-        + `\n${point.description ?? `Descripción del punto: ${point.description}`}`
-        + `\nCoordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
-        + `\nEmail de contacto: ${point.email}`
-        + `\nFecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}`;
+    const body = `<p>Solicitud de punto publicitario con los siguientes datos:`
+      + `<br>Nombre del punto: ${point.name}`
+      + `${point.description ?? `<br>Descripción del punto: ${point.description}`}`
+      + `<br>Coordenadas del punto (longitud, latitud): ${point.longitude}, ${point.latitude}`
+      + `<br>Email de contacto: ${point.email}`
+      + `<br>Fecha de registro de la solicitud: ${new Date(Date.now()).toLocaleString()}</p>`;
 
-    try {
-        
-    }  catch (error: unknown) {
-        console.error('Error al registrarse:', error);
+    const response = await fetch(`${API_URL}/api/email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: MAIL_ADDRESS,
+        to: MAIL_ADDRESS,
+        subject: subject,
+        html: body,
+      }),
+    });
 
-        let errorMessage: string = 'Ocurrió un error inesperado';
-
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        } else if (error && typeof error === 'object' && 'message' in error) {
-            errorMessage = (error as { message: string }).message;
-        }
-
-    } finally {
-        setLoading(false);
+    const data = await response.json();
+    
+    if (response.ok) {
+      setIsSent(true);
+    } else {
+      setLoading(false)
+      Alert.alert('Error', data.message || 'No se pudo procesar la solicitud.');
     }
     
   };
@@ -144,7 +153,30 @@ const AdvertisementForm = () => {
       box-sizing: border-box;
       height: 44px;
     }
+
+    .ad-container {
+      margin: 50px;
+    }
   `;
+
+  const renderSentModal = () => (
+    <Modal visible={isSent} transparent={true} animationType="slide">
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)", }}>
+        <View style={{ backgroundColor: "white", borderRadius: 12, padding: 20, width: "85%", maxWidth: 400, elevation: 5, }}>
+        <Text style={{ fontSize: 20, marginBottom: 20, textAlign: "center", }}>Solicitud enviada correctamente</Text>
+        <Text style={{ fontSize: 16, textAlign: 'center', }}>En breves nos pondremos en contacto con vosotros.</Text>
+              <View>
+                <TouchableOpacity 
+                  style={{ flex: 1, paddingVertical: 12, borderRadius: 8, alignItems: "center", marginHorizontal: 8, backgroundColor: "#2bbbad", marginTop: 20, }} 
+                  onPress={() => navigation.navigate('Welcome')}
+                >
+                  <Text style={{ fontWeight: "bold", fontSize: 16, color: "white", }}>Volver al inicio</Text>
+                </TouchableOpacity>
+              </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <ImageBackground
@@ -156,7 +188,7 @@ const AdvertisementForm = () => {
       <View style={styles.semi_transparent_overlay} />
         <ScrollView>
           {/* Content */}
-          <View className="flex-1 justify-center items-center min-h-screen">
+          <View className="flex-1 justify-center items-center min-h-screen ad-container">
             <style dangerouslySetInnerHTML={{ __html: customInputStyles }} />
             <div style={{ 
               backgroundColor: 'white', 
@@ -169,6 +201,10 @@ const AdvertisementForm = () => {
               flexDirection: 'column',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
+              <h1><span style={{color: '#2bbbad'}}>Publicítate</span> con nosotros</h1>
+              <div style={{ margin: 20, fontSize: 16, color: '#64748b', }}>
+                Si quieres aparecer en nuestro mapa, ponte en contacto con nuestro equipo rellenando el siguiente formulario.
+              </div>
               
               <div style={{ width: '100%', marginBottom: 20 }}>
                 {/* Correo electrónico */}
@@ -184,7 +220,7 @@ const AdvertisementForm = () => {
                       onChange={(e) => handleChange('email', e.target.value)}
                       style={{ 
                         width: '100%',
-                        paddingLeft: '35px',
+                        paddingLeft: '10px',
                         paddingRight: '10px',
                         height: '44px',
                         borderColor: errors.email ? '#e53e3e' : undefined
@@ -211,7 +247,7 @@ const AdvertisementForm = () => {
                       onChange={(e) => handleChange('name', e.target.value)}
                       style={{ 
                         width: '100%',
-                        paddingLeft: '35px',
+                        paddingLeft: '10px',
                         paddingRight: '10px',
                         height: '44px',
                         borderColor: errors.name ? '#e53e3e' : undefined
@@ -238,7 +274,7 @@ const AdvertisementForm = () => {
                       onChange={(e) => handleChange('description', e.target.value)}
                       style={{ 
                         width: '100%',
-                        paddingLeft: '35px',
+                        paddingLeft: '10px',
                         paddingRight: '10px',
                         height: '44px',
                         borderColor: errors.description ? '#e53e3e' : undefined
@@ -256,7 +292,7 @@ const AdvertisementForm = () => {
                 <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
                     Coordenadas
                 </div>
-                <div style={{ flexDirection: 'row', gap: 5, marginBottom: 20 }}>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 5, marginBottom: 20 }}>
                   {/* Longitud */}
                   <div className="input-container" style={{ width: '50%', }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
@@ -270,7 +306,7 @@ const AdvertisementForm = () => {
                         onChange={(e) => handleChange('longitude', e.target.value)}
                         style={{ 
                           width: '100%',
-                          paddingLeft: '35px',
+                          paddingLeft: '10px',
                           paddingRight: '10px',
                           height: '44px',
                           borderColor: errors.longitude ? '#e53e3e' : undefined
@@ -296,7 +332,7 @@ const AdvertisementForm = () => {
                         onChange={(e) => handleChange('latitude', e.target.value)}
                         style={{ 
                           width: '100%',
-                          paddingLeft: '35px',
+                          paddingLeft: '10px',
                           paddingRight: '10px',
                           height: '44px',
                           borderColor: errors.name ? '#e53e3e' : undefined
@@ -336,6 +372,8 @@ const AdvertisementForm = () => {
             </div>
           </View>
         </ScrollView>
+        {/* Modales */}
+        {renderSentModal()}
     </ImageBackground>
   );
 };
