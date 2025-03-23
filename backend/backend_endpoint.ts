@@ -17,12 +17,18 @@ import subscriptionRoutes from './payment-service/routes/subscription.routes';
 import { createAchievements } from './achievement-service/mocks/achievement_create';
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
+import https from 'https';
+import fs from 'fs';
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Permite orígenes seguros
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
