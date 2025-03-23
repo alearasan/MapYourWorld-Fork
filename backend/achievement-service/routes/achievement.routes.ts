@@ -18,9 +18,9 @@ router.get('/', achievementController.getAchievements);
 
 /**
  * Obtiene un logro según su nombre.
- * GET /achievements/name/:name
+ * GET /achievements/:achievementName
  */
-router.get('/name/:name', achievementController.getAchievementByName);
+router.get("/:achievementName", achievementController.getAchievementByName);
 
 /**
  * Obtiene un logro según su id.
