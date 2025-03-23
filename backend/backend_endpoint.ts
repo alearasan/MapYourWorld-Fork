@@ -18,8 +18,7 @@ import { createAchievements } from './achievement-service/mocks/achievement_crea
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
 import emailRoutes from './auth-service/src/routes/email.routes';
-import https from 'https';
-import fs from 'fs';
+
 
 dotenv.config();
 
