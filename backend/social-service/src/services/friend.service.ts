@@ -56,8 +56,23 @@ export const sendRequestFriend = async (
     
     const requester = await userRepo.findById(requesterId);
     const recipient = await userRepo.findById(recipientId);
+
+
+
     if (!requester || !recipient) {
       throw new Error(`Uno de los usuarios no fue encontrado (requester: ${requesterId}, recipient: ${recipientId}).`);
+    }
+    
+    const usersMap = await mapRepo.getUsersOnMapById(map.id)
+    const usuariosMapId = usersMap.map(user => user.id)
+
+
+    if(usuariosMapId.some(userId => userId == recipient.id)){
+      throw new Error("Está intentando invitar a un usuario que ya está dentro de la partida")
+    }
+
+    if (!usuariosMapId.includes(requester.id)){
+      throw new Error("No puede invitar si no está unido al mapa")
     }
     // Crear la solicitud de amistad
     const newFriend = new Friend();
