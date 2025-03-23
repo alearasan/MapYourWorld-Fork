@@ -172,15 +172,112 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       testUserId = response.body.user.id;
     });
 
-    it('debe retornar error por email inválido', async () => {
+    it('debe retornar error por email inválido al no darse email', async () => {
       const response = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'no-es-un-email',
+          email: '',
           password: 'Password1!'
         });
       
       console.log('Respuesta de email inválido:', response.body);
+      
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por email inválido', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'no-es-un-email.com',
+          password: 'Password1!'
+        });
+      
+      console.log('Respuesta de email inválido:', response.body);
+      
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por email inválido al mezclar mayusculas', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'teSt@mail.com',
+          password: 'Password1!'
+        });
+      
+      console.log('Respuesta de email inválido:', response.body);
+      
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por password inválido al no tener caracteres especiales', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@mail.com',
+          password: 'Password1'
+        });
+            
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por password inválido al no tener mayusculas ni caracteres especiales', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@mail.com',
+          password: 'password1'
+        });
+          
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por password inválido al no tener longitud minima 8', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@mail.com',
+          password: 'p'
+        });
+      
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por password inválido al exceder la longitud maxima', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@mail.com',
+          password: '0123456789ABCDEF0123456789ABCDEF01234567uuuuuuuuuuuuuuuuuuuuiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii89ABCDEF01!3456789AbCDEF0123456789AffffffffffBCDEF0123456789ABCDEF0123456789ABCDEF012345678jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk___________________________________________9ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF'
+        });
+      
+      console.log('Respuesta de email inválido:', response.body);
+      
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('debe retornar error por no pasar password', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'test@mail.com',
+          password: ''
+        });
       
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -297,6 +394,33 @@ describe('Auth Service - Pruebas de Endpoints', () => {
       expect(verifyResponse.status).toBe(200);
       expect(verifyResponse.body.success).toBe(true);
     });
+    it('debe retornar error por credenciales inválidas, sql injection', async () => {
+      const mockUser = {
+        id: 'mocked-user-id',
+        email: " '' OR '1'='1' ",
+        password: 'hashed-password',
+        is_active: true,
+        role: Role.USER,
+        token_data: '',
+        profile: {
+          id: 'mocked-profile-id',
+          username: 'usuario_prueba'
+        }
+      };
+      
+      // @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
+      mockUserRepo.findOne.mockResolvedValueOnce(null);
+      
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: " '' OR '1'='1' ",
+          password: 'Password1!'
+        });
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+    });
+      
   });
 
   describe('Tests de integración - logout', () => {
