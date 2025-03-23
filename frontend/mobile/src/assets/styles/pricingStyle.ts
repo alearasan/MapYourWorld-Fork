@@ -1,4 +1,4 @@
-// src/styles/styles.ts
+// pricingStyle.ts
 
 import { StyleSheet } from 'react-native';
 
@@ -21,6 +21,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 8,
     marginTop: 20,
+    color: '#fff',
+
   },
   buttonText: {
     color: '#fff',
@@ -94,6 +96,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     paddingHorizontal: 40,
+  },
+  checkoutForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardElement: {
+    width: '100%',
+    marginBottom: 20,
   },
 });
 

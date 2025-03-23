@@ -81,6 +81,28 @@ const SubscriptionScreen = () => {
     }
   };
 
+  const updateSubscriptionPlan = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/subscriptions/upgrade/${user?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan: 'PREMIUM' }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al actualizar la suscripción:', errorData);
+      } else {
+        console.log('Suscripción actualizada a PREMIUM');
+        fetchActualPlan(); // Volver a obtener el plan actualizado
+      }
+    } catch (error) {
+      console.error('Error al actualizar el plan:', error);
+    }
+  };
+
 
 
   const openPaymentSheet = async () => {
@@ -104,6 +126,7 @@ const SubscriptionScreen = () => {
         console.log('Error al procesar el pago:', paymentError);
       } else {
         console.log('Pago exitoso!');
+        await updateSubscriptionPlan();
         navigation.navigate('Map');
       }
     } else {

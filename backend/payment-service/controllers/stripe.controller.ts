@@ -25,8 +25,6 @@ export const createPaymentIntent = async (req: Request, res: Response) => {
         automatic_payment_methods: { enabled: true },
       });
       
-      await subscriptionService.incrementarSuscripcion(userId)
-
       res.json({ paymentIntent: paymentIntent.client_secret });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
