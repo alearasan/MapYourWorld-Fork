@@ -20,6 +20,7 @@ import { RootStackParamList } from './src/navigation/types';
 import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
+import SocialScreen from './src/components/screens/SocialScreen';
 
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
@@ -191,6 +192,22 @@ const AppContent = () => {
                   style={{ width: 35, height: 35, marginRight: 5 }}
                 />
                 <StyledText className="text-xl font-bold ml-2 text-gray-800">Mapas Colaborativos</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }} 
+        />
+        <Stack.Screen 
+          name="SocialScreen" 
+          component={SocialScreen}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Amigos</StyledText>
               </View>
             ),
             headerRight: () => <HamburgerMenu />,

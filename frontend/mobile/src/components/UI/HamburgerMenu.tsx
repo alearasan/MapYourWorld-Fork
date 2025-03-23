@@ -41,6 +41,10 @@ const HamburgerMenu = () => {
             >
               <Text style={styles.menuItemText}>Mapas Colaborativos</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Social</Text>
+            </TouchableOpacity>
             
             <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Inicio</Text>
@@ -49,6 +53,8 @@ const HamburgerMenu = () => {
             <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Suscripción</Text>
             </TouchableOpacity>
+           
+
           </View>
         </TouchableOpacity>
       </Modal>
