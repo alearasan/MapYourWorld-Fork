@@ -157,9 +157,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           lastName: mockUser.profile.lastName
         });
 
-      // Para depuración
-      console.log('Respuesta de registro:', response.body);
-
       // Validar la respuesta
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -180,7 +177,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!'
         });
       
-      console.log('Respuesta de email inválido:', response.body);
       
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -195,7 +191,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!'
         });
       
-      console.log('Respuesta de email inválido:', response.body);
       
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -210,7 +205,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!'
         });
       
-      console.log('Respuesta de email inválido:', response.body);
       
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -264,7 +258,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: '0123456789ABCDEF0123456789ABCDEF01234567uuuuuuuuuuuuuuuuuuuuiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii89ABCDEF01!3456789AbCDEF0123456789AffffffffffBCDEF0123456789ABCDEF0123456789ABCDEF012345678jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk___________________________________________9ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF'
         });
       
-      console.log('Respuesta de email inválido:', response.body);
       
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -324,8 +317,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           lastName: 'Prueba'
         });
 
-      console.log('Respuesta de registro:', response.body);
-      console.log('Hack trial: ', response.body.username);
 
       // Validar la respuesta
       expect(response.status).toBe(201);
@@ -369,7 +360,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!'
         });
       
-      console.log('Respuesta de login:', loginResponse.body);
       
       expect(loginResponse.status).toBe(200);
       expect(loginResponse.body.success).toBe(true);
@@ -390,7 +380,6 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           token: loginResponse.body.token
         });
         
-      console.log('Respuesta de VERIFY:', verifyResponse.body);
       expect(verifyResponse.status).toBe(200);
       expect(verifyResponse.body.success).toBe(true);
     });
@@ -429,6 +418,7 @@ describe('Auth Service - Pruebas de Endpoints', () => {
   
     beforeEach(() => {
       jest.clearAllMocks();
+      // Definimos un usuario mock con token_data asignado
       mockUser = {
         id: userId,
         token_data: 'valid-token'
