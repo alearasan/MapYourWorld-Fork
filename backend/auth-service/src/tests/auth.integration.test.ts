@@ -3,17 +3,13 @@ import request from 'supertest';
 import { Server } from 'http';
 import { mock } from 'jest-mock-extended';
 import { Repository } from 'typeorm';
-import { logout } from '../../../auth-service/src/services/auth.service';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository'; 
-import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
-// @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
+// Create mock variables BEFORE using them in any mocks
 const mockUserRepo = mock<Repository<any>>();
-// @ts-ignore - Ignoramos los errores de tipo para los mocks en pruebas
 const mockProfileRepo = mock<Repository<any>>();
 const mockMapRepo = mock<any>();
 
-// Mock de los módulos antes de importar app
+// Mock modules before app import
 jest.mock('../../../database/appDataSource', () => ({
   AppDataSource: {
     isInitialized: true,
@@ -27,7 +23,7 @@ jest.mock('../../../database/appDataSource', () => ({
   initializeDatabase: jest.fn().mockResolvedValue(undefined)
 }));
 
-// Mock para el servicio de mapas
+// Mock map service
 jest.mock('../../../map-service/src/services/map.service', () => ({
   createMap: jest.fn().mockResolvedValue({ id: 'mock-map-id' })
 }));
@@ -43,13 +39,18 @@ jest.mock('../../../map-service/src/repositories/map.repository', () => {
   };
 });
 
-// Mock para bcrypt
+// Mock bcrypt
 jest.mock('bcryptjs', () => ({
   hash: jest.fn().mockResolvedValue('hashed-password'),
   compare: jest.fn().mockImplementation((plain, hash) => Promise.resolve(plain === 'Password1!'))
 }));
 
-// Ahora importamos app después de configurar los mocks
+// Now import the auth service that was causing the circular reference
+import { logout } from '../../../auth-service/src/services/auth.service';
+import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository'; 
+import { UserProfile } from '../../../user-service/src/models/userProfile.model';
+
+// Import app after all mocks are set up
 import app from '../index';
 import { Role, User } from '../models/user.model';
 
