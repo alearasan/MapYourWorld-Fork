@@ -7,8 +7,8 @@ import { FriendStatus } from '../models/friend.model';
  */
 export const createFriendController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {requesterId, receiverId} = req.body; // Datos de la solicitud de amistad
-    const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId);
+    const {requesterId, receiverId, mapId} = req.body; // Datos de la solicitud de amistad
+    const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
     res.status(201).json(newFriend);
   } catch (error) {
     res.status(500).json({ 

@@ -1,11 +1,13 @@
-import { Friend, FriendStatus } from '../models/friend.model';
+import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import FriendRepository from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import MapRepository from '../../../map-service/src/repositories/map.repository';
 
 const repo = new FriendRepository();
 const userRepo = new AuthRepository();
+const mapRepo = new MapRepository();
 
 /**
  * Envía una solicitud de amistad.
@@ -14,24 +16,28 @@ const userRepo = new AuthRepository();
 export const sendRequestFriend = async (
 
   requesterId:string,
-  recipientId:string
+  recipientId:string,
+  mapId?:string
 
 ): Promise<Friend | { success: boolean; message: string }> => {
   try {
-    
-    
-
+    var map: any = null;
 
     if (requesterId === recipientId) {
       throw new Error("El receptor y el solicitante deben ser distintos.");
     }
-
     
+    if(mapId){
+      map = await mapRepo.getOnlyMapById(mapId);
+      if(!map){
+        throw new Error("El mapa no fue encontrado");
+      }
+    }
 
     // Verificar si ya existe una relación entre estos usuarios
     const existingFriendship = await repo.findExistingFriendship(requesterId, recipientId);
 
-    if (existingFriendship) {
+    if (existingFriendship && existingFriendship.requestType === RequestType.FRIEND) {
       if (existingFriendship.status === FriendStatus.PENDING) {
         return { success: false, message: "Ya existe una solicitud de amistad pendiente." };
       }
@@ -47,6 +53,7 @@ export const sendRequestFriend = async (
       }
     }
 
+    
     const requester = await userRepo.findById(requesterId);
     const recipient = await userRepo.findById(recipientId);
     if (!requester || !recipient) {
@@ -58,6 +65,10 @@ export const sendRequestFriend = async (
     newFriend.recipient = recipient;
     newFriend.createdAt = new Date();
     newFriend.updatedAt = new Date();
+    if(map){
+      newFriend.requestType = RequestType.MAP;
+      newFriend.map = map;
+    }
 
     const savedFriend = await repo.createFriend(newFriend);
 

@@ -10,8 +10,10 @@ import {
     JoinColumn,
     JoinTable,
     ManyToOne,
+    Unique,
   } from 'typeorm';
   import { User } from '../../../auth-service/src/models/user.model';
+  import { Map } from '../../../map-service/src/models/map.model';
 
   /**
    * Posibles estados de amistad.
@@ -22,8 +24,14 @@ import {
     BLOCKED = 'BLOCKED',
     DELETED = 'DELETED',
   }
+
+  export enum RequestType{
+    MAP = 'MAP',
+    FRIEND = 'FRIEND'
+  }
   
   @Entity('friend')
+  @Unique(['requester', 'recipient', 'requestType'])
   export class Friend {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
@@ -40,6 +48,16 @@ import {
       default: FriendStatus.PENDING,
     })
     status!: FriendStatus;
+
+    @Column({
+      type: 'enum',
+      enum: RequestType,
+      default: RequestType.FRIEND,
+    })
+    requestType!: RequestType;
+
+    @ManyToOne(() => Map, (map) => map, { nullable: true })
+    map!: Map;
   
     @CreateDateColumn()
     createdAt!: Date;

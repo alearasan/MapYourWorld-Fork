@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Friend, FriendStatus } from '../models/friend.model';
+import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
@@ -103,5 +103,16 @@ export default class FriendRepository {
       .leftJoinAndSelect('friend.requester', 'requester')
       .getMany();
   }
+
+  async getInvitationsForMapByUser(userId: string): Promise<Friend[]> {
+    return this.friendRepo
+      .createQueryBuilder('friend')
+      .where('friend.recipientId = :userId', { userId })
+      .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
+      .andWhere('friend.requestType = :requestType', { requestType: RequestType.MAP })
+      .leftJoinAndSelect('friend.requester', 'requester')
+      .getMany();
+  }
+
   
 }
