@@ -829,11 +829,12 @@ const MapScreen = () => {
                 console.warn(`Distrito ${distrito.name} no tiene suficientes coordenadas válidas`);
                 return null;
               }
+              // Respetamos exactamente el valor de isUnlocked que viene del backend
               return {
                 id: distrito.id,
                 nombre: distrito.name,
                 coordenadas: coordenadasTransformadas,
-                isUnlocked: distrito.isUnlocked,
+                isUnlocked: distrito.isUnlocked === true, // Aseguramos que sea un booleano y respetamos el valor original
                 regionId: distrito.region_assignee ? distrito.region_assignee.id : null,
               };
             } catch (error) {
