@@ -156,14 +156,6 @@ const LoginScreen = () => {
               className="mb-3"
             />
             
-            <Button 
-              title="Entrar en Modo Prueba" 
-              onPress={handleTestMode}
-              variant="outline"
-              fullWidth
-              className="mb-3"
-            />
-            
             <StyledView className="flex-row justify-center mt-4">
               <StyledText className="text-gray-600">
                 ¿No tienes una cuenta?{' '}
