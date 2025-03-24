@@ -178,7 +178,12 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
       console.log(`Controlador: Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
       
       if (districts && districts.length > 0) {
-        res.status(200).json({ success: true, districts });
+        // Aseguramos que la propiedad isUnlocked esté correctamente establecida
+        const sanitizedDistricts = districts.map(district => ({
+          ...district,
+          isUnlocked: district.isUnlocked === true
+        }));
+        res.status(200).json({ success: true, districts: sanitizedDistricts });
       } else {
         // Si no hay distritos, creamos distritos para el mapa
         console.log(`Controlador: No se encontraron distritos, creando distritos para el mapa ${mapId}`);
@@ -193,7 +198,13 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
           const newDistricts = await DistrictService.getDistrictsByMapId(mapId);
           console.log(`Controlador: Se crearon ${newDistricts.length} distritos para el mapa ${mapId}`);
           
-          res.status(200).json({ success: true, districts: newDistricts });
+          // Aseguramos que todos los distritos nuevos tengan isUnlocked en false
+          const sanitizedNewDistricts = newDistricts.map(district => ({
+            ...district,
+            isUnlocked: district.isUnlocked === true // Aseguramos que sea booleano, pero mantenemos el valor original
+          }));
+          
+          res.status(200).json({ success: true, districts: sanitizedNewDistricts });
         } catch (createError) {
           console.error(`Controlador: Error al crear distritos para el mapa ${mapId}:`, createError);
           
@@ -202,7 +213,14 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
           try {
             const allDistricts = await DistrictService.getAllDistricts();
             console.log(`Controlador: Se encontraron ${allDistricts.length} distritos genéricos como fallback`);
-            res.status(200).json({ success: true, districts: allDistricts });
+            
+            // Aseguramos que los distritos de fallback tengan isUnlocked en false
+            const sanitizedFallbackDistricts = allDistricts.map(district => ({
+              ...district,
+              isUnlocked: district.isUnlocked === true
+            }));
+            
+            res.status(200).json({ success: true, districts: sanitizedFallbackDistricts });
           } catch (fallbackError) {
             console.error(`Controlador: Error al obtener distritos de fallback:`, fallbackError);
             // En caso de error total, devolvemos un array vacío pero con éxito
@@ -218,7 +236,14 @@ export const getDistrictsByMapId = async (req: Request, res: Response): Promise<
       try {
         const allDistricts = await DistrictService.getAllDistricts();
         console.log(`Controlador: Se encontraron ${allDistricts.length} distritos genéricos como fallback`);
-        res.status(200).json({ success: true, districts: allDistricts });
+        
+        // Aseguramos que los distritos de último fallback tengan isUnlocked en false
+        const sanitizedLastFallbackDistricts = allDistricts.map(district => ({
+          ...district,
+          isUnlocked: district.isUnlocked === true
+        }));
+        
+        res.status(200).json({ success: true, districts: sanitizedLastFallbackDistricts });
       } catch (fallbackError) {
         console.error(`Controlador: Error al obtener distritos de fallback:`, fallbackError);
         // En caso de error total, devolvemos un array vacío pero con éxito

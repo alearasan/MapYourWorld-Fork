@@ -251,58 +251,42 @@ const LoginScreen = () => {
             </div>
             
             <div style={{ width: '100%' }}>
-              <button 
+              <button
                 onClick={handleLogin}
+                disabled={isLoading}
                 style={{
-                  width: '100%',
-                  backgroundColor: APP_TEAL,
+                  backgroundColor: '#2bbbad',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '12px 0',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
+                  padding: '0 16px',
                   cursor: 'pointer',
-                  marginBottom: '12px',
-                  height: '44px',
-                  transition: 'background-color 0.2s'
-                }}
-              >
-                {isLoading ? 'Cargando...' : 'Iniciar sesión'}
-              </button>
-              
-              <button 
-                onClick={handleTestMode}
-                style={{
+                  fontWeight: 600,
                   width: '100%',
-                  backgroundColor: '#f5f5f5',
-                  color: '#333',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '12px 0',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  marginBottom: '20px',
-                  height: '44px',
-                  transition: 'background-color 0.2s'
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                Entrar en Modo Prueba
+                {isLoading ? (
+                  <div className="loader" style={{ width: '20px', height: '20px' }}></div>
+                ) : (
+                  'Iniciar sesión'
+                )}
               </button>
               
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 15 }}>
-                <div style={{ color: '#666', fontSize: '15px' }}>
+              <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <span style={{ color: '#666', fontSize: '14px' }}>
                   ¿No tienes una cuenta?{' '}
-                </div>
-                <a 
+                </span>
+                <a
                   onClick={goToRegister}
-                  style={{ 
-                    color: APP_TEAL, 
-                    marginLeft: '5px', 
-                    fontWeight: 'bold', 
+                  style={{
+                    color: APP_TEAL,
                     cursor: 'pointer',
-                    fontSize: '15px',
+                    fontWeight: 500,
+                    fontSize: '14px',
                     textDecoration: 'none'
                   }}
                 >

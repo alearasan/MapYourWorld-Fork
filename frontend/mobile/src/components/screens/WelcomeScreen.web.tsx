@@ -11,6 +11,7 @@ type RootStackParamList = {
   Register: undefined;
   Map: undefined;
   ForgotPassword: undefined;
+  AdvertisementForm: undefined;
 };
 
 type WelcomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
@@ -24,6 +25,10 @@ const WelcomeScreen = () => {
   
   const handleLoginPress = () => {
     navigation.navigate('Login');
+  };
+
+  const handleAdvertisementFormPress = () => {
+    navigation.navigate('AdvertisementForm');
   };
 
   return (
@@ -64,9 +69,19 @@ const WelcomeScreen = () => {
                 >
                   <Text style={webStyles.secondaryButtonText}>Iniciar sesión</Text>
                 </TouchableOpacity>
+
+                {/* Advertisment form */}
+                <TouchableOpacity 
+                    style={webStyles.tertiaryButton}
+                    onPress={handleAdvertisementFormPress}
+                >
+                  <Text style={webStyles.tertiaryButtonText}>Publicítate con nosotros</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
+          {/* Versión 2.0 */}
+          <Text style={webStyles.versionText}>Versión 2.0</Text>
         </View>
       </ImageBackground>
     </View>
@@ -155,6 +170,27 @@ const webStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  versionText: {
+    fontSize: 12,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+    opacity: 0.7
+  },
+  tertiaryButton: {
+    marginTop: 5,
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  tertiaryButtonText: {
+    color: '#334155',
+    fontSize: 14,
+  }
 });
 
 export default WelcomeScreen; 
