@@ -687,14 +687,6 @@ const MapScreen = () => {
     }
     
     console.log("No se encontró ningún distrito que contenga el punto actual");
-    
-    // Como último recurso, desbloqueamos el primer distrito no desbloqueado
-    // Esto es una solución temporal para asegurar que funcione la demo
-    const primerDistritoNoDesbloqueado = distritos.find(d => !d.isUnlocked);
-    if (primerDistritoNoDesbloqueado) {
-      console.log("Como medida alternativa, desbloqueando el primer distrito no desbloqueado:", primerDistritoNoDesbloqueado.nombre);
-      desbloquearDistrito(primerDistritoNoDesbloqueado.id);
-    }
   };
 
   // Función para desbloquear un distrito
