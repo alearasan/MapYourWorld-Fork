@@ -14,7 +14,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   });
 
 
-
 export const createPaymentIntent = async (req: Request, res: Response) => {
     try {
       const userId = req.params.userId; 
