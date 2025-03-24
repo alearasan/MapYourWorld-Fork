@@ -24,4 +24,6 @@ export type RootStackParamList = {
   POIDetail: { poiId: string };
   Settings: undefined;
   AdvertisementForm: undefined;
+  Payment: undefined;
+  UserAchievementsScreen: undefined;
 }; 
