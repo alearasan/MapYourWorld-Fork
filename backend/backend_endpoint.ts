@@ -50,7 +50,6 @@ app.use('/api/payment', paymentRoutes)
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/user-achievements', userAchievementRoutes);
 app.use('/api/achievements', achievementRoutes);
-
 app.use('/api/photos', photoRoutes);
 app.use('/api/email', emailRoutes);
 
