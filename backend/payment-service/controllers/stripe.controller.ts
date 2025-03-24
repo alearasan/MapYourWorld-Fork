@@ -5,7 +5,8 @@ import path from "path";
 
 import * as subscriptionService from "../services/subscription.service";
 
-dotenv.config();
+// Configurar dotenv para que busque el archivo .env en la raíz del proyecto
+dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
