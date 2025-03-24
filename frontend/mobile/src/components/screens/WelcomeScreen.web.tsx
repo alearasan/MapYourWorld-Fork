@@ -67,6 +67,8 @@ const WelcomeScreen = () => {
               </View>
             </View>
           </View>
+          {/* Versión 2.0 */}
+          <Text style={webStyles.versionText}>Versión 2.0</Text>
         </View>
       </ImageBackground>
     </View>
@@ -155,6 +157,14 @@ const webStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  versionText: {
+    fontSize: 12,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+    opacity: 0.7
+  }
 });
 
 export default WelcomeScreen; 
