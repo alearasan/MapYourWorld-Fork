@@ -57,15 +57,17 @@ const LeafletMap = ({ location, distritos }: any) => {
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const distritosRef = useRef<any[]>([]);
+  const distritosLayerRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   
   // Función para convertir un arreglo de { latitude, longitude } en arrays [lat, lng] para leaflet
   const convertirCoordenadas = (coords: { latitude: number; longitude: number }[]) =>
     coords.map((coord) => [coord.latitude, coord.longitude] as [number, number]);
   
-  // Efecto para inicializar el mapa
+  // Efecto para inicializar el mapa - esto solo debe ocurrir UNA VEZ
   useEffect(() => {
-    if (!mapContainerRef.current || !L) return;
+    if (!mapContainerRef.current || !L || mapInstanceRef.current) return;
     
     console.log("Inicializando mapa Leaflet colaborativo manualmente");
     
@@ -77,19 +79,8 @@ const LeafletMap = ({ location, distritos }: any) => {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Añadir distritos al mapa
-    distritos.forEach((distrito: Distrito) => {
-      console.log(`Renderizando distrito colaborativo: ${distrito.nombre}`);
-      const posiciones = convertirCoordenadas(distrito.coordenadas);
-      const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
-      
-      L.polygon(posiciones, {
-        fillColor: color,
-        color: "#808080",
-        weight: 2,
-        fillOpacity: 0.4
-      }).addTo(map);
-    });
+    // Crear un grupo de capas para los distritos y guardarlo en la referencia
+    distritosLayerRef.current = L.layerGroup().addTo(map);
     
     // Guardar referencia al mapa
     mapInstanceRef.current = map;
@@ -100,9 +91,45 @@ const LeafletMap = ({ location, distritos }: any) => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
+        distritosLayerRef.current = null;
+        distritosRef.current = [];
       }
     };
-  }, [location, distritos]);
+  }, []);  // Solo se ejecuta una vez al montar el componente
+  
+  // Efecto para renderizar los distritos - solo cuando cambia el array de distritos
+  useEffect(() => {
+    if (!mapInstanceRef.current || !distritosLayerRef.current || !mapReady) return;
+    
+    // Solo renderizamos los distritos si han cambiado
+    if (distritosRef.current !== distritos) {
+      console.log("Actualizando capa de distritos colaborativos...");
+      
+      // Limpiar la capa de distritos actual
+      distritosLayerRef.current.clearLayers();
+      
+      // Añadir los distritos actualizados
+      distritos.forEach((distrito: Distrito, index: number) => {
+        // Evitamos loggear cada distrito para reducir la sobrecarga en la consola
+        if (index === 0) {
+          console.log(`Renderizando distritos colaborativos (total: ${distritos.length})`);
+        }
+        
+        const posiciones = convertirCoordenadas(distrito.coordenadas);
+        const color = distrito.isUnlocked ? "rgb(0, 255, 0)" : "rgb(128, 128, 128)";
+        
+        L.polygon(posiciones, {
+          fillColor: color,
+          color: "#808080",
+          weight: 2,
+          fillOpacity: 0.4
+        }).addTo(distritosLayerRef.current);
+      });
+      
+      // Guardar referencia a los distritos actuales para comparar en la próxima actualización
+      distritosRef.current = distritos;
+    }
+  }, [distritos, mapReady]);
   
   return (
     <div style={{ height: "100vh", width: "100vw" }}>
@@ -120,6 +147,7 @@ const CollaborativeMapScreenWeb: React.FC<{ mapId: string; userId: string }> = (
   const [distritos, setDistritos] = useState<Distrito[]>([]);
   const mapRef = useRef(null);
   const [leafletReady, setLeafletReady] = useState(false);
+  const distritosYaCargados = useRef(false);
 
   // Cargar Leaflet solo una vez al inicio
   useEffect(() => {
@@ -186,8 +214,21 @@ const CollaborativeMapScreenWeb: React.FC<{ mapId: string; userId: string }> = (
     
     // Solo procedemos si Leaflet está cargado o tenemos un error
     if (leafletReady || error) {
-      // Cargar distritos del mapa colaborativo
-      fetchDistricts();
+      // Cargar distritos del mapa colaborativo solo una vez
+      if (!distritosYaCargados.current) {
+        fetchDistricts();
+        distritosYaCargados.current = true;
+        
+        // Configurar un timer para recargar los distritos muy ocasionalmente (cada 30 minutos)
+        const interval = setInterval(() => {
+          console.log("Recargando distritos colaborativos (actualización programada)...");
+          fetchDistricts();
+        }, 1800000); // 30 minutos
+        
+        return () => {
+          clearInterval(interval);
+        };
+      }
       
       // Intentar obtener ubicación actual del usuario
       if (typeof navigator !== 'undefined' && navigator.geolocation) {
