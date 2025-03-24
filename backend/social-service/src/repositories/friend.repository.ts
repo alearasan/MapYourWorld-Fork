@@ -5,7 +5,7 @@ import { AppDataSource } from '../../../database/appDataSource'; // Importa la i
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
 
-export default class FriendRepository  {
+export class FriendRepository  {
   private friendRepo: Repository<Friend>;
   private userProfileRepo: Repository<UserProfile>;
   private userRepo: Repository<User>;

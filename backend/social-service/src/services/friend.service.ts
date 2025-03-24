@@ -5,7 +5,7 @@
  */
 
 import { Friend, FriendStatus } from '../models/friend.model';
-import FriendRepository from '../repositories/friend.repository';
+import {FriendRepository} from '../repositories/friend.repository';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
 

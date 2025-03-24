@@ -21,6 +21,7 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
+import AdvertisementForm from '@/components/screens/AdvertismentForm';
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -98,6 +99,26 @@ const ForgotPasswordScreenWrapper = (props: any) => {
   }
 };
 
+const SubscriptionScreenWrapper = (props: any) => {
+  if (Platform.OS === 'web') {
+    const SubscriptionScreenWeb = require('@/components/screens/SubscriptionScreen.web').default;
+    return <SubscriptionScreenWeb {...props} />;
+  } 
+
+  try {
+    const SubscriptionScreen = require('@/components/screens/SubscriptionScreen').default;
+    return (
+        <SubscriptionScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando SubscriptionScreen:", error);
+    return null;
+  }
+};
+
+
+
+
 const UserAchievementsScreenWrapper = (props: any) => {
   if (Platform.OS === 'web') {
     const WebUserAchievementsScreen = require('./src/components/Achievements/UserAchievementsScreen.web').default;
@@ -150,6 +171,20 @@ const AppContent = () => {
               style={{ width: 35, height: 35, marginRight: 5 }}
             />
             <StyledText className="text-xl font-bold ml-2 text-gray-800">Login</StyledText>
+          </View>
+          )
+          
+        }}/>
+        <Stack.Screen name="AdvertisementForm" 
+        component={AdvertisementForm} 
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={require('./src/assets/images/logo.png')} 
+              style={{ width: 35, height: 35, marginRight: 5 }}
+            />
+            <StyledText className="text-xl font-bold ml-2 text-gray-800">Publicítate</StyledText>
           </View>
           )
           
@@ -217,6 +252,23 @@ const AppContent = () => {
             ),
           }} 
         />
+        
+        <Stack.Screen 
+          name="Payment" 
+          component={SubscriptionScreenWrapper}
+           options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+             <StyledText className="text-xl font-bold ml-2 text-gray-800">Pago</StyledText>
+              </View>
+            ),
+          }} 
+          />
+        
         <Stack.Screen 
           name="UserAchievementsScreen" 
           component={UserAchievementsScreenWrapper}
