@@ -11,6 +11,7 @@ import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
 import paymentRoutes from './payment-service/src/routes/payment.routes';
+import photoRoutes from './social-service/src/routes/photo.routes'
 import { initializeDatabase } from './database/appDataSource';
 import { createAllDistricts, createUsers } from './map-service/src/mocks/district_create';
 import subscriptionRoutes from './payment-service/routes/subscription.routes';
@@ -49,6 +50,7 @@ app.use('/api/payment', paymentRoutes)
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/user-achievements', userAchievementRoutes);
 app.use('/api/achievements', achievementRoutes);
+app.use('/api/photos', photoRoutes);
 app.use('/api/email', emailRoutes);
 
 // Interfaz para los servicios
