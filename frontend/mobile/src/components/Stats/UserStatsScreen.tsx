@@ -157,7 +157,7 @@ const UserStatsScreen = () => {
             </View>
             <View className="w-1/2 pl-2 mb-4">
               <Text className="text-gray-500 text-sm">POIs Creados</Text>
-              <Text className="text-xl font-bold text-teal-600">{formatTime(stats?.totalPoisCreados || 0)}</Text>
+              <Text className="text-xl font-bold text-teal-600">{stats?.totalPoisCreados || 0}</Text>
             </View>
           </View>
         </View>
