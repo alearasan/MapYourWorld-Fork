@@ -263,25 +263,32 @@ interface TermsAndConditionsProps {
   isVisible: boolean;
   onClose: () => void;
   onAccept: () => void;
+  alreadyRead?: boolean;
 }
 
 const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
   isVisible,
   onClose,
-  onAccept
+  onAccept,
+  alreadyRead = false
 }) => {
-  const [canAccept, setCanAccept] = useState(false);
+  const [canAccept, setCanAccept] = useState(alreadyRead);
   const [scrollProgress, setScrollProgress] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const [showProgress, setShowProgress] = useState(false);
   const [showBottomPrompt, setShowBottomPrompt] = useState(false);
 
-  // Reset canAccept cuando el modal se cierra
+  // Reset canAccept cuando el modal se cierra o si alreadyRead cambia
   useEffect(() => {
     if (!isVisible) {
-      setCanAccept(false);
+      setCanAccept(alreadyRead);
       setScrollProgress(0);
     } else {
+      // Si ya ha leído los términos, permitir aceptar de inmediato
+      if (alreadyRead) {
+        setCanAccept(true);
+      }
+      
       // Mostrar el indicador de progreso después de un breve retardo
       const timer = setTimeout(() => {
         setShowProgress(true);
@@ -297,7 +304,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
         clearTimeout(bottomPromptTimer);
       };
     }
-  }, [isVisible]);
+  }, [isVisible, alreadyRead]);
 
   const handleScroll = () => {
     if (!contentRef.current) return;

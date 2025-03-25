@@ -54,6 +54,7 @@ const RegisterScreen = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -180,6 +181,7 @@ const RegisterScreen = () => {
 
   const acceptTerms = () => {
     handleChange('acceptTerms', true);
+    setTermsAlreadyRead(true);
     closeTermsModal();
   };
 
@@ -533,6 +535,7 @@ const RegisterScreen = () => {
         isVisible={termsModalVisible}
         onClose={closeTermsModal}
         onAccept={acceptTerms}
+        alreadyRead={termsAlreadyRead}
       />
     </ImageBackground>
   );
