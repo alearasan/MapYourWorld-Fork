@@ -12,7 +12,7 @@ import MapRepository from '../repositories/map.repository';
 import * as fs from 'fs';
 import { Geometry } from 'geojson';
 import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
-import { UserDistrict } from '../models/user-district.model';
+import { Color, UserDistrict } from '../models/user-district.model';
 import RegionRepository from '../repositories/region.repository';
 
 const filePath = 'database/map.geojson';
@@ -87,7 +87,7 @@ export const createDistricts = async (
 
 
     for (let i = 0; i < numberOfRegions; i++) {
-      const regionName = `Región ${i + 1}`;
+      const regionName = geojsonData.region_name;
       const regionData = {
         name: regionName,
         description: `Región generada para ${regionName}`,
@@ -320,7 +320,7 @@ export const unlockCollaborativeDistrict = async (
 
     // Crear un objeto UserDistrict que cumpla con el modelo actualizado
     const userdistrict = {
-      color: "pepe",
+      color: Color.AZUL,
       user: user,
       district: district
     };
@@ -353,7 +353,7 @@ export const unlockCollaborativeDistrict = async (
 export const simulateUserPassingByDistrict = async (
   userId: string,
   districtId: string,
-  color: string = "pepe", // Valor por defecto
+  color: Color = Color.AZUL, // Valor por defecto
   mapId?: string // Opcional: ID del mapa colaborativo
 ): Promise<{
   success: boolean;

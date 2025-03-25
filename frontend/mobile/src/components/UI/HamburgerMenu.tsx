@@ -49,11 +49,25 @@ const HamburgerMenu = () => {
               <Text style={styles.menuItemText}>Estadísticas</Text>
             </TouchableOpacity>
             
+            <TouchableOpacity 
+              onPress={() => handleNavigate('UserAchievementsScreen')} 
+              style={styles.menuItem}
+            >
+              <Text style={styles.menuItemText}>Logros</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Inicio</Text>
             </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Suscripción</Text>
+            </TouchableOpacity>
+
           </View>
         </TouchableOpacity>
+
+        
       </Modal>
     </View>
   );

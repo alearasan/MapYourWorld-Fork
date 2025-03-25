@@ -20,8 +20,11 @@ export type RootStackParamList = {
   MapDetail: { mapId: string };
   CollaborativeMapListScreen: undefined;
   CollaborativeMapScreen: { mapId: string; userId: string };
-  
+
   // Otras pantallas
   POIDetail: { poiId: string };
   Settings: undefined;
+  AdvertisementForm: undefined;
+  Payment: undefined;
+  UserAchievementsScreen: undefined;
 }; 
