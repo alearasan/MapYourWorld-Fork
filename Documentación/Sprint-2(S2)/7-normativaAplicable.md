@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 1
+    Sprint 2
 </p>
 <p align="center">
     Alba Ramos Vargas
@@ -106,6 +106,8 @@ Es decir, se debe crear un sistema seguro, además de monitorear cómo se tratan
 
 - Artículo 6: que explicita el consentimiento del usuario mencionado en el RGPD. Según este el usuario debe ser plenamente consciente del tratamiento que sus datos van a sufrir. El punto 3 también especifica que el consentimiento debe ser directo y autocontenido, no debe condicionar a un consentimiento a fines que no guarden relación con el fin principal del contrato.
 
+- Artículo 7: que trata el consentimiento de los menores de edad. En este artículo se especifica que el consentimiento de menores para el tratamiento de sus datos personales será válido cuando este sea mayor de 14 años.
+
 - Título III: este título está íntegramente dedicado a los derechos del usuario que menciona el RGPD.
 
 - Artículo 28: este artículo hace referencia a los deberes y obligaciones del encargado de los datos y los casos de especial interés, entre los que nos afectan los siguientes apartados:
@@ -147,7 +149,7 @@ La normativa que destaca el CTPDA con respecto a protección de datos[^13^](http
 
 El fin último de estudiar esta legislación es saber qué procedimientos y pautas tenemos que seguir a la hora de lanzar la aplicación para uso público. A partir de esta legislación y de lo recogido en este documento definimos qué nos supone seguir esta normativa.
 
-1. No podemos recoger información de menores de edad.
+1. No podemos recoger información de menores de catorce años sin el consentimiento de sus tutores legales. Este consentimiento de los padres debe ser verificado de alguna manera ya que la información de geolocalización es considerada "sensible" baso la RGPD.
 2. Debemos considerar unos costos legales para la contratación de un Delegado de Protección de Datos.
 3. Debemos definir a un responsable de los datos en nuestra propia organización.
 4. Debemos ofrecer información sobre el tratamiento de los datos y su uso.
