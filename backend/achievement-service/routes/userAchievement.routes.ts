@@ -14,13 +14,13 @@ router.post('/:userId/:achievementId', userAchievementController.createUserAchie
  * Obtiene todos los logros (Achievement) obtenidos por un usuario.
  * GET /user-achievements/user/:userId
  */
-router.get('/user/:userId', userAchievementController.getAchievementsByUser);
+router.get('/achievements/:userId', userAchievementController.getAchievementsByUser);
 
 /**
  * Obtiene todos los usuarios que han desbloqueado un logro específico.
  * GET /user-achievements/achievement/:achievementId
  */
-router.get('/achievement/:achievementId', userAchievementController.getUsersByAchievement);
+router.get('/users/:achievementId', userAchievementController.getUsersByAchievement);
 
 
 export default router;
