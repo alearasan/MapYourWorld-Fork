@@ -27,4 +27,7 @@ export type RootStackParamList = {
   AdvertisementForm: undefined;
   Payment: undefined;
   UserAchievementsScreen: undefined;
+
+  // Pantallas de administración
+  DashboardAdmin: undefined;
 }; 
