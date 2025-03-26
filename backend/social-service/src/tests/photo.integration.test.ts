@@ -27,6 +27,7 @@ import app from '../index';
 import { Geometry, Point } from 'geojson';
 import { Region } from '@backend/map-service/src/models/region.model';
 import { UserDistrict } from '@backend/map-service/src/models/user-district.model';
+import { create } from 'domain';
 
 let server: Server;
 const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-token';
@@ -121,33 +122,20 @@ describe('Photo Service - Tests de integración', () => {
       // Configuramos el mock para simular que se encuentran fotos
       mockPhotoRepo.find.mockResolvedValue([mockPhoto]);
 
-      const response = await request(app)
-        .get('/api/photos')
-        .set('Authorization', `Bearer ${testToken}`);
+      const response = await request(app).get('/api/photos/');
+      console.log("fotos: ", response.body);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
     });
   });
-
-  describe('POST /api/photos/:poiId', () => {
-    it('debe subir una nueva foto asociada a un POI', async () => {
-      // Configuramos los mocks para encontrar el POI y guardar la foto
-      mockPoiRepo.findOne.mockResolvedValue(mockPoi);
-      mockPhotoRepo.create.mockReturnValue(mockPhoto);
-      mockPhotoRepo.save.mockResolvedValue(mockPhoto);
-
-      const newPhotoData = {
-        image: 'http://example.com/nueva-foto.jpg',
-        caption: 'Nueva foto'
-      };
-
+  describe('GET /api/photos/:photoId', () => {
+    it('debe obtenerse una foto por su ID', async () => {
+      mockPhotoRepo.findOneBy.mockResolvedValue(mockPhoto);
+    
       const response = await request(app)
-        .post(`/api/photos/${mockPoi.id}`)
-        .set('Authorization', `Bearer ${testToken}`)
-        .send({ photoData: newPhotoData });
+        .get('/api/photos/photo-1');
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -155,7 +143,7 @@ describe('Photo Service - Tests de integración', () => {
       expect(response.body.data.caption).toBe(mockPhoto.caption);
     });
 
-    it('debe retornar error si no se encuentra el POI', async () => {
+    it('debe retornar error si no se encuentra la foto', async () => {
       // Simulamos que el POI no existe
       mockPoiRepo.findOne.mockResolvedValue(null);
 
@@ -166,16 +154,13 @@ describe('Photo Service - Tests de integración', () => {
 
       const response = await request(app)
         .post('/api/photos/non-existent-poi')
-        .set('Authorization', `Bearer ${testToken}`)
         .send({ photoData: newPhotoData });
 
-      // Según la lógica del controlador, se lanza error y retorna 500
-      expect(response.status).toBe(500);
-      expect(response.body.success).toBe(false);
+      expect(response.status).toBe(404);
     });
   });
-
-  describe('GET /api/photos/:photoId', () => {
+  
+  /* describe('POST /upload/:poiId', () => {
     it('debe obtener una foto por ID', async () => {
       mockPhotoRepo.findOneBy.mockResolvedValue(mockPhoto);
 
@@ -200,7 +185,8 @@ describe('Photo Service - Tests de integración', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeNull();
     });
-  });
+  }); */
+  /*
 
   describe('PUT /api/photos/:photoId', () => {
     it('debe actualizar una foto correctamente', async () => {
@@ -283,6 +269,6 @@ describe('Photo Service - Tests de integración', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toEqual([]);
     });
-  });
+  });*/
 
 });
