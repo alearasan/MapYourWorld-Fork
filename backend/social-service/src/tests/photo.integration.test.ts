@@ -119,7 +119,7 @@ describe('Photo Service - Tests de integración', () => {
 
   describe('GET /api/photos', () => {
     it('debe retornar la lista de fotos', async () => {
-      // Configuramos el mock para simular que se encuentran fotos
+
       mockPhotoRepo.find.mockResolvedValue([mockPhoto]);
 
       const response = await request(app).get('/api/photos/');
@@ -129,6 +129,17 @@ describe('Photo Service - Tests de integración', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
     });
+
+    it('debe retornar un error si falla la consulta', async () => {
+      mockPhotoRepo.find.mockRejectedValue(new Error('Error de prueba'));
+
+      const response = await request(app).get('/api/photos/');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+    }
+    );
+    
   });
   describe('GET /api/photos/:photoId', () => {
     it('debe obtenerse una foto por su ID', async () => {
@@ -144,7 +155,7 @@ describe('Photo Service - Tests de integración', () => {
     });
 
     it('debe retornar error si no se encuentra la foto', async () => {
-      // Simulamos que el POI no existe
+
       mockPoiRepo.findOne.mockResolvedValue(null);
 
       const newPhotoData = {
@@ -158,35 +169,75 @@ describe('Photo Service - Tests de integración', () => {
 
       expect(response.status).toBe(404);
     });
+
+    it('debe retornar error si falla la consulta', async () => {
+      mockPhotoRepo.findOneBy.mockRejectedValue(new Error('Error de prueba'));
+
+      const response = await request(app)
+        .get('/api/photos/photo-1');
+
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+    }
+    );
   });
   
-  /* describe('POST /upload/:poiId', () => {
-    it('debe obtener una foto por ID', async () => {
-      mockPhotoRepo.findOneBy.mockResolvedValue(mockPhoto);
+  describe('POST /upload/:poiId', () => {
+    it('debe subir una nueva foto correctamente', async () => {
 
+      mockPoiRepo.findOne.mockResolvedValue(mockPoi);
+
+      mockPhotoRepo.create.mockReturnValue(mockPhoto);
+      mockPhotoRepo.save.mockResolvedValue(mockPhoto);
+  
+      const newPhotoData = {
+        image: 'http://example.com/nueva-foto.jpg',
+        caption: 'Nueva foto'
+      };
+  
       const response = await request(app)
-        .get(`/api/photos/${mockPhoto.id}`)
-        .set('Authorization', `Bearer ${testToken}`);
-
+        .post(`/api/photos/upload/${mockPoi.id}`)
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({ photoData: newPhotoData });
+  
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.id).toBe(mockPhoto.id);
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.message).toBe('Foto subida correctamente');
     });
+  
+    it('debe retornar error si no se encuentra el POI', async () => {
 
-    it('debe retornar error si la foto no existe', async () => {
-      mockPhotoRepo.findOneBy.mockResolvedValue(null);
-
+      mockPoiRepo.findOne.mockResolvedValue(null);
+  
+      const newPhotoData = {
+        image: 'http://example.com/nueva-foto.jpg',
+        caption: 'Nueva foto'
+      };
+  
       const response = await request(app)
-        .get('/api/photos/non-existent-photo')
-        .set('Authorization', `Bearer ${testToken}`);
-
-      // Según el controlador, se retorna status 400 con data null
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeNull();
+        .post(`/api/photos/upload/non-existent-poi`)
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({ photoData: newPhotoData });
+  
+      expect(response.status).toBe(500);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Error al subir la foto');
     });
-  }); */
-  /*
+  
+    it('debe retornar error si no se proporciona photoData', async () => {
+      const response = await request(app)
+        .post(`/api/photos/upload/${mockPoi.id}`)
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({});
+  
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('No se encontró ninguna foto');
+    });
+  });
+  
+
 
   describe('PUT /api/photos/:photoId', () => {
     it('debe actualizar una foto correctamente', async () => {
@@ -200,7 +251,7 @@ describe('Photo Service - Tests de integración', () => {
       };
 
       const response = await request(app)
-        .put(`/api/photos/${mockPhoto.id}`)
+        .put(`/api/photos/update/${mockPhoto.id}`)
         .set('Authorization', `Bearer ${testToken}`)
         .send({ photoData: updateData });
 
@@ -211,7 +262,7 @@ describe('Photo Service - Tests de integración', () => {
 
     it('debe retornar error si no se proporcionan datos para actualizar', async () => {
       const response = await request(app)
-        .put(`/api/photos/${mockPhoto.id}`)
+        .put(`/api/photos/update/${mockPhoto.id}`)
         .set('Authorization', `Bearer ${testToken}`)
         .send({});
 
@@ -220,12 +271,49 @@ describe('Photo Service - Tests de integración', () => {
     });
   });
 
+  it('debe retornar error si la foto no se encuentra al actualizar', async () => {
+    mockPhotoRepo.findOneBy.mockResolvedValue(null);
+  
+    const updateData = {
+      image: 'http://example.com/updated-photo.jpg',
+      caption: 'Foto Actualizada'
+    };
+  
+    const response = await request(app)
+      .put('/api/photos/update/non-existent-photo')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ photoData: updateData });
+  
+    expect(response.status).toBe(500);
+    expect(response.body.success).toBe(false);
+  });
+  
+
+  it('debe retornar error si falla la consulta al actualizar', async () => {
+    mockPhotoRepo.findOneBy.mockRejectedValue(new Error('Error de prueba'));
+
+    const updateData = {
+      image: 'http://example.com/updated-photo.jpg',
+      caption: 'Foto Actualizada'
+    };
+
+    const response = await request(app)
+      .put(`/api/photos/update/${mockPhoto.id}`)
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({ photoData: updateData });
+
+    expect(response.status).toBe(500);
+    expect(response.body.success).toBe(false);
+  }
+  );
+
+
   describe('DELETE /api/photos/:photoId', () => {
     it('debe eliminar una foto correctamente', async () => {
       mockPhotoRepo.delete.mockResolvedValue({ raw: {}, affected: 1 });
 
       const response = await request(app)
-        .delete(`/api/photos/${mockPhoto.id}`)
+        .delete(`/api/photos/delete/${mockPhoto.id}`)
         .set('Authorization', `Bearer ${testToken}`);
 
       expect(response.status).toBe(200);
@@ -236,12 +324,32 @@ describe('Photo Service - Tests de integración', () => {
       mockPhotoRepo.delete.mockResolvedValue({ raw: {}, affected: 0 });
 
       const response = await request(app)
-        .delete('/api/photos/non-existent-photo')
+        .delete('/api/photos/delete/non-existent-photo')
         .set('Authorization', `Bearer ${testToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
     });
+  });
+
+  it('debe retornar error si falla la consulta al eliminar', async () => {
+    mockPhotoRepo.delete.mockRejectedValue(new Error('Error de prueba'));
+
+    const response = await request(app)
+      .delete(`/api/photos/delete/${mockPhoto.id}`)
+      .set('Authorization', `Bearer ${testToken}`);
+
+    expect(response.status).toBe(500);
+    expect(response.body.success).toBe(false);
+  }
+  );
+
+  it('debe retornar error si no se proporciona un ID de foto al eliminar', async () => {
+    const response = await request(app)
+      .delete('/api/photos/delete/')
+      .set('Authorization', `Bearer ${testToken}`);
+
+    expect(response.status).toBe(404);
   });
 
   describe('GET /api/photos/poi/:poiId', () => {
@@ -269,6 +377,6 @@ describe('Photo Service - Tests de integración', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toEqual([]);
     });
-  });*/
+  });
 
 });

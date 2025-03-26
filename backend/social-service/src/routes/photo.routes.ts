@@ -5,8 +5,8 @@ const router: Router = Router();
 router.get('/', findAllPhotos);
 router.post('/upload/:poiId', uploadPhoto);
 router.get('/:photoId', getPhotoById);
-router.post('/update/:photoId', updatePhoto);
-router.post('/delete/:poiId', deletePhoto);
-router.post('/poi/:poiId', getPhotosofPoi);
+router.put('/update/:photoId', updatePhoto);
+router.delete('/delete/:photoId', deletePhoto);
+router.get('/poi/:poiId', getPhotosofPoi);
 
 export default router;
