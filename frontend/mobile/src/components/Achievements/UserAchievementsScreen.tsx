@@ -118,7 +118,7 @@ const UserAchievementsScreen = () => {
       });
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("La respuesta del servidor no es válida (no es JSON)");
+        throw new Error("Error al crear el logro");
       }
       const data = await response.json();
       console.log("Respuesta del servidor:", data);
