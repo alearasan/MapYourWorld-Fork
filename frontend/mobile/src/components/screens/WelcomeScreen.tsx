@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Button from '../UI/Button';
 import { styles as globalStyles } from '../../assets/styles/styles';
+import CookieBanner from '../UI/CookieBanner';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -83,6 +84,9 @@ const WelcomeScreen = () => {
         {/* Versión 2.0 */}
         <Text style={styles.versionText}>Versión 2.0</Text>
       </View>
+
+      {/* Banner de cookies */}
+      <CookieBanner />
     </ImageBackground>
   );
 };

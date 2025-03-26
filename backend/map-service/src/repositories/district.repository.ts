@@ -4,7 +4,7 @@ import { AppDataSource } from '../../../database/appDataSource'; // Importa la i
 import { Map } from '../models/map.model';
 import { Region } from '../models/region.model';
 import { User } from '../../../auth-service/src/models/user.model';
-import { Color, UserDistrict } from '../models/user-district.model';
+import { UserDistrict } from '../models/user-district.model';
 
 export default class DistrictRepository {
     private districtRepo: Repository<District>;
@@ -44,7 +44,7 @@ export default class DistrictRepository {
         return await this.districtRepo.save(district);
     }
 
-    async unlockDistrict(districtId: string, userId:string , regionId:string ): Promise<District> {
+    async unlockDistrict(districtId: string, userId:string , regionId:string, color: string ): Promise<District> {
         const district = await this.districtRepo.findOne({where:
             {   
                 id:districtId,
@@ -76,7 +76,7 @@ export default class DistrictRepository {
             const userDistrict = new UserDistrict();
             userDistrict.user = discoveredBy;
             userDistrict.district = district;
-            userDistrict.color = Color.AZUL; // Poner los colores definidos(Los colores definidos son los posibles valores del enum Color)
+            userDistrict.color = color; // Poner los colores definidos
             await this.userDistrictRepo.save(userDistrict);
         }
         return await this.districtRepo.save(district);
