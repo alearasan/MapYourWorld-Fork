@@ -110,4 +110,13 @@ export default class DistrictRepository {
         console.log(`Se encontraron ${districts.length} distritos para el mapa ${mapId}`);
         return districts;
     }
+
+    async getDistrictsContainingCoordinates(longitude: number, latitude: number): Promise<District[]> {
+        return await this.districtRepo.createQueryBuilder('district')
+          .where(
+            "ST_Contains(district.boundaries, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))",
+            { longitude, latitude }
+          )
+          .getMany();
+      }
 }

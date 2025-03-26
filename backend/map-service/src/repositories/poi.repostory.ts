@@ -2,14 +2,19 @@ import { Repository } from 'typeorm';
 import { AppDataSource } from '../../../database/appDataSource';
 import { PointOfInterest } from '../models/poi.model';
 import { User } from '../../../auth-service/src/models/user.model';
+import { District } from '../models/district.model';
+import DistrictRepository from '../repositories/district.repository';
+
 
 export class PointOfInterestRepository {
     private poiRepo: Repository<PointOfInterest>;
     private userRepo: Repository<User>
+    private districtRepo: Repository<District>
 
     constructor() {
         this.poiRepo = AppDataSource.getRepository(PointOfInterest);
         this.userRepo = AppDataSource.getRepository(User)
+        this.districtRepo = AppDataSource.getRepository(District)
     }
 
 
@@ -117,6 +122,37 @@ export class PointOfInterestRepository {
 
         return pois;
     };
+
+
+
+
+     async createPoiInAllMaps(poiData: Omit<PointOfInterest, 'id'>): Promise<void> {
+        const newDistrictRepo = new DistrictRepository();
+        const coordenadasPOI = poiData.location
+        
+        if (!coordenadasPOI || 
+            !coordenadasPOI.type || 
+            coordenadasPOI.type !== 'Point' || 
+            !coordenadasPOI.coordinates || 
+            coordenadasPOI.coordinates.length !== 2) {
+          throw new Error('Las coordenadas de ubicación son inválidas');
+        }
+
+        const [longitude, latitude] = coordenadasPOI.coordinates;
+        const distritosConCoordenadas = await newDistrictRepo.getDistrictsContainingCoordinates(longitude, latitude);
+
+
+        for (const district of distritosConCoordenadas) {
+            const newPoi = this.poiRepo.create(poiData);
+            newPoi.district = district;
+            newPoi.createdAt = new Date();
+            await this.poiRepo.save(newPoi);
+        }
+
+
+
+    }
+
 
 
 
