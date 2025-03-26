@@ -208,3 +208,17 @@ export const getPOIsByMapId = async (req: Request, res: Response): Promise<void>
 };
 
 
+
+export const getUniquePointsOfInterestBusiness = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const pois = await POIService.getPointsBusinessAndUnique();
+    res.status(200).json({ success: true, pois });
+  } catch (error) {
+    console.error('Error al obtener todos los POIs:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Error al obtener los POIs' 
+    });
+  }
+};
+
+

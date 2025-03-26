@@ -111,6 +111,29 @@ export default class DistrictRepository {
         return districts;
     }
 
+
+
+    async getDistrictInMapByCoordinates(mapId: string, longitude: number, latitude: number): Promise<District | null> {
+        console.log(`Buscando distrito en el mapa ${mapId} que contenga las coordenadas [${longitude}, ${latitude}]`);
+        
+        // Utilizamos queryBuilder para combinar las condiciones del mapId y el punto geográfico
+        const district = await this.districtRepo.createQueryBuilder('district')
+            .innerJoinAndSelect('district.region_assignee', 'region')
+            .innerJoinAndSelect('region.map_assignee', 'map')
+            .where('map.id = :mapId', { mapId })
+            .andWhere('ST_Contains(district.boundaries, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326))', 
+                     { longitude, latitude })
+            .getOne();
+        
+        if (district) {
+            console.log(`Se encontró un distrito (${district.name}) que contiene las coordenadas especificadas.`);
+        } else {
+            console.log(`No se encontró ningún distrito en el mapa ${mapId} que contenga las coordenadas especificadas.`);
+        }
+        
+        return district;
+    }
+
     async getDistrictsContainingCoordinates(longitude: number, latitude: number): Promise<District[]> {
         return await this.districtRepo.createQueryBuilder('district')
           .where(

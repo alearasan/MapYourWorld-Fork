@@ -198,3 +198,21 @@ export const getPointsOfInterestByMapId = async (mapId:string): Promise<PointOfI
 };
 
 
+export const getPointsBusinessAndUnique = async (): Promise<PointOfInterest[] | null> => {
+
+  const pois = await poiRepository.getUniquePointsOfInterestBusiness();
+  if (!pois) {
+    return null;
+  }
+
+  return pois;
+
+
+}
+
+export const createPOIsOnLagMaps = async (mapId:string): Promise<void> => {
+  const poisList = await poiRepository.getUniquePointsOfInterestBusiness();
+  await poiRepository.createPOIsOnLagMaps(poisList, mapId);  
+}
+
+

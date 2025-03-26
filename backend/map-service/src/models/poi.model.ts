@@ -32,6 +32,9 @@ export class PointOfInterest {
   @Column({ nullable: true })
   images!: string;
 
+  @Column({ nullable: true })
+  isBusiness!:Boolean;
+
   @Column()
   createdAt!: Date;
 
