@@ -1,6 +1,8 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
+const APP_TEAL = '#2bbbad';
+
 interface AlertModalProps {
   visible: boolean;
   title: string;
@@ -45,7 +47,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-    width: '80%',
+    width: '45%',
     backgroundColor: 'white',
     borderRadius: 8,
     padding: 20,
@@ -55,19 +57,22 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
+    color: APP_TEAL,
+    alignSelf: 'flex-start',
   },
   message: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
+    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '100%',
+    maxWidth: 600,
   },
   actionButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: APP_TEAL,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -78,13 +83,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   closeButton: {
-    backgroundColor: '#f44336',
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: APP_TEAL,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   closeButtonText: {
-    color: 'white',
+    color: APP_TEAL,
     fontSize: 16,
   },
 });

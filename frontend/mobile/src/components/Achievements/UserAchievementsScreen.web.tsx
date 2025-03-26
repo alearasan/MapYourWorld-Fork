@@ -6,11 +6,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import AlertModal from '../UI/Alert';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/types';
+import Button from '../UI/Button';
 
 interface Achievement {
   name: string;
   description: string;
-  dateEarned: string;
   points: number;
   iconUrl: string;
 }
@@ -23,13 +23,12 @@ const UserAchievementsScreen = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [achievementName, setAchievementName] = useState<string>("");
   const [achievementDescription, setAchievementDescription] = useState<string>("");
   const [achievementPoints, setAchievementPoints] = useState<number>(0);
   const [achievementIcon, setAchievementIcon] = useState<string>(iconPlaceholder);
-  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertTitle, setAlertTitle] = useState<string>("");
@@ -49,7 +48,6 @@ const UserAchievementsScreen = () => {
     setAlertOnAction(() => onAction);
     setAlertVisible(true);
   };
-  
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -84,7 +82,6 @@ const UserAchievementsScreen = () => {
         const transformed = data.map((item: any) => ({
           name: item.achievement ? item.achievement.name : item.name,
           description: item.achievement ? item.achievement.description : item.description,
-          dateEarned: item.dateEarned,
           points: item.achievement ? item.achievement.points : item.points,
           iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
         }));
@@ -122,7 +119,7 @@ const UserAchievementsScreen = () => {
       });
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json"))
-        throw new Error("La respuesta del servidor no es válida (no es JSON)");
+        throw new Error("Error al crear el logro");
       const data = await response.json();
       if (data.success) {
         setAchievementName("");
@@ -188,7 +185,9 @@ const UserAchievementsScreen = () => {
         margin: '0 auto',
         minWidth: '60%',
         padding: 16,
+        marginTop: 16,
         minHeight: '100vh',
+        boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)'
       }}
     >
       {/* Cabecera */}
@@ -197,13 +196,13 @@ const UserAchievementsScreen = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          backgroundColor: '#2196F3',
+          backgroundColor: 'rgb(43, 187, 173)',
           padding: '12px 16px',
-          borderRadius: 8,
+          borderRadius: 40,
           marginBottom: 16,
+          width: 'fit-content',
         }}
       >
-        <h2 style={{ color: 'white', margin: 0, fontSize: 20 }}>Logros</h2>
         <button
           onClick={() => {
             if (subscription && subscription.plan !== "PREMIUM") {
@@ -217,12 +216,12 @@ const UserAchievementsScreen = () => {
               );
             } else {
               setShowCreateModal(true);
-            }            
-          }}            
+            }
+          }}
           style={{
-            backgroundColor: 'rgba(255,255,255,0.3)',
+            backgroundColor: 'rgb(43, 187, 173)',
             border: 'none',
-            borderRadius: '20px',
+            borderRadius: '35px',
             width: '40px',
             height: '40px',
             cursor: 'pointer',
@@ -232,12 +231,13 @@ const UserAchievementsScreen = () => {
         </button>
       </div>
 
-      {/* Lista de logros – grid responsive */}
+      {/* Lista de logros */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 10,
+          rowGap: 32,
+          columnGap: 16,
         }}
       >
         {achievements.map((achievement, index) => (
@@ -263,15 +263,19 @@ const UserAchievementsScreen = () => {
                 borderRadius: 8,
               }}
             />
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#0d9488', marginBottom: 4 }}>
+            <div
+              style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
+              <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#0d9488' }}>
                 {achievement.name}
               </h3>
-              <p style={{ color: '#6b7280', fontSize: 16, marginBottom: 4 }}>
+              <p style={{ color: '#6b7280', fontSize: 16 }}>
                 {achievement.description}
-              </p>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>
-                Obtenido el: {achievement.dateEarned}
               </p>
               <p style={{ color: '#6b7280', fontSize: 14 }}>
                 Puntos: {achievement.points}
@@ -305,11 +309,29 @@ const UserAchievementsScreen = () => {
               width: '85%',
             }}
           >
-            <h2 style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>
+            {/* Título alineado a la izquierda */}
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                textAlign: 'left',
+                marginBottom: 20,
+              }}
+            >
               Crear Logro
             </h2>
+
+            {/* Nombre del logro */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 16, fontWeight: 500, marginBottom: 8, display: 'block' }}>
+              <label
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  display: 'block',
+                  textAlign: 'left'
+                }}
+              >
                 Nombre del logro*
               </label>
               <input
@@ -326,8 +348,18 @@ const UserAchievementsScreen = () => {
                 }}
               />
             </div>
+
+            {/* Descripción */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 16, fontWeight: 500, marginBottom: 8, display: 'block' }}>
+              <label
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  display: 'block',
+                  textAlign: 'left'
+                }}
+              >
                 Descripción
               </label>
               <textarea
@@ -344,8 +376,18 @@ const UserAchievementsScreen = () => {
                 }}
               />
             </div>
+
+            {/* Puntos */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 16, fontWeight: 500, marginBottom: 8, display: 'block' }}>
+              <label
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  display: 'block',
+                  textAlign: 'left'
+                }}
+              >
                 Puntos
               </label>
               <input
@@ -361,8 +403,18 @@ const UserAchievementsScreen = () => {
                 }}
               />
             </div>
+
+            {/* Ícono del logro */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 16, fontWeight: 500, marginBottom: 8, display: 'block' }}>
+              <label
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  display: 'block',
+                  textAlign: 'left'
+                }}
+              >
                 Ícono del logro
               </label>
               <input
@@ -378,6 +430,8 @@ const UserAchievementsScreen = () => {
                 }}
               />
             </div>
+
+            {/* Botones */}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -385,9 +439,9 @@ const UserAchievementsScreen = () => {
                   flex: 1,
                   padding: '12px 0',
                   borderRadius: 8,
-                  backgroundColor: '#f44336',
-                  border: 'none',
-                  color: 'white',
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #2bbbad',
+                  color: '#2bbbad',
                   fontWeight: 'bold',
                   fontSize: 16,
                   marginRight: 8,
@@ -396,13 +450,14 @@ const UserAchievementsScreen = () => {
               >
                 Cancelar
               </button>
+
               <button
                 onClick={createAchievement}
                 style={{
                   flex: 1,
                   padding: '12px 0',
                   borderRadius: 8,
-                  backgroundColor: '#2196F3',
+                  backgroundColor: '#2bbbad',
                   border: 'none',
                   color: 'white',
                   fontWeight: 'bold',
@@ -417,7 +472,6 @@ const UserAchievementsScreen = () => {
           </div>
         </div>
       )}
-      
 
       <AlertModal
         visible={alertVisible}
