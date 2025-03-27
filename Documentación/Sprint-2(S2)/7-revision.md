@@ -158,15 +158,15 @@
   - **URL:** [Despliegue de MapYourWorld](https://app2.mapyourworld.es)
   - **Credenciales:**  
     - **Usuario 1:**  
-    - Usuario: `usuarioprueba1`  
+    - Correo electrónico: `usuarioprueba1@gmail.com`  
     - Contraseña: `Usuarioprueba12345*`
 
   - **Usuario 2:**  
-    - Usuario: `usuarioprueba2`  
+    - Correo electrónico: `usuarioprueba2@gmail.com`  
     - Contraseña: `Usuarioprueba12345*`
 
   - **Administrador:**  
-    - Usuario: `administradorprueba1@gmail.com`  
+    - Correo electrónico: `administradorprueba1@gmail.com`  
     - Contraseña: `Administradorprueba12345*`
 
   - **Plataforma de pago:**
