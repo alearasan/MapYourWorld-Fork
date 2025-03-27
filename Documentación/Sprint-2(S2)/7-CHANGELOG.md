@@ -7,7 +7,7 @@ A continuación se muestra el documento Markdown con la portada indicada y, tras
   <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
 </p>
 
-<h1 align="center">Informe de Análisis de Métricas de SonarQube</h1>
+<h1 align="center">Changelog</h1>
 
 <p align="center">
     Grupo 7
