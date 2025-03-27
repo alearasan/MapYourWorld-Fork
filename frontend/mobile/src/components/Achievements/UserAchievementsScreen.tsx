@@ -11,7 +11,6 @@ import { RootStackParamList } from '@/navigation/types';
 interface Achievement {
   name: string;
   description: string;
-  dateEarned: string;
   points: number;
   iconUrl: string;
 }
@@ -73,7 +72,6 @@ const UserAchievementsScreen = () => {
         const transformed = data.map((item: any) => ({
           name: item.achievement ? item.achievement.name : item.name,
           description: item.achievement ? item.achievement.description : item.description,
-          dateEarned: item.dateEarned,
           points: item.achievement ? item.achievement.points : item.points,
           iconUrl: item.achievement ? item.achievement.iconUrl : item.iconUrl,
         }));
@@ -254,7 +252,6 @@ const UserAchievementsScreen = () => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.achievementName}>{ach.name}</Text>
                 <Text style={styles.achievementDescription}>{ach.description}</Text>
-                <Text style={styles.achievementInfo}>Obtenido el: {ach.dateEarned}</Text>
                 <Text style={styles.achievementInfo}>Puntos: {ach.points}</Text>
               </View>
             </View>
@@ -277,7 +274,6 @@ const UserAchievementsScreen = () => {
                 style={{ width: 100, height: 100, alignSelf: "center", marginBottom: 20 }}
               />
               <Text style={styles.inputLabel}>{selectedAchievement.description}</Text>
-              <Text style={styles.inputLabel}>Obtenido el: {selectedAchievement.dateEarned}</Text>
               <Text style={styles.inputLabel}>Puntos: {selectedAchievement.points}</Text>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
