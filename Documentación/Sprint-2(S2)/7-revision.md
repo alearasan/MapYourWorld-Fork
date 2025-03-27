@@ -15,11 +15,11 @@
     Sprint 2
 </p>
 <p align="center">
-    Jaime Gómez Marín, Ángel Neria Acal, José María Baquero Rodríguez, Pablo Caballero María
+     Ángel Neria Acal, José María Baquero Rodríguez
 </p>
 
 <p align="center">
-    12/03/2025
+    27/03/2025
 </p>
 
 ---
@@ -27,10 +27,8 @@
 
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
-| V1      | 12/03/2025| Primera versión          | Jaime Gómez Marín, Ángel Neria Acal y José María Baquero Rodríguez     |
-| V2      | 13/03/2025| Actualización del documento| Ángel Neria Acal y José María Baquero Rodríguez     |
-| V3      | 13/03/2025| Actualización del documento| Pablo Caballero María     |
-| V3      | 27/03/2025| Segunda versión| José María Baquero Rodríguez y Ángel Neria Acal     |
+| V1      | 27/03/2025| Primera versión          | Ángel Neria Acal y José María Baquero Rodríguez     |
+
 
 ---
 ## 1. Mapeo Explícito de Casos de Uso (UC) a Interacciones
@@ -40,7 +38,7 @@
 
 
 - **(Mejora) Bienvenida**:  
-  El usuario tiene la opcion de iniciar sesión con una cuenta existente o registrarse en el sistema con una nueva cuenta. También se peude realizar una gestión del usu de cookies, 
+  El usuario tiene la opción de iniciar sesión con una cuenta existente o registrarse en el sistema con una nueva cuenta. También se peude realizar una gestión del usu de cookies.
   ![Registro](./Images/bienvenidaWeb.png)
   *(Caso de uso implementado en #S2)*
 
@@ -55,7 +53,7 @@
 - **Login**:  
   El usuario inicia sesión en el sistema introduciendo el correo y contraseña con el que previamente se ha debido registrar en el sistema. 
   ![Login](./Images/LoginWeb.png)
-  *(Mockup ficticio en #S1)*
+  *(Caso de uso implementado en #S2)*
 
 - **(Mejora) Exploración de zonas no descubiertas**:  
   El usuario se desplaza físicamente hacia la zona que quiere descubrir. Al llegar a la ubicación, el sistema detecta su presencia y automáticamente desbloquea la localización en su mapa personal pintandola de color verde. La posición actual del usuario se indica con un marcador en el mapa.
@@ -96,13 +94,13 @@
 
 
 
-- **(Nuevo) Publicidad**:  
-  El usuario tiene disponible la opción de "Publicítate con nosotros", para aquellas empresas que quieran aparecer en los mapas como pntos de interés. Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sitma puedan añadirlo.
+- **(Nuevo) Publicidad de empresas**:  
+  Las empresas que quieran aparecer en los mapas como puntos de interés tienen disponible la opción de "Publicítate con nosotros". Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sistema puedan añadirlo.
   ![Registro](./Images/publicidadWeb.png)
   *(Caso de uso implementado en #S2)*
 
 - **(Nuevo) Social:**
-El usuario puede acceder al apartado de Social desde el menú desplegable en la esquina superior derecha. 
+  El usuario puede acceder al apartado de Social desde el menú desplegable en la esquina superior derecha. 
  ![suscripcion](./Images/menuWeb.png)
   *(Caso de uso implementado en #S2)* 
 
@@ -132,7 +130,7 @@ El usuario puede acceder al apartado de Social desde el menú desplegable en la 
   ![collab](./Images/crearMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
 
-  Si el usuario pulsa sobre alguno de los mapas colaborativos que aparecen listados pasa a visualizar el progreso de dicho mapa, viendo en la parte superior derecha una leyenda que indica el color asociado a las zonas descuniertas por el resto de usuarios que formen parte del mapa colaborativo. También dispone de las funcionalidades de invitar a otros usuarios, que tenga previamnete añadidos como amigos, y recargar datos, las cuales estan disponibles en la parte inferior de la pantalla.
+  Si el usuario pulsa sobre alguno de los mapas colaborativos que aparecen listados pasa a visualizar el progreso de dicho mapa, viendo en la parte superior derecha una leyenda que indica el color asociado a las zonas descuniertas por el resto de usuarios que formen parte del mapa colaborativo. También dispone de las funcionalidades de invitar a otros usuarios, que tenga previamente añadidos como amigos, y recargar datos, las cuales estan disponibles en la parte inferior de la pantalla.
   ![collab](./Images/verMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
 
@@ -153,28 +151,29 @@ El usuario puede acceder al apartado de Social desde el menú desplegable en la 
 
 - **URL de la página de inicio (Landing Page):** [Landing Page de MapYourWorld](https://mapyourworld.netlify.app/)  
   
-- **Credenciales de Usuarios:**
-  El login y registro ya son completamente funcionales, permitiendo la creación de nuevos usuarios y el acceso con credenciales de usuarios existentes. Además, proporcionamos algunos usuarios preconfigurados en el sistema con sus respectivas credenciales para facilitar pruebas y acceso. Además se proporcionan los datos necesrios para hacer pagos de pruebva en la sección de subscripcion con cualquier usuario.
 
-  - **Usuario 1:**  
-    - Usuario: `user1@gamil.com`  
-    - Contraseña: `user12345*`
-  - **Usuario 2:**  
-    - Usuario: `user2@gmail.com`  
-    - Contraseña: `user12345*`
-  - **Administrador:**  
-    - Usuario: `admin@gamil.com`  
-    - Contraseña: `admin12345*`
 
-- **Plataforma de pago:**
-   - Número de tarjeta: `4242 4242 4242 4242`
-   - Fecha: `08/28`
-   - CVC: `123`
 
 - **Plataforma de Despliegue:**
   - **URL:** [Despliegue de MapYourWorld](https://app2.mapyourworld.es)
   - **Credenciales:**  
-    - Acceder como usuario de prueba.
+    - **Usuario 1:**  
+    - Usuario: `usuarioprueba1`  
+    - Contraseña: `Usuarioprueba12345*`
+
+  - **Usuario 2:**  
+    - Usuario: `usuarioprueba2`  
+    - Contraseña: `Usuarioprueba12345*`
+
+  - **Administrador:**  
+    - Usuario: `administradorprueba1@gmail.com`  
+    - Contraseña: `Administradorprueba12345*`
+
+  - **Plataforma de pago:**
+    - Número de tarjeta: `4242 4242 4242 4242`
+    - Fecha: `08/28`
+    - CVC: `123`
+    - Código postal:`41410`
 
 - **Repositorio en GitHub:**  
   - **URL:** [Repositorio de MapYourWorld](https://github.com/ISPP-Grupo-7/MapYourWorld)
@@ -193,7 +192,7 @@ El usuario puede acceder al apartado de Social desde el menú desplegable en la 
 
 ## 4. Demo de la Evaluación
 
-- **URL:** [Demo de MapYourWorld](https://youtu.be/t4GDfnUqC7o)
+- **URL:** [Demo de MapYourWorld](https://youtu.be/WeYa_Oi5U5A)
 
 ## 5. Acceso al despliegue
 
