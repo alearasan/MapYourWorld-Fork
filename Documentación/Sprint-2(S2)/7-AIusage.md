@@ -26,7 +26,8 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 26/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán|
-| V1      | 27/03/2025| Proms usados         | Claudio Gonzalez Benito|
+| V1      | 27/03/2025| Prompts usados         | Claudio Gonzalez Benito|
+| V1      | 27/03/2025| Prompts usados         | Pablo Caballero María|
 ---
 
 # Índice
@@ -64,7 +65,6 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 |   Alfonso Luis Alonso Lanzarán y Gonzalo García Lama | Generar un documento de requisitos exhaustivo y diagrama UML del modelo conceptual      | Se usaron 6 prompts iterando sobre los documentos generados, no se describen por su extensión     |  Sí           |
 |   Claudio Gonzalez Benito | Resumir el feedback  | Se usaron 4 prompts para  resumir el feedback, categorizarlo y contar las repeticiones para medir importancia   |  Sí           |
 |   Claudio Gonzalez Benito | ordenar changelog  | Se uso para ordenar un documento markdow ya generado con otra herramienta (no ia) por fecha y dejarlo con la platilla que usamos  |  Sí           |
-|   Claudio Gonzalez Benito | Resumir el feedback  | Se usaron 4 prompts para  resumir el feedback, categorizarlo y contar las repeticiones para medir importancia   |  Sí           |
 |   Pablo Caballero María | Sintaxis de jest para tests de integración  | Se usaron 6 prompts para generar la estructura básica de un test de integración, para tenerlo como referencia  |  Sí           |
 |   Pablo Caballero María | Generación de server de sonarqube  | Se usaron 4 prompts para configurar los contenedores de docker y su conexión, y para corregir la sintaxis del archivo de configuración de sonar  |  Sí           |
 ---
