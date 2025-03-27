@@ -142,6 +142,9 @@ El usuario puede acceder al apartado de Social desde el menú desplegable en la 
   Esta solicitud le aparecerá al usuario amigo en la sección de social en el apartado de Solicitudes.
   ![collab](./Images/invitacionMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
+  El usuario que se una al mapa podrá ver el progreso del mismo visualizando las diferentes zonas coloreadoas del color asociado a cada uno del resto de usuario que forman parte del mapa colaborativo. Estos colores están disponibles en alleyenda que aparece en la parte superior derecha de la pantalla.
+  ![collab](./Images/ProgresoMapaColabWeb.png)
+  *(Caso de uso implementado en #S2)*
 
 
 ---
@@ -169,7 +172,7 @@ El usuario puede acceder al apartado de Social desde el menú desplegable en la 
    - CVC: `123`
 
 - **Plataforma de Despliegue:**
-  - **URL:** [Despliegue de MapYourWorld](https://52.143.134.165/)
+  - **URL:** [Despliegue de MapYourWorld](https://app2.mapyourworld.es)
   - **Credenciales:**  
     - Acceder como usuario de prueba.
 
