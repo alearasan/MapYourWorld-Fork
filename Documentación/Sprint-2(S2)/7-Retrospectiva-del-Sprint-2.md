@@ -25,84 +25,80 @@
 
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
-| V1      | 20/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán
+| V1      | 20/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán|
+| V2      | 26/03/2025| Segunda versión para la entrega del Sprint 2         | Alfonso Luis Alonso Lanzarán|
 
 <!-- omit in toc--> # Índice
 
 - [1. Resumen ejecutivo](#1-resumen-ejecutivo)
 - [2. Qué mejorar](#2-qué-mejorar)
-- [3. Empezar a hacer](#3-empezar-a-hacer)
-- [4. Dejar de hacer](#4-dejar-de-hacer)
-- [5. Continuar haciendo](#5-continuar-haciendo)
+- [3. Qué ha ido bien](#3-qué-ha-ido-bien)
+- [4. Propuestas para el Sprint 3](#4-propuestas-para-el-sprint-3)
 - [6. Problemas encontrados](#6-problemas-encontrados)
 
 # 1. Resumen ejecutivo 
-Este documento recoge los puntos tratados en la retrospectiva de la primera semana del Sprint 2, se ha decidido estructurar según el índice que aparece tras la portada.
+Este documento recoge los puntos tratados en la retrospectiva de la primera semana del Sprint 2, se ha decidido estructurar según el índice que aparece tras la portada. Para esta nueva versión del documento se ha reestructurado el índice, sintetizando el contenido de la retrospectiva.
+Se ha utilizado un formulario de Microsfot Forms para recopilar las respuestas del equipo.
 
 # 2. Qué mejorar
 
-**Compromiso y responsabilidad:**
+**Falta de compromiso**
 
-- Utilizar la confirmación de lectura en Teams. Los días que se utilizó correctamente hubo menos pregutnas y se trabajó con mayor calidad
+- Hay un grupo de 5/6 miembros que trabajan muchas más horas del resto, cuando se pide ayuda para distribuir la carga hay poca predisposición a arrimar el hombro.
 
-**Monitorización y seguimiento**
+**Correcciones no planificadas**
 
-- Cumplimentar todos los campos de las issues en GitHubProject. Algunos miembros no lo hacen de manera adecuada lo que dificulta el análisis de la productividad y el seguimiento del proyecto.
-- Seguir las directrices para realizar tareas en clockify utilizando las task y tags correspondiente.
+- Sigue habiendo funcionalidades que deberían estar funcionando perfectamente y cerradas y se siguen corrigiendo a día de hoy
 
-**Desarrollo**
+**Mala planificación temporal**
 
-- Mayor autonomía por parte de los miembros del equipo de desarrollo. Es necesario reducir la cantidad de preguntas por desconocimiento técnico, no debería de ser un problema teniendo la documentación que tenemos y la ia.
+- Las tareas no se han planificado correctamente, por lo que hay algunas que no se han podido completar debido a la dependencia con otras.
+- Querer terminar completamente las funcionalidades de backend antes de tener claro las necesidades de front. Esto ha llevado a cambio excesivos y retrasos.
 
-# 3. Empezar a hacer
+# 3. Qué ha ido bien
 
-**Optimizar la gestión del código:**
+**Buen avance del desarrollo**
 
-- Establecer procedimientos claros para la gestión de tareas.
-- Normas para redactar pull requests y hacer comentarios útiles.
+- Se han completado todas las funcionalidades planificadas menos administrador
 
-**Carga de trabajo de los equipos**
+**Reparto de tareas**
 
-- Los equipos de DevOps, Seguridad y Análisis y Testing deberían de tener tareas de mayor envergadura y que aporten más valor al proyecto.
+- Se han adelantado las fechas de fin de todas las tareas así como las reuniones semanales para tener margen entre equipos y para el despliegue.
+- Se ha hecho una definición formal y estricta de los requisitos para que sea más sencillo realizar las tareas.
 
-# 4. Dejar de hacer
+**Comunicación entre el equipo de front y el de back**
 
-**Malas prácticas en la comunicación:**
+- Se ha establecido una comunicación continua entre front y backend para acelerar el desarrollo y la corrección de funcionalidades
 
-- Dejar de usar WhatsApp para compartir información importante.
+**Despliegue**
 
-**Dependencia de miembros:**
+- Se ha trabajado en el despliegue durante toda la semana, mejorando la máquina virtual en la que se ejecuta la aplicación.
 
-- Depender en exceso de los miembros con más conocimiento técnico, cargándolos a ellos con trabajo correctivo no planificado.
+# 4. Propuestas para el Sprint 3
 
-# 5. Continuar haciendo
+**Registro de peticiones de front a back**
 
-**Buenas prácticas a mantener:**
+- Un documento o canal de comunciación en el que queden registradas las peticiones que los desarrolladores de frontend hacen a los de backend
 
-- Amonestar a aquellas personas que incumplan el commitment agreement.
-- Mantener las reuniones semanales para seguimiento del equipo.
-- Continuar con la documentación de resolución de problemas comunes para facilitar el trabajo en equipo.
-- Respetar el flujo de comunicación, de miembros a coordinadores y coordinadores entre ellos
-- Usar el sistema de confirmación de lectura de Teams
+**Dedicar más tiempo a las presentaciones**
 
-**Definir tareas de forma clara:**
+- Invertir más horas en la presentación ya que es la imagen que tienen de nuestro trabajo.
 
-- Especificar en detalle qué código implementar y establecer fechas límite.
-- Indicar el tiempo estimado para completar cada tarea en GitHub Projects.
+**Liberar a los miembros que tienen más horas**
 
-**Facilitar la comunicación con los coordinadores:**
+- Ahora que las tareas de código están pracitcamente termiandas
 
-- Fomentar la consulta de dudas con los coordinadores para evitar malentendidos.
+**Seguir con las mejoras de la segunda mitad del Sprint 2**
 
 # 6. Problemas encontrados
 
 **PROBLEMAS**
 
-| Problema | Previsto | Solución | Solucionado? |
-|---------|-----------|--------------------------|--------------------|
-|Poco margen de tiempo para que el equipo de frontend conecte el backend | Sí | Poner fechas límite más tempranas al equipo de backend | No |
-|Tiempo excesivo en tareas correctivas | Sí | Penalizar en la valoración de rendimiento a los miembros que han generado una carga de trabajo adicional en el resto de compañeros | Sí |
-|Problemas técnicos con la arquitectura de microservicios | Sí | No usar microservicios para el S1 e implementarlos en el S3  | Sí |
-|Falta de una visión unificada de los requisitos del sistema y sus casos de uso  | Sí | Realizar una revisión de los requisitos, definiéndolos con un nivel de detalle superior y actualizando el código para satisfacerlos  | Sí |
-|Dependencia excesiva de los miembros con mayor nivel técnico  | No | Generar documentación sobre el proyecto, resolver dudas comunes, crear tutoriales y scripts  | No |
-|La publicación de la APK se está complicando al tener una misma versión para todas las platformas y la falta de conocimientos del equipo de DevOps| Sí | Documentarse sobre la publicación de APKs| No |
+| Problema | Previsto | Solución | Solucionado? |Medición de la efectividad de la solución|
+|---------|-----------|--------------------------|--------------------|----|
+|Poco margen de tiempo para que el equipo de frontend conecte el backend | Sí | Poner fechas límite más tempranas al equipo de backend | Sí | nº tareas no completadas o completadas fuera de tiempo|
+|Tiempo excesivo en tareas correctivas | Sí | Penalizar en la valoración de rendimiento a los miembros que han generado una carga de trabajo adicional en el resto de compañeros | Sí |horas invertidas en tareas correctivas|
+|Falta de una visión unificada de los requisitos del sistema y sus casos de uso  | Sí | Realizar una revisión de los requisitos, definiéndolos con un nivel de detalle superior y actualizando el código para satisfacerlos  | Sí |nº de cambios del modelo de datos|
+|Dependencia excesiva de los miembros con mayor nivel técnico  | Sí | Generar documentación sobre el proyecto, resolver dudas comunes, crear tutoriales y scripts  | No |cantidad de código erróneo generado|
+|La publicación de la APK se está complicando al tener una misma versión para todas las platformas y la falta de conocimientos del equipo de DevOps| Sí | Documentarse sobre la publicación de APKs y obtener experiencia| Sí | Tenemos una apk funcional|
+|Mala presentación en la primera mitad del Sprint| No | Empezar a trabajar en la presentación días antes y hacer una revisión completa de la imagen de marca| - |Feedback de los profesores|
