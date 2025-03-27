@@ -35,7 +35,6 @@
 - [Introducción](#introducción)
 - [¿Para qué y cómo vamos a usar la IA?](#para-qué-y-cómo-vamos-a-usar-la-ia)
 - [Registro de uso de IA](#registro-de-uso-de-ia)
-  - [|   Alfonso Luis Alonso Lanzarán y Gonzalo García Lama | Generar un documento de requisitos exhaustivo y diagrama UML del modelo conceptual      | Se usaron 6 prompts iterando sobre los documentos generados, no se describen por su extensión     |  Sí           |](#---alfonso-luis-alonso-lanzarán-y-gonzalo-garcía-lama--generar-un-documento-de-requisitos-exhaustivo-y-diagrama-uml-del-modelo-conceptual-------se-usaron-6-prompts-iterando-sobre-los-documentos-generados-no-se-describen-por-su-extensión-------sí-----------)
 - [Referencias](#referencias)
 
 ---
@@ -63,7 +62,11 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 |---------|-----------|--------------------------|--------------------|
 |   Alfonso Luis Alonso Lanzarán y Gonzalo García Lama | Generar un documento de requisitos exhaustivo y diagrama UML del modelo conceptual      | Se usaron 6 prompts iterando sobre los documentos generados, no se describen por su extensión     |  Sí           |
 |   Claudio Gonzalez Benito | Resumir el feedback  | Se usaron 4 prompts para  resumir el feedback, categorizarlo y contar las repeticiones para medir importancia   |  Sí           |
-|   Claudio Gonzalez Benito | ordenar changelog  | Se uso para ordenar un documento markdow ya generado con otra herramienta (no ia) por fecha y dejarlo con la platilla que usamos  |  Sí           |
+|   Claudio Gonzalez Benito | Ordenar changelog  | Se uso para ordenar un documento markdow ya generado con otra herramienta (no ia) por fecha y dejarlo con la platilla que usamos  |  Sí           |
+|Ángel Neria Acal| Uso de Stripe | ¿Estoy intentando usar stripe en react native, me puedes decir que llamadas necesito hacer a la api de stripe y que dependencias debo instalar? | Sí
+|Ángel Neria Acal| Conocer los iconos de los inputs de react-native| ¿Qué iconos existen para los Texts Inputs en react-native| No
+|Manuel Vélez López| Generar storyboards| Necesitamos una imagen estilo comic (Muy importante) en la que se muestre a 2  personas dentro de un bar que mantienen un dialogo en el que reflexionan que gracias a la aplicación de "MapYourWorld", descubrieron una taberna publicitada en dicha aplicación, en la que la comida estaba deliciosa.  Deben hablar en español y debe aparecer como una persona le muestra a la otra la aplicación en el móvil. Lo que se ve en la aplicación es un mapa con un marcador.| Sí
+|Manuel Vélez López| Generar Storyboards| Manteniendo la historia anterior, quiero que dibujes de nuevo en formato cómic, el dueño del bar en el que se encuentran las 2 personas manteniendo un dialogo reflexivo en el que se plantea publicitarse en la aplicación. El dueño debe estar mostrando la aplicación en su móvil, pero esta vez va a publicitar su negocio y encuentra que el precio es de ÚNICAMENTE 100€ al mes.| Sí
 ---
 
 # Referencias
