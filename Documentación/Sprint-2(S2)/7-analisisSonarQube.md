@@ -36,6 +36,12 @@
     <td>Primera versión</td>
     <td>Alejandro Aragón Sánchez</td>
   </tr>
+    <tr>
+    <td>V2</td>
+    <td>27/02/2025</td>
+    <td>Segunda versión</td>
+    <td>Alejandro Aragón Sánchez</td>
+  </tr>
 </table>
 
 <!-- omit in toc-->
@@ -65,6 +71,8 @@ El objetivo de este informe es realizar un análisis detallado de las métricas 
 - Duplications
 - Technical Debt
 
+
+
 # 2. Análisis de Métricas Actuales
 
 ## 2.1 Estado Actual de las Métricas
@@ -88,11 +96,28 @@ El análisis muestra que las métricas han empeorado desde la última versión, 
 #### Gráfica de Evolución de Métricas
 
 - **Evolución de Bugs**: 14 nuevos bugs detectados.
+
+![Evolución de Bugs](./Images/SonarQubeOverviewReliability.jpeg)
+
 - **Evolución de Code Smells**: 251 nuevos code smells.
+
+![Evolución de Code Smells](./Images/SonarQubeOverviewMaintainability.jpeg)
+
 - **Evolución de Vulnerabilities**: No se han detectado nuevas vulnerabilidades.
+
+![Evolución de Vulnerabilities](./Images/SonarQubeOverviewSecurity.jpeg)
+
 - **Evolución de Security Hotspots**: 49 nuevos hotspots detectados.
+
+![Evolución de Security Hotspots](./Images/SonarQubeOverviewHotspots.jpeg)
+
 - **Evolución de Coverage**: 0% de cobertura, sin cambios.
+
+![Evolución de Coverage](./Images/SonarQubeOverviewCoverage.jpeg)
+
 - **Evolución de Duplications**: 8.3% de duplicación.
+
+![Evolución de Duplications](./Images/SonarQubeOverviewDuplications.jpeg)
 
 ## 2.3 Identificación de Componentes Críticos
 
@@ -102,7 +127,6 @@ A continuación, se destacan los archivos y módulos con el mayor número de pro
 |-------------------------|--------------------------|-------------------|-----------------------|
 | **backend**             | 13 nuevos bugs, 117 code smells, 42 hotspots | 2h 5min en deuda técnica | Requiere atención inmediata para mejorar la estabilidad y la calidad. |
 | **frontend**            | 9 nuevos bugs, 134 code smells, 34 hotspots | 41min en deuda técnica | Alta cantidad de code smells que impacta la calidad y mantenibilidad. |
-| **infrastructure/compose** | Sin problemas relevantes | N/A | Requiere revisión para evitar futuros problemas. |
 
 ## 2.4 Análisis de Vulnerabilidades y Seguridad
 
