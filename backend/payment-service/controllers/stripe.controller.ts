@@ -6,13 +6,12 @@ import path from "path";
 import * as subscriptionService from "../services/subscription.service";
 
 // Configurar dotenv para que busque el archivo .env en la raíz del proyecto
-dotenv.config({ path: path.resolve(process.cwd(), '../../.env') });
-
+const rootDir = path.resolve(__dirname, '../../../');
+dotenv.config({ path: path.join(rootDir, '.env') });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
     apiVersion: "2025-02-24.acacia",
   });
-
 
 export const createPaymentIntent = async (req: Request, res: Response) => {
     try {

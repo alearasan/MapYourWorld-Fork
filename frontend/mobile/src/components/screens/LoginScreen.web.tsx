@@ -8,6 +8,7 @@ import TextInput from '@components/UI/TextInput';
 import {styles} from '@assets/styles/styles';
 import { useAuth } from '../../contexts/AuthContext';
 import { RootStackParamList } from '../../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 require ('../../assets/styles/web.css')
 require ('../../assets/styles/auth.css')
 
@@ -70,14 +71,22 @@ const LoginScreen = () => {
     setIsLoading(true);
     
     try {
-      // Usar el contexto de autenticación para iniciar sesión
       const success = await signIn(formData.email, formData.password);
       
       if (success) {
-        // Si el inicio de sesión fue exitoso, navegar a la pantalla principal
-        navigation.navigate('Map');
+        // Recuperar el usuario actualizado desde AsyncStorage
+        const storedUser = await AsyncStorage.getItem('@MapYourWorld:user');
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  
+        console.log('Rol del usuario:', parsedUser?.role);
+  
+        if (parsedUser?.role === 'ADMIN') {
+          navigation.navigate('DashboardAdmin');
+        } else {
+          navigation.navigate('Map');
+        }
       }
-    } catch (error) {
+    }  catch (error) {
       console.error('Error al iniciar sesión:', error);
     } finally {
       setIsLoading(false);
