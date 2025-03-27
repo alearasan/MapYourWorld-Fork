@@ -15,7 +15,7 @@
     Sprint 2
 </p>
 <p align="center">
-    Antonio Porcar, Ricardo Carrero, Pablo Caballero, Jaime Gómez, José María Baquero, Claudio González y Pablo Olivencia
+    Alfonso Luis Alonso Lanzarán, Pablo Caballero, Manuel Vélez López, Angel Neria Acal y Claudio González
 </p>
 <p align="center">
     26/03/2025
@@ -70,6 +70,7 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 |Manuel Vélez López| Generar Storyboards| Manteniendo la historia anterior, quiero que dibujes de nuevo en formato cómic, el dueño del bar en el que se encuentran las 2 personas manteniendo un dialogo reflexivo en el que se plantea publicitarse en la aplicación. El dueño debe estar mostrando la aplicación en su móvil, pero esta vez va a publicitar su negocio y encuentra que el precio es de ÚNICAMENTE 100€ al mes.| Sí
 |   Pablo Caballero María | Sintaxis de jest para tests de integración  | Se usaron 6 prompts para generar la estructura básica de un test de integración, para tenerlo como referencia  |  Sí           |
 |   Pablo Caballero María | Generación de server de sonarqube  | Se usaron 4 prompts para configurar los contenedores de docker y su conexión, y para corregir la sintaxis del archivo de configuración de sonar  |  Sí           |
+
 ---
 
 # Referencias
