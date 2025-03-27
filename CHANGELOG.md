@@ -6,9 +6,32 @@
 * Actualizar dependencia de jest para adecuado funcionamiento (2025-03-16) [137c178b5e85f30f5bf5379cc260c5b80f1bbae5]
 
 
-### doc
+### docs
 
+* "Se han añadido los prompts utilizados a la IA" (2025-03-27) [6c60debda7b32b872873b9bb94df41e6c2d96f53]
+* actualizando ai usage (2025-03-27) [29f6fbbd47675d4267d9fc06411c95613aa1cee6]
+* actualizar AI usage (2025-03-27) [2aa45fed02810eb25b8242bf276a6fe9bb44c750]
+* cosas de usuarios piloto (2025-03-27) [bc9cec6c3d652c0e95dd9a45940473b0d07d44e2]
+* descripciones mas precisas (2025-03-23) [e05e1ca2893bd9bbdca5d18979cc916e6b0820d6]
+* estadisticas encuesta 2 (2025-03-22) [a34df72578beb9b16972b92bdd3b9960d3db108b]
+* terminado analisis de primera encuesta (2025-03-20) [8df3b3687cf4ed0f6ec0bbde54f7e67bb3d0b79c]
+* actualización de normativa en relación al consentimiento de menores (2025-03-25) [665571046010145b14205df7dfd825fd8cc84ec3]
+* actualización del documento de revisión del sprint 2 con nuevos detalles y progreso del mapa colaborativo (2025-03-27) [94c6bbaf3e965490c378e96dc43e75a19ce7bdbf]
+* actualizado Sprint 2 revision.md (2025-03-27) [39ff79341d76983ed8bf53209d5605a1f5bcaffd]
+* añadido documento de revision para el sprint 2 (2025-03-27) [a98bf460eed79f37b7d77d526a5d6b3a52955f1d]
+* Añadir apartados faltantes a KBReport.md (2025-03-27) [4af61b3e97d28be910b9da75191c3c4814c6d1ad]
+* añadir documento de planificación para el Sprint 3 (2025-03-27) [8307a404f3c5de0e4240f33f2c0e58414c2ab9c8]
+* Cambiar Sprint en el documento revision.md y aportar al documento AIusage.md (2025-03-27) [a15296bfbf56113a8c9621eade839591edd86b22]
+* cambiar usuario por correo electrónico en las credenciales para profesores (2025-03-27) [f991df992333a905b0a631ae3c72dc27342cb04c]
+* Corregir portada de AIusage (2025-03-27) [0dce0a3478405b43106bc57a060ae64be510fb9a]
+* Corregir portadas (2025-03-27) [aad9d07144dc1a3af1621b1d9034cdc241395cb9]
+* Crear documentos para la entrega del Sprint 2(S2) (2025-03-27) [112e26a162c86fcec016e0a0a37954c4b08351d9]
+* Crear retrospectiva del mitad del Sprint 2 (2025-03-20) [0c2a2dc9151f60398ad99936d6192aa709a08f8a]
+* documento de Customer Agreement (2025-03-23) [6cae259bc85a79ff36810a6f9b624c5ae4ce3e92]
+* documento de Informe de Análisis de Métricas de SonarQube v1 (2025-03-26) [8f673fa43bfeca10bc7a705a8b2d1465977f690e]
+* documento de Informe de Análisis de Métricas de SonarQube v2 (2025-03-27) [bc80cc1ea0c8eac22bf9f51f14e346b4797c0514]
 * documento de Normativa Aplicable (2025-03-16) [3e0fd67c0fba0d242583fc9850db0ee45d528a01]
+* Subir presentación (2025-03-27) [d2201aa940d932af91b2dd5f9f3d42773f7bf1c3]
 
 
 ### feat
@@ -26,6 +49,7 @@
 * Añadir verificacion con correo al registro [to_review #195] (2025-03-23) [1c1c951a84da543fa056af045e2a6a5341f0700a]
 * Cambios de funcionalidad core actualizada correctamente (2025-03-19) [da5539919766ce8d97f3ecf88a000fc5a29c1b2c]
 * Cambios realizados para tener en cuenta el tipo de suscripción del usuario (2025-03-21) [3214ad6fc25379af0f304a950a569a85984bdf19]
+* changelog (2025-03-27) [bd77dd6626d5b2ad59a134a1b62acaf8763719ed]
 * changelog generator (2025-03-27) [cd0c0302212cae97d17b93bd4b7465f8ad3e3566]
 * add static friend list and update invite modal UI (2025-03-20) [9fd4177065053e746aba6f7a1c1e2a25636df04e]
 * Colores user-district (2025-03-21) [668a1aad7dbc903cdb6d0d12b1a3570861b0988f]
@@ -88,6 +112,7 @@
 
 * Corregir rutas de la api (2025-03-25) [037ff515208a5ad08e900c64430f44eeb8fee177]
 * Hacer modificaciones en el mvc de achievements para que cumpla las necesidades (2025-03-25) [01ef4713f8276b983cb68448feb85155914b33da]
+* actualizar tabla de cambios (2025-03-27) [211983081745d6f6f79d5b1cce24471abee87589]
 * add workflow dispatch + checkout develop (2025-03-20) [12394d4fc75c7ef9f51a6b3d022c7746215c4978]
 * add workflow dispatch + checkout develop (2025-03-20) [ace5a92272f98992afe97a82434155b1ef3952ed]
 * Ajustes en frontend para que el registro funcione correctamente. (2025-03-19) [b021c0b378fd4a8ce428b2c9a2984c0d2a1a4626]
