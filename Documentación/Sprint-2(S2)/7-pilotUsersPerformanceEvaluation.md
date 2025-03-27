@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 1
+    Sprint 2
 </p>
 <p align="center">
     Claudio Gonzalez Benito

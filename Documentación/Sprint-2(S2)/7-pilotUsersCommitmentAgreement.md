@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 1
+    Sprint 2
 </p>
 <p align="center">
     Claudio Gonzalez Benito
@@ -32,9 +32,10 @@
 <!-- omit in toc--> 
 # Índice
 
+- [Índice](#índice)
 - [1. Contenido](#1-contenido)
   - [1.1. Compromiso del Usuario Piloto](#11-compromiso-del-usuario-piloto)
-  - [1.2. Evaluación](#12-evaluacion)
+  - [1.2. Evaluación](#12-evaluación)
   - [1.3. Compromiso del Grupo 7](#13-compromiso-del-grupo-7)
   - [1.4. Firmas](#14-firmas)
 
