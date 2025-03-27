@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 1
+    Sprint 2
 </p>
 <p align="center">
     Jaime Gómez Marín, Ángel Neria Acal, José María Baquero Rodríguez, Pablo Caballero María
