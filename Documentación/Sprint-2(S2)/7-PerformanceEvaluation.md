@@ -15,7 +15,7 @@
     Sprint 2
 </p>
 <p align="center">
-    Alfonso Luis Alonso Lanzará
+    Alfonso Luis Alonso Lanzarán
 </p>
 <p align="center">
     26/03/2025

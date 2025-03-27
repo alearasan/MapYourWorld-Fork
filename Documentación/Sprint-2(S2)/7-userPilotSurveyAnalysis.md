@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 1
+    Sprint 2
 </p>
 <p align="center">
     Claudio Gonzalez Benito
@@ -31,6 +31,7 @@
 <!-- omit in toc-->
 # Índice
 
+- [Índice](#índice)
 - [1. Objetivo general del documento](#1-objetivo-general-del-documento)
   - [1.1. Medición de éxito](#11-medición-de-éxito)
   - [1.2. Tareas de respuesta](#12-tareas-de-respuesta)

@@ -58,6 +58,16 @@
 
 # 1. Contenido
 
+## 1.1 Resumen ejecutivo
+En este documento se recoge las aportaciones hechas por el equipo 7 a la base común de conocimiento, encontramos las contribuciones agrupadas por contenido durante el Sprint 2.
+
+Al final encontramos el feedback recopilado de los grupos del grupo de tarde, este feedback se recoge y aporta todas las semanas.
+
+## 1.2. Enlace a la base común de conocimiento
+https://bcc2425.vercel.app/docs/conocimiento-común/Commitment%20Agreement
+
+## 1.3. Contenido contribuido por el equipo 7
+
 ## Semana 10/03
  - Mejorar el opener e introducción, fortalecer el inicio de la presentación con un “killer opener” y un elevator pitch impactante que cuente una historia atractiva, logrando un mayor dinamismo y captación de la atención desde el principio.
  - Mejorar el diseño empleando fondos y gráficos que aseguren legibilidad y resalten la información clave (por ejemplo, usando colores llamativos)

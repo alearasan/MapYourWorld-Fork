@@ -26,7 +26,8 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 26/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán|
-| V1      | 27/03/2025| Proms usados         | Claudio Gonzalez Benito|
+| V1      | 27/03/2025| Prompts usados         | Claudio Gonzalez Benito|
+| V1      | 27/03/2025| Prompts usados         | Pablo Caballero María|
 ---
 
 # Índice
@@ -67,6 +68,8 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 |Ángel Neria Acal| Conocer los iconos de los inputs de react-native| ¿Qué iconos existen para los Texts Inputs en react-native| No
 |Manuel Vélez López| Generar storyboards| Necesitamos una imagen estilo comic (Muy importante) en la que se muestre a 2  personas dentro de un bar que mantienen un dialogo en el que reflexionan que gracias a la aplicación de "MapYourWorld", descubrieron una taberna publicitada en dicha aplicación, en la que la comida estaba deliciosa.  Deben hablar en español y debe aparecer como una persona le muestra a la otra la aplicación en el móvil. Lo que se ve en la aplicación es un mapa con un marcador.| Sí
 |Manuel Vélez López| Generar Storyboards| Manteniendo la historia anterior, quiero que dibujes de nuevo en formato cómic, el dueño del bar en el que se encuentran las 2 personas manteniendo un dialogo reflexivo en el que se plantea publicitarse en la aplicación. El dueño debe estar mostrando la aplicación en su móvil, pero esta vez va a publicitar su negocio y encuentra que el precio es de ÚNICAMENTE 100€ al mes.| Sí
+|   Pablo Caballero María | Sintaxis de jest para tests de integración  | Se usaron 6 prompts para generar la estructura básica de un test de integración, para tenerlo como referencia  |  Sí           |
+|   Pablo Caballero María | Generación de server de sonarqube  | Se usaron 4 prompts para configurar los contenedores de docker y su conexión, y para corregir la sintaxis del archivo de configuración de sonar  |  Sí           |
 ---
 
 # Referencias
