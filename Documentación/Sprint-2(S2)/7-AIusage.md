@@ -26,6 +26,7 @@
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
 | V1      | 26/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán|
+| V1      | 27/03/2025| Proms usados         | Claudio Gonzalez Benito|
 ---
 
 # Índice
@@ -61,6 +62,8 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 | Miembro | Intención de uso | Prompt              | ¿Requirió modificación el resultado?              |
 |---------|-----------|--------------------------|--------------------|
 |   Alfonso Luis Alonso Lanzarán y Gonzalo García Lama | Generar un documento de requisitos exhaustivo y diagrama UML del modelo conceptual      | Se usaron 6 prompts iterando sobre los documentos generados, no se describen por su extensión     |  Sí           |
+|   Claudio Gonzalez Benito | Resumir el feedback  | Se usaron 4 prompts para  resumir el feedback, categorizarlo y contar las repeticiones para medir importancia   |  Sí           |
+|   Claudio Gonzalez Benito | ordenar changelog  | Se uso para ordenar un documento markdow ya generado con otra herramienta (no ia) por fecha y dejarlo con la platilla que usamos  |  Sí           |
 ---
 
 # Referencias
