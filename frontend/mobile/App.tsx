@@ -23,6 +23,10 @@ import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScre
 import UserStatsScreen from './src/components/Stats/UserStatsScreen';
 import UserAchievementsScreen from './src/components/Achievements/UserAchievementsScreen';
 import AdvertisementForm from '@/components/screens/AdvertismentForm';
+import DashboardAdmin from '@/components/screens/DashboardAdmin';
+import SocialScreen from './src/components/screens/SocialScreen';
+import SocialScreenWeb from './src/components/screens/SocialScreen.web';
+
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
 const StyledView = styled(View);
@@ -64,31 +68,7 @@ const MapScreenWithDistritos = (props: any) => {
 };
 
 // Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
-const CollaborativeMapScreenWithParams = (props: any) => {
-  // Obtenemos el mapId y userId de los parámetros de navegación
-  const mapId = props.route?.params?.mapId || "map-123";
-  const userId = props.route?.params?.userId || "user-456";
-  
-  // Usar la versión web cuando estamos en navegador
-  if (Platform.OS === 'web') {
-    try {
-      // Importación dinámica del componente web
-      const CollaborativeMapScreenWeb = require('./src/components/Map/CollaborativeMapScreen.web').default;
-      return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
-    } catch (error) {
-      console.error("Error cargando CollaborativeMapScreen.web:", error);
-      return (
-        <StyledView className="flex-1 justify-center items-center p-4">
-          <StyledText className="text-lg text-red-500">
-            Error al cargar el mapa colaborativo web. Por favor, intenta de nuevo.
-          </StyledText>
-        </StyledView>
-      );
-    }
-  } else {
-    return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
-  }
-};
+
 
 // Definimos un wrapper para ForgotPasswordScreen que selecciona la versión adecuada según la plataforma
 const ForgotPasswordScreenWrapper = (props: any) => {
@@ -133,6 +113,48 @@ const UserStatsScreenWrapper = (props: any) => {
   } else {
     return <UserStatsScreen {...props} />;
   }
+};
+
+// Definimos un wrapper para CollaborativeMapScreen que incluye los parámetros de ejemplo
+const CollaborativeMapScreenWithParams = (props: any) => {
+  // Obtenemos el mapId y userId de los parámetros de navegación
+  const mapId = props.route?.params?.mapId || "map-123";
+  const userId = props.route?.params?.userId || "user-456";
+  
+  // Usar la versión web cuando estamos en navegador
+  if (Platform.OS === 'web') {
+    try {
+      // Importación dinámica del componente web
+      const CollaborativeMapScreenWeb = require('./src/components/Map/CollaborativeMapScreen.web').default;
+      return <CollaborativeMapScreenWeb mapId={mapId} userId={userId} />;
+    } catch (error) {
+      console.error("Error cargando CollaborativeMapScreen.web:", error);
+      return (
+        <StyledView className="flex-1 justify-center items-center p-4">
+          <StyledText className="text-lg text-red-500">
+            Error al cargar el mapa colaborativo web. Por favor, intenta de nuevo.
+          </StyledText>
+        </StyledView>
+      );
+    }
+  } else {
+    return <CollaborativeMapScreen mapId={mapId} userId={userId} />;
+  }
+};
+
+const SocialScreenWrapper= (props: any) => {
+  if (Platform.OS === 'web') {
+    const SocialScreenWeb = require('@/components/screens/SocialScreen.web').default;
+    return <SocialScreenWeb {...props} />;
+  } try {
+    const SocialScreen = require('@/components/screens/SocialScreen').default;
+    return (
+        <SocialScreen {...props} />
+    );
+  } catch (error) {
+    console.error("Error cargando SocialScreen:", error);
+    return null;
+}
 };
 
 // Componente principal de la aplicación
@@ -291,7 +313,39 @@ const AppContent = () => {
             headerRight: () => <HamburgerMenu />,
           }}
         />
+
         <Stack.Screen 
+          name="SocialScreen" 
+          component={SocialScreenWrapper}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Amigos</StyledText>
+              </View>
+            ),
+            headerRight: () => <HamburgerMenu />,
+          }} 
+        />
+      <Stack.Screen 
+          name="DashboardAdmin" 
+          component={DashboardAdmin}
+          options={{
+            headerTitle: () => (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('./src/assets/images/logo.png')} 
+                  style={{ width: 35, height: 35, marginRight: 5 }}
+                />
+                <StyledText className="text-xl font-bold ml-2 text-gray-800">Dashboard de administrador</StyledText>
+              </View>
+            )
+          }}
+        />
+      <Stack.Screen 
           name="UserStats" 
           component={UserStatsScreenWrapper}
           options={{
@@ -305,7 +359,7 @@ const AppContent = () => {
               </View>
             ),
             headerRight: () => <HamburgerMenu />,
-          }}
+          }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

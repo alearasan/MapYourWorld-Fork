@@ -64,6 +64,10 @@ const HamburgerMenu = () => {
               <Text style={styles.menuItemText}>Suscripción</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Social</Text>
+            </TouchableOpacity>
+
           </View>
         </TouchableOpacity>
 
