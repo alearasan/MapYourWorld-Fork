@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as FriendService from '../services/friend.service'; // Importamos el servicio
+import * as FriendService from '../services/friend.service'; 
 import { FriendStatus } from '../models/friend.model';
 
 /**
@@ -7,7 +7,7 @@ import { FriendStatus } from '../models/friend.model';
  */
 export const createFriendController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {requesterId, receiverId, mapId} = req.body; // Datos de la solicitud de amistad
+    const {requesterId, receiverId, mapId} = req.body; 
     const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
     res.status(201).json(newFriend);
   } catch (error) {
