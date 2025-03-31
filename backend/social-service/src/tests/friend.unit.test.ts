@@ -1,5 +1,5 @@
 import { createFriend, listFriends, findFriendById, listSearchUser, updateFriendStatus } from '../services/friend.service';
-import { FriendStatus, Friend } from '../models/friend.model';
+import { FriendStatus, Friend, RequestType } from '../models/friend.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import FriendRepository from '../repositories/friend.repository';
@@ -10,6 +10,16 @@ const createValidFriendData = (overrides: Partial<Omit<Friend, 'id'>> = {}): Omi
     requester: { id: 'user1' } as User,
     recipient: { id: 'user2' } as User,
     status: FriendStatus.PENDING,
+    requestType: RequestType.FRIEND,
+    map: {
+      id: 'map1',
+      name: 'Default Map',
+      description: 'Mapa para test',
+      createdAt: new Date(),
+      is_colaborative: false,
+      users_joined: [],
+      user_created: { id: 'user1' } as User,
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -179,6 +189,16 @@ describe('Friend Service', () => {
               requester: { id: 'user1' } as User,
               recipient: { id: 'user2' } as User,
               status: FriendStatus.PENDING,
+              requestType: RequestType.FRIEND,
+              map: {
+                id: 'map1',
+                name: 'Default Map',
+                description: 'Mapa para test',
+                createdAt: new Date(),
+                is_colaborative: false,
+                users_joined: [],
+                user_created: { id: 'user1' } as User,
+              },
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -187,6 +207,16 @@ describe('Friend Service', () => {
               requester: { id: 'user1' } as User,
               recipient: { id: 'user3' } as User,
               status: FriendStatus.PENDING,
+              requestType: RequestType.FRIEND,
+              map: {
+                id: 'map1',
+                name: 'Default Map',
+                description: 'Mapa para test',
+                createdAt: new Date(),
+                is_colaborative: false,
+                users_joined: [],
+                user_created: { id: 'user1' } as User,
+              },
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -207,11 +237,21 @@ describe('Friend Service', () => {
         it('debe retornar la solicitud de amistad si se encuentra', async () => {
           const friend: Friend = {
             id: 'friend1',
-            requester: { id: 'user1' } as User,
-            recipient: { id: 'user2' } as User,
-            status: FriendStatus.PENDING,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+              requester: { id: 'user1' } as User,
+              recipient: { id: 'user2' } as User,
+              status: FriendStatus.PENDING,
+              requestType: RequestType.FRIEND,
+              map: {
+                id: 'map1',
+                name: 'Default Map',
+                description: 'Mapa para test',
+                createdAt: new Date(),
+                is_colaborative: false,
+                users_joined: [],
+                user_created: { id: 'user1' } as User,
+              },
+              createdAt: new Date(),
+              updatedAt: new Date(),
           };
           repoInstance.getFriendById.mockResolvedValue(friend);
           const result = await findFriendById('friend1');
@@ -304,4 +344,3 @@ describe('Friend Service', () => {
         });
       });
 });
-

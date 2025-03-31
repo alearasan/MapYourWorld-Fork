@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Map: undefined;
   Profile: { userId: string };
   MapList: undefined;
+  SocialScreen: undefined;
 
   // Pantallas de mapas
   MapDetail: { mapId: string };
@@ -26,4 +27,7 @@ export type RootStackParamList = {
   AdvertisementForm: undefined;
   Payment: undefined;
   UserAchievementsScreen: undefined;
+
+  // Pantallas de administración
+  DashboardAdmin: undefined;
 }; 

@@ -16,6 +16,8 @@ import { createDistricts } from '../../../map-service/src/services/district.serv
 import MapRepository from '../../../map-service/src/repositories/map.repository';
 import { PlanType, Subscription } from '../../../payment-service/models/subscription.model';
 import SubscriptionRepository from '../../../payment-service/repositories/subscription.repository';
+import { createPOIsOnLagMaps } from '../../../map-service/src/services/poi.service';
+
 
 
 const repo = new AuthRepository();
@@ -70,6 +72,8 @@ export const registerUser = async (userData: any): Promise<User> => {
       if (newMap) {
         const savedMap = await mapRepo.getMapById(newMap.id);
         await createDistricts(savedMap.id);
+        await createPOIsOnLagMaps(savedMap.id)
+
       }
     } catch (mapError) {
       console.error('Error al crear mapa o distritos:', mapError);
@@ -83,6 +87,8 @@ export const registerUser = async (userData: any): Promise<User> => {
     suscriptionUserData.is_active = true
 
     await subscriptionsRepo.create(suscriptionUserData)
+
+
 
 
 
