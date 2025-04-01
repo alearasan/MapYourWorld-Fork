@@ -150,7 +150,7 @@ const CollaborativeMapScreenListWithParams = (props: any) => {
   } try {
     const CollaborativeMapListScreen = require('@/components/Map/CollaborativeMapListScreen').default;
     return (
-        <SocialScreen {...props} />
+        <CollaborativeMapListScreen {...props} />
     );
   } catch (error) {
     console.error("Error cargando CollaborativeMapListScreen:", error);

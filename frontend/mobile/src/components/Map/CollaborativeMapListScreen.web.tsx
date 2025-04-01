@@ -46,6 +46,8 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
   const [mapName, setMapName] = useState<string>("");
   const [mapDescription, setMapDescription] = useState<string>("");
   const [maxUsers, setMaxUsers] = useState<number>(6);
+  const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
+
   
   // Estado para el modal de invitación
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
@@ -159,9 +161,9 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
   // Función para crear un nuevo mapa colaborativo
   const createCollaborativeMap = async () => {
     if (!mapName.trim()) {
-      Alert.alert("Error", "Por favor, ingresa un nombre para el mapa");
-      return;
-    }
+        setErrors({ mapName: "El nombre es obligatorio" });
+        return;
+      }
     try {
       setLoading(true);
       console.log("Creando mapa colaborativo:", {
@@ -359,23 +361,30 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
             <Text style={webStyles.modalTitle}>Crear Mapa Colaborativo</Text>
  
             <Text style={webStyles.inputLabel}>Nombre del mapa*</Text>
-          <TextInput
-            style={webStyles.input}
-            placeholder="Ej: Exploración de Sevilla"
-            value={mapName}
-            onChangeText={setMapName}
-            maxLength={30}
-          />
-          
-          <Text style={webStyles.inputLabel}>Descripción</Text>
-          <TextInput
-            style={[webStyles.input, webStyles.textArea]}
-            placeholder="Descripción del mapa colaborativo"
-            value={mapDescription}
-            onChangeText={setMapDescription}
-            multiline={true}
-            maxLength={100}
-          />
+            <TextInput
+                style={webStyles.input}
+                placeholder="Ej: Exploración de Sevilla"
+                value={mapName}
+                onChangeText={(text) => {
+                    setMapName(text);
+                    if (errors.mapName) setErrors({ mapName: "" });
+                  }}
+                  maxLength={255}
+                />{errors.mapName ? (
+                    <Text style={{ color: "#e53e3e", marginBottom: 8, fontSize: 14 }}>
+                      {errors.mapName}
+                    </Text>
+                  ) : null}
+            
+            <Text style={webStyles.inputLabel}>Descripción</Text>
+            <TextInput
+                style={[webStyles.input, webStyles.textArea]}
+                placeholder="Descripción del mapa colaborativo"
+                value={mapDescription}
+                onChangeText={setMapDescription}
+                multiline={true}
+                maxLength={100}
+            />
           
           <Text style={webStyles.inputLabel}>Número máximo de usuarios (2-6)</Text>
           <View style={webStyles.pickerContainer}>
