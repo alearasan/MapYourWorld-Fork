@@ -354,83 +354,90 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     >
       <View style={webStyles.modalContainer}>
         <View style={webStyles.modalContent}>
-          <Pressable onPress={Keyboard.dismiss}>
+
+          <View>
             <Text style={webStyles.modalTitle}>Crear Mapa Colaborativo</Text>
+ 
             <Text style={webStyles.inputLabel}>Nombre del mapa*</Text>
-            <TextInput
-              style={webStyles.input}
-              placeholder="Ej: Exploración de Sevilla"
-              value={mapName}
-              onChangeText={setMapName}
-              maxLength={30}
-            />
-            <Text style={webStyles.inputLabel}>Descripción</Text>
-            <TextInput
-              style={[webStyles.input, webStyles.textArea]}
-              placeholder="Descripción del mapa colaborativo"
-              value={mapDescription}
-              onChangeText={setMapDescription}
-              multiline={true}
-              maxLength={100}
-            />
-            <Text style={webStyles.inputLabel}>Número máximo de usuarios (2-6)</Text>
-            <View style={webStyles.pickerContainer}>
-              {[2, 3, 4, 5, 6].map((num) => {
-                const isSelected = maxUsers === num;
-                return (
-                  <TouchableOpacity
-                    key={num}
-                    style={[
-                      webStyles.pickerItem,
-                      { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }
-                    ]}
-                    onPress={() => setMaxUsers(num)}
-                  >
-                    <Text
-                      style={[
-                        webStyles.pickerText,
-                        isSelected && webStyles.pickerTextSelected
-                      ]}
-                    >
-                      {num}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            <View style={webStyles.playerPreview}>
-              {[...Array(maxUsers)].map((_, index) => (
-                <View 
-                  key={index} 
+          <TextInput
+            style={webStyles.input}
+            placeholder="Ej: Exploración de Sevilla"
+            value={mapName}
+            onChangeText={setMapName}
+            maxLength={30}
+          />
+          
+          <Text style={webStyles.inputLabel}>Descripción</Text>
+          <TextInput
+            style={[webStyles.input, webStyles.textArea]}
+            placeholder="Descripción del mapa colaborativo"
+            value={mapDescription}
+            onChangeText={setMapDescription}
+            multiline={true}
+            maxLength={100}
+          />
+          
+          <Text style={webStyles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+          <View style={webStyles.pickerContainer}>
+            {[2, 3, 4, 5, 6].map((num) => {
+              const isSelected = maxUsers === num;
+              return (
+                <TouchableOpacity
+                  key={num}
                   style={[
-                    webStyles.playerColorCircle, 
-                    { backgroundColor: playerColors[index] }
-                  ]} 
-                />
-              ))}
-            </View>
-            <Text style={webStyles.playerPreviewText}>
-              Vista previa de colores de jugadores
-            </Text>
-            <View style={webStyles.modalButtons}>
-              <TouchableOpacity
-                style={[webStyles.modalButton, webStyles.cancelButton]}
-                onPress={() => setShowCreateModal(false)}
-              >
-                <Text style={[webStyles.buttonText, {color: "#fff"}]}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[webStyles.modalButton, webStyles.createButton]}
-                onPress={createCollaborativeMap}
-              >
-                <Text style={webStyles.buttonText}>Crear</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
+                    webStyles.pickerItem,
+                    { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }
+                  ]}
+                  onPress={() => setMaxUsers(num)}
+                >
+                  <Text
+                    style={[
+                      webStyles.pickerText,
+                      isSelected && webStyles.pickerTextSelected
+                    ]}
+                  >
+                    {num}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          
+          <View style={webStyles.playerPreview}>
+            {[...Array(maxUsers)].map((_, index) => (
+              <View 
+                key={index} 
+                style={[
+                  webStyles.playerColorCircle, 
+                  { backgroundColor: playerColors[index] }
+                ]} 
+              />
+            ))}
+          </View>
+          <Text style={webStyles.playerPreviewText}>
+            Vista previa de colores de jugadores
+          </Text>
+          
+          <View style={webStyles.modalButtons}>
+            <TouchableOpacity
+              style={[webStyles.modalButton, webStyles.cancelButton]}
+              onPress={() => setShowCreateModal(false)}
+            >
+              <Text style={[webStyles.buttonText, { color: "#fff" }]}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[webStyles.modalButton, webStyles.createButton]}
+              onPress={createCollaborativeMap}
+            >
+              <Text style={webStyles.buttonText}>Crear</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </Modal>
-  );
+    </View>
+  </Modal>
+);
+  
 
   // Modal para invitar a un usuario al mapa colaborativo
   const renderInviteModal = () => (
