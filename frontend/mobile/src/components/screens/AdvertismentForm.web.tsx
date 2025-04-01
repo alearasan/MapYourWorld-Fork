@@ -350,7 +350,7 @@ const AdvertisementForm = () => {
                   {/* Postal code */}
                   <div className="input-container" style={{ width: '50%', }}>
                     <div style={{ marginBottom: 8, fontWeight: 500, color: '#333', textAlign: 'left' }}>
-                      Longitud
+                      Código postal
                     </div>
                     <div style={{ position: 'relative' }}>
                       <input

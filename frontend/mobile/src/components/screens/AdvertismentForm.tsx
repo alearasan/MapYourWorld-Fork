@@ -215,7 +215,7 @@ const AdvertisementForm = () => {
                     </View>
                     <View style={styles.cityInputs}>
                         <View style={styles.cityInput}>
-                            <Text>City</Text>
+                            <Text>Ciudad</Text>
                             <TextInput
                             placeholder="Ciudad"
                             value={point.city}
