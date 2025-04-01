@@ -49,11 +49,13 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const [errors, setErrors] = useState<{ mapName: string }>({ mapName: "" });
 
 
+
     // Estado para el modal de invitación
     const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
     const [selectedMapId, setSelectedMapId] = useState<string>("");
     const [inviteInput, setInviteInput] = useState<string>("");
     const [inviteType, setInviteType] = useState<"email" | "username">("email");
+    const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
 
     // Estado para la confirmación de eliminación
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -251,48 +253,51 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
             setLoading(false);
         }
     };
-
+    const fetchFriends = async (userId: string) => {
+      try {
+        console.log(`Solicitando amigos para el usuario: ${userId}`);
+        const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+        const data = await response.json();
+    
+        console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+    
+        if (Array.isArray(data)) {
+          // Si la respuesta es directamente un array de usuarios, lo asignamos
+          setFriends(data.map((user) => ({
+            id: user.id,
+            name: user.email, // Puedes usar otra propiedad si el backend la tiene
+          })));
+        } else {
+          console.warn("Formato inesperado en la respuesta de amigos:", data);
+        }
+      } catch (error) {
+        console.error("Error al obtener amigos:", error);
+      }
+    };
+      useEffect(() => {
+        if (showInviteModal && userId) {
+          console.log("Modal abierto, cargando amigos para el usuario:", userId);
+          fetchFriends(userId);
+        }
+      }, [showInviteModal, userId]);
     // Función para invitar a un usuario al mapa colaborativo
-    const inviteUserToMap = async () => {
-        if (!inviteInput.trim() || !selectedMapId) {
-            Alert.alert("Error", "Por favor, completa todos los campos");
-            return;
+    const sendFriendRequest = async (friendId: string) => {
+      try {
+        console.log(`mapa colaborativo ${selectedMapId} para ${friendId} enviada por ${userId}`);
+        const response = await fetch(`${API_URL}/api/friends/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requesterId: userId, receiverId: friendId, mapId: selectedMapId }),
+        });
+        console.log("Respuesta del backend:", response);
+        const data = await response.json();
+        
+        if (data.success) {
+          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
         }
-        try {
-            setLoading(true);
-            console.log(`Invitando a ${inviteInput} al mapa ${selectedMapId}`);
-            try {
-                const response = await fetch(`${API_URL}/api/maps/invite`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        mapId: selectedMapId,
-                        [inviteType === "email" ? "userEmail" : "username"]: inviteInput,
-                        invitedByUserId: userId
-                    })
-                });
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await response.json();
-                    console.log("Respuesta de invitación:", data);
-                }
-            } catch (inviteError) {
-                console.log("Error en la petición de invitación, continuando con simulación:", inviteError);
-            }
-            setInviteInput("");
-            setShowInviteModal(false);
-            Alert.alert("Éxito", `Invitación enviada correctamente a ${inviteInput}`);
-        } catch (error) {
-            console.error("Error al invitar usuario:", error);
-            setInviteInput("");
-            setShowInviteModal(false);
-            Alert.alert(
-                "Información",
-                `Se ha registrado la invitación a ${inviteInput}, pero puede haber un problema con el servidor.`
-            );
-        } finally {
-            setLoading(false);
-        }
+      } catch (error) {
+        console.error("Error al enviar solicitud:", error);
+      }
     };
 
     // Renderizado de cada elemento de la lista de mapas
@@ -449,86 +454,35 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
 
     // Modal para invitar a un usuario al mapa colaborativo
-    const renderInviteModal = () => (
-        <Modal
-            visible={showInviteModal}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setShowInviteModal(false)}
-        >
-            <View style={webStyles.modalContainer}>
-                <View style={webStyles.modalContent}>
-                    <Text style={webStyles.modalTitle}>Invitar Usuario</Text>
-                    <View style={webStyles.toggleContainer}>
-                        <TouchableOpacity
-                            style={[
-                                webStyles.toggleButton,
-                                inviteType === "email" && webStyles.toggleButtonActive
-                            ]}
-                            onPress={() => setInviteType("email")}
-                        >
-                            <Text
-                                style={[
-                                    webStyles.toggleText,
-                                    inviteType === "email" && webStyles.toggleTextActive
-                                ]}
-                            >
-                                Por Email
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                webStyles.toggleButton,
-                                inviteType === "username" && webStyles.toggleButtonActive
-                            ]}
-                            onPress={() => setInviteType("username")}
-                        >
-                            <Text
-                                style={[
-                                    webStyles.toggleText,
-                                    inviteType === "username" && webStyles.toggleTextActive
-                                ]}
-                            >
-                                Por Nombre de Usuario
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={webStyles.inputLabel}>
-                        {inviteType === "email" ? "Email del usuario" : "Nombre de usuario"}
-                    </Text>
-                    <TextInput
-                        style={webStyles.input}
-                        placeholder={
-                            inviteType === "email"
-                                ? "ejemplo@correo.com"
-                                : "nombre_de_usuario"
-                        }
-                        value={inviteInput}
-                        onChangeText={setInviteInput}
-                        keyboardType={inviteType === "email" ? "email-address" : "default"}
-                        autoCapitalize="none"
-                    />
-                    <View style={webStyles.modalButtons}>
-                        <TouchableOpacity
-                            style={[webStyles.modalButton, webStyles.cancelButton]}
-                            onPress={() => {
-                                setShowInviteModal(false);
-                                setInviteInput("");
-                            }}
-                        >
-                            <Text style={[webStyles.buttonText, { color: "#fff" }]}>Cancelar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[webStyles.modalButton, webStyles.createButton]}
-                            onPress={inviteUserToMap}
-                        >
-                            <Text style={webStyles.buttonText}>Invitar</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    );
+    const renderInviteFriendsModal = () => {
+        if (!showInviteModal) return null;
+        return (
+          <div
+            style={webStyles.modalOverlay}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowInviteModal(false);
+            }}
+          >
+            <div style={webStyles.modalContent}>
+              <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
+              <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+              <div style={{ maxHeight: 150, overflowY: "auto" }}>
+                {friends.map((friend) => (
+                  <div key={friend.id} style={webStyles.invitedItem}>
+                    <span style={webStyles.friendName}>{friend.name}</span>
+                    <button style={webStyles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
+                      Invitar
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button style={webStyles.closeButton} onClick={() => setShowInviteModal(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        );
+      };
 
     // Modal para confirmar la eliminación de un mapa
     const renderDeleteConfirmModal = () => (
@@ -611,7 +565,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
             )}
             {/* Modales */}
             {renderCreateModal()}
-            {renderInviteModal()}
+            {renderInviteFriendsModal()}
             {renderDeleteConfirmModal()}
         </View>
     );
@@ -698,6 +652,11 @@ const webStyles = StyleSheet.create({
     deleteButton: {
         backgroundColor: "#ffebee"
     },
+    friendName: {
+        fontSize: 16,
+        color: "#023E8A",
+        flex: 1,
+      },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
@@ -755,12 +714,30 @@ const webStyles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2
     },
+    modalOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      },
     modalTitle: {
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 20,
         textAlign: "center"
     },
+    modalSubtitle: {
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 15,
+        textAlign: "center",
+      },
     inputLabel: {
         fontSize: 16,
         marginBottom: 8,
@@ -774,6 +751,35 @@ const webStyles = StyleSheet.create({
         marginBottom: 16,
         fontSize: 16
     },
+    invitedItem: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+        paddingTop: 8,
+        paddingBottom: 8,
+      },
+      inviteButton: {
+        backgroundColor: "#0096C7",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderWidth: 0,
+        color: "white",
+        cursor: "pointer",
+      },
+      closeButton: {
+        backgroundColor: "#03045E",
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderWidth: 0,
+        color: "white",
+        cursor: "pointer",
+        marginTop: 20,
+      },
     textArea: {
         minHeight: 80,
         textAlignVertical: "top"

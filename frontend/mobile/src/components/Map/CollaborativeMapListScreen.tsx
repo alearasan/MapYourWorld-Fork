@@ -54,6 +54,7 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [selectedMapId, setSelectedMapId] = useState<string>("");
   const [inviteInput, setInviteInput] = useState<string>("");
   const [inviteType, setInviteType] = useState<"email" | "username">("email");
+  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
 
   // Estado para la confirmación de eliminación
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -314,60 +315,95 @@ const CollaborativeMapListScreen: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Función para invitar a un usuario al mapa colaborativo
-  const inviteUserToMap = async () => {
-    if (!inviteInput.trim() || !selectedMapId) {
-      Alert.alert("Error", "Por favor, completa todos los campos");
-      return;
-    }
-
+  const fetchFriends = async (userId: string) => {
     try {
-      setLoading(true); // Mostrar indicador de carga
+      console.log(`Solicitando amigos para el usuario: ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+      const data = await response.json();
 
-      console.log(`Invitando a ${inviteInput} al mapa ${selectedMapId}`);
+      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
 
-      try {
-        const response = await fetch(`${API_URL}/api/maps/invite`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mapId: selectedMapId,
-            [inviteType === "email" ? "userEmail" : "username"]: inviteInput,
-            invitedByUserId: userId,
-          }),
-        });
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          console.log("Respuesta de invitación:", data);
-        }
-      } catch (inviteError) {
-        console.log("Error en la petición de invitación, continuando con simulación:", inviteError);
+      if (Array.isArray(data)) {
+        // Si la respuesta es directamente un array de usuarios, lo asignamos
+        setFriends(data.map((user) => ({
+          id: user.id,
+          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+        })));
+      } else {
+        console.warn("Formato inesperado en la respuesta de amigos:", data);
       }
-
-      // Limpiar campos y cerrar modal independientemente de la respuesta del servidor
-      setInviteInput("");
-      setShowInviteModal(false);
-
-      Alert.alert("Éxito", `Invitación enviada correctamente a ${inviteInput}`);
     } catch (error) {
-      console.error("Error al invitar usuario:", error);
-
-      // Limpiar campos y cerrar modal
-      setInviteInput("");
-      setShowInviteModal(false);
-
-      Alert.alert(
-        "Información",
-        `Se ha registrado la invitación a ${inviteInput}, pero puede haber un problema con el servidor.`
-      );
-    } finally {
-      setLoading(false);
+      console.error("Error al obtener amigos:", error);
     }
+  };
+  useEffect(() => {
+    if (showInviteModal && userId) {
+      console.log("Modal abierto, cargando amigos para el usuario:", userId);
+      fetchFriends(userId);
+    }
+  }, [showInviteModal, userId]);
+
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      console.log(`mapa colaborativo ${selectedMapId} para ${friendId} enviada por ${userId}`);
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId: userId, receiverId: friendId, mapId: selectedMapId }),
+      });
+      console.log("Respuesta del backend:", response);
+      const data = await response.json();
+
+      if (data.success) {
+        Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+      }
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
+
+  const renderInviteFriendsModal = () => {
+    return (
+      <Modal
+        visible={showInviteModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invitar Amigos</Text>
+            <Text style={styles.modalSubtitle}>
+              Máximo 5 amigos (6 usuarios en total)
+            </Text>
+
+            <FlatList
+              data={friends}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.invitedItem}>
+                  <Text style={styles.friendName}>{item.name}</Text>
+                  <TouchableOpacity
+                    style={styles.inviteButton}
+                    onPress={() => sendFriendRequest(item.id)}
+                  >
+                    <Text style={styles.inviteButtonText}>Invitar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
+
+            {/* Botón para cerrar el modal */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowInviteModal(false)}
+            >
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   // Renderizado de cada elemento de la lista de mapas
@@ -538,92 +574,6 @@ const CollaborativeMapListScreen: React.FC = () => {
     </Modal>
   );
 
-  // Modal para invitar a un usuario al mapa colaborativo
-  const renderInviteModal = () => (
-    <Modal
-      visible={showInviteModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowInviteModal(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Invitar Usuario</Text>
-
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                inviteType === "email" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setInviteType("email")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  inviteType === "email" && styles.toggleTextActive,
-                ]}
-              >
-                Por Email
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.toggleButton,
-                inviteType === "username" && styles.toggleButtonActive,
-              ]}
-              onPress={() => setInviteType("username")}
-            >
-              <Text
-                style={[
-                  styles.toggleText,
-                  inviteType === "username" && styles.toggleTextActive,
-                ]}
-              >
-                Por Nombre de Usuario
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.inputLabel}>
-            {inviteType === "email" ? "Email del usuario" : "Nombre de usuario"}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder={
-              inviteType === "email"
-                ? "ejemplo@correo.com"
-                : "nombre_de_usuario"
-            }
-            value={inviteInput}
-            onChangeText={setInviteInput}
-            keyboardType={inviteType === "email" ? "email-address" : "default"}
-            autoCapitalize="none"
-          />
-
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={[styles.modalButton, styles.cancelButton]}
-              onPress={() => {
-                setShowInviteModal(false);
-                setInviteInput("");
-              }}
-            >
-              <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, styles.createButton]}
-              onPress={inviteUserToMap}
-            >
-              <Text style={styles.buttonText}>Invitar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
 
   // Modal para confirmar la eliminación de un mapa
   const renderDeleteConfirmModal = () => (
@@ -713,7 +663,7 @@ const CollaborativeMapListScreen: React.FC = () => {
 
       {/* Modales */}
       {renderCreateModal()}
-      {renderInviteModal()}
+      {renderInviteFriendsModal()}
       {renderDeleteConfirmModal()}
     </View>
   );
@@ -779,6 +729,12 @@ const styles = StyleSheet.create({
   },
   mapActions: {
     flexDirection: "row",
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 15,
+    textAlign: "center",
   },
   actionButton: {
     width: 36,
@@ -847,6 +803,45 @@ const styles = StyleSheet.create({
   },
   confirmModal: {
     alignItems: "center",
+  },
+  invitedItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingVertical: 8,
+  },
+  friendName: {
+    fontSize: 16,
+    color: "#023E8A",
+    flex: 1,
+  },
+  inviteButton: {
+    backgroundColor: "#0096C7", // Tono medio para el botón
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  inviteButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    backgroundColor: "#03045E", // Tono oscuro para el botón de cerrar
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   modalTitle: {
     fontSize: 20,
