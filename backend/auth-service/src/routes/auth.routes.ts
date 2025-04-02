@@ -5,10 +5,7 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { register, login, forgotPassword, resetPassword, verify, changePassword, logout, getUserById } from '../controllers/auth.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
-import { requireAdmin, isAuthenticated } from '../middleware/auth.middleware';
-import adminRoutes from './admin.routes';
-import { AuthenticatedRequest } from '../types';
+
 const router: Router = Router();
 
 // Ruta para registrar un usuario
