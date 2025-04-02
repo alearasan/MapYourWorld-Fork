@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import * as UserStatController from '../controllers/userStat.controller';
 
-const router: Router = Router();
+const userStatRouter: Router = Router();
 
-router.get('/:id', UserStatController.getAllStatsByUser);
+userStatRouter.get('/:userId', UserStatController.getAllStatsByUser);
 
-export default router;
+export default userStatRouter;

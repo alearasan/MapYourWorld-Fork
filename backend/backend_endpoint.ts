@@ -20,6 +20,7 @@ import StripeRoutes from "./payment-service/routes/stripe.routes"
 import userAchievementRoutes from './achievement-service/routes/userAchievement.routes';
 import achievementRoutes from './achievement-service/routes/achievement.routes';
 import emailRoutes from './auth-service/src/routes/email.routes';
+import userStatRouter from './stat-service/routes/userStat.routes';
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use('/api/user-achievements', userAchievementRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/email', emailRoutes);
+app.use('/api/userStat', userStatRouter);
 
 // Interfaz para los servicios
 interface Service {
