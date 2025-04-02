@@ -318,21 +318,16 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         const assignedColors: { [key: string]: string } = {}; // idUsuario -> color
 
         // Recorrer usuarios y asignar colores únicos
-        const usersWithColors = data.users.map((user: { id: string; username: string; color?: string }, index: number) => {
-          let color = user.color; // Intentamos recuperar su color de la BD
-          
+        const usersWithColors = data.users.map((user: any, index: number) => {
+          let color = user.color;
           if (!color) {
-            // Buscar el primer color disponible que no esté asignado aún
             const availableColorIndex = USER_COLORS.findIndex((col) => !Object.values(assignedColors).includes(col));
-            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080"; // Gris si no hay colores disponibles
-            
-            // Guardamos la asignación en el objeto temporal
+            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080";
             assignedColors[user.id] = color;
           }
-
           return {
             id: user.id,
-            username: user.username || `Usuario ${index + 1}`,
+            username: user.profile?.username || `Usuario ${index + 1}`,
             color: color
           };
         });

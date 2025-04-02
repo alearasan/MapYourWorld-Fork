@@ -368,7 +368,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
             color = availableColor;
             assignedColors[u.id] = color;
           }
-          return { id: u.id, username: u.username || `Usuario ${index + 1}`, color, colorIndex: USER_COLORS.indexOf(color) } as MapUser;
+          return { 
+            id: u.id, 
+            username: u.profile?.username || `Usuario ${index + 1}`, 
+            color, 
+            colorIndex: USER_COLORS.indexOf(color) 
+          } as MapUser;
         });
         setMapUsers(usersWithColors);
         const currentUser = usersWithColors.find((u) => u.id === userId);
