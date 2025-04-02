@@ -219,29 +219,35 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
     // Función para eliminar un mapa colaborativo
     const deleteCollaborativeMap = async () => {
-        if (!mapToDelete) return;
+        // Asegúrate de tener definidos tanto mapToDelete como userId (por ejemplo, obtenido del contexto o estado de autenticación)
+        if (!mapToDelete || !userId) return;
+
         try {
             setLoading(true);
-            console.log(`Intentando eliminar mapa con ID: ${mapToDelete}`);
-            try {
-                const response = await fetch(`${API_URL}/api/maps/${mapToDelete}`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" }
-                });
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await response.json();
-                    console.log("Respuesta del servidor:", data);
-                }
-            } catch (deleteError) {
-                console.log("Error en la petición de eliminación, continuando localmente:", deleteError);
+            console.log(`Intentando eliminar mapa con ID: ${mapToDelete} para el usuario: ${userId}`);
+
+            // Se arma la URL incluyendo ambos parámetros según la ruta: '/delete/:mapId/:userId'
+            const response = await fetch(`${API_URL}/api/maps/delete/${mapToDelete}/${userId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            // Se verifica si la respuesta es en formato JSON y se procesa
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                console.log("Respuesta del servidor:", data);
             }
+
+            // Actualización de la lista de mapas en el estado
             setMaps(maps.filter(map => map.id !== mapToDelete));
             setShowDeleteConfirm(false);
             setMapToDelete("");
             Alert.alert("Éxito", "Mapa colaborativo eliminado correctamente");
+
         } catch (error) {
             console.error("Error al eliminar mapa colaborativo:", error);
+            // Aunque ocurra error, se actualiza la UI para reflejar que el mapa ha sido eliminado localmente
             setMaps(maps.filter(map => map.id !== mapToDelete));
             setShowDeleteConfirm(false);
             setMapToDelete("");
@@ -249,55 +255,57 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                 "Información",
                 "El mapa ha sido eliminado de tu lista, pero puede haber un problema con el servidor."
             );
+
         } finally {
             setLoading(false);
         }
     };
+
     const fetchFriends = async (userId: string) => {
-      try {
-        console.log(`Solicitando amigos para el usuario: ${userId}`);
-        const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
-        const data = await response.json();
-    
-        console.log("Respuesta del backend:", data); // Verifica la estructura en consola
-    
-        if (Array.isArray(data)) {
-          // Si la respuesta es directamente un array de usuarios, lo asignamos
-          setFriends(data.map((user) => ({
-            id: user.id,
-            name: user.email, // Puedes usar otra propiedad si el backend la tiene
-          })));
-        } else {
-          console.warn("Formato inesperado en la respuesta de amigos:", data);
+        try {
+            console.log(`Solicitando amigos para el usuario: ${userId}`);
+            const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
+            const data = await response.json();
+
+            console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+
+            if (Array.isArray(data)) {
+                // Si la respuesta es directamente un array de usuarios, lo asignamos
+                setFriends(data.map((user) => ({
+                    id: user.id,
+                    name: user.email, // Puedes usar otra propiedad si el backend la tiene
+                })));
+            } else {
+                console.warn("Formato inesperado en la respuesta de amigos:", data);
+            }
+        } catch (error) {
+            console.error("Error al obtener amigos:", error);
         }
-      } catch (error) {
-        console.error("Error al obtener amigos:", error);
-      }
     };
-      useEffect(() => {
+    useEffect(() => {
         if (showInviteModal && userId) {
-          console.log("Modal abierto, cargando amigos para el usuario:", userId);
-          fetchFriends(userId);
+            console.log("Modal abierto, cargando amigos para el usuario:", userId);
+            fetchFriends(userId);
         }
-      }, [showInviteModal, userId]);
+    }, [showInviteModal, userId]);
     // Función para invitar a un usuario al mapa colaborativo
     const sendFriendRequest = async (friendId: string) => {
-      try {
-        console.log(`mapa colaborativo ${selectedMapId} para ${friendId} enviada por ${userId}`);
-        const response = await fetch(`${API_URL}/api/friends/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ requesterId: userId, receiverId: friendId, mapId: selectedMapId }),
-        });
-        console.log("Respuesta del backend:", response);
-        const data = await response.json();
-        
-        if (data.success) {
-          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+        try {
+            console.log(`mapa colaborativo ${selectedMapId} para ${friendId} enviada por ${userId}`);
+            const response = await fetch(`${API_URL}/api/friends/create`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ requesterId: userId, receiverId: friendId, mapId: selectedMapId }),
+            });
+            console.log("Respuesta del backend:", response);
+            const data = await response.json();
+
+            if (data.success) {
+                Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+            }
+        } catch (error) {
+            console.error("Error al enviar solicitud:", error);
         }
-      } catch (error) {
-        console.error("Error al enviar solicitud:", error);
-      }
     };
 
     // Renderizado de cada elemento de la lista de mapas
@@ -457,32 +465,32 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const renderInviteFriendsModal = () => {
         if (!showInviteModal) return null;
         return (
-          <div
-            style={webStyles.modalOverlay}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setShowInviteModal(false);
-            }}
-          >
-            <div style={webStyles.modalContent}>
-              <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
-              <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
-              <div style={{ maxHeight: 150, overflowY: "auto" }}>
-                {friends.map((friend) => (
-                  <div key={friend.id} style={webStyles.invitedItem}>
-                    <span style={webStyles.friendName}>{friend.name}</span>
-                    <button style={webStyles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
-                      Invitar
+            <div
+                style={webStyles.modalOverlay}
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) setShowInviteModal(false);
+                }}
+            >
+                <div style={webStyles.modalContent}>
+                    <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
+                    <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+                    <div style={{ maxHeight: 150, overflowY: "auto" }}>
+                        {friends.map((friend) => (
+                            <div key={friend.id} style={webStyles.invitedItem}>
+                                <span style={webStyles.friendName}>{friend.name}</span>
+                                <button style={webStyles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
+                                    Invitar
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <button style={webStyles.closeButton} onClick={() => setShowInviteModal(false)}>
+                        Cerrar
                     </button>
-                  </div>
-                ))}
-              </div>
-              <button style={webStyles.closeButton} onClick={() => setShowInviteModal(false)}>
-                Cerrar
-              </button>
+                </div>
             </div>
-          </div>
         );
-      };
+    };
 
     // Modal para confirmar la eliminación de un mapa
     const renderDeleteConfirmModal = () => (
@@ -656,7 +664,7 @@ const webStyles = StyleSheet.create({
         fontSize: 16,
         color: "#023E8A",
         flex: 1,
-      },
+    },
     loadingContainer: {
         flex: 1,
         justifyContent: "center",
@@ -725,7 +733,7 @@ const webStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         zIndex: 1000,
-      },
+    },
     modalTitle: {
         fontSize: 20,
         fontWeight: "bold",
@@ -737,7 +745,7 @@ const webStyles = StyleSheet.create({
         color: "#666",
         marginBottom: 15,
         textAlign: "center",
-      },
+    },
     inputLabel: {
         fontSize: 16,
         marginBottom: 8,
@@ -760,8 +768,8 @@ const webStyles = StyleSheet.create({
         borderBottomColor: "#eee",
         paddingTop: 8,
         paddingBottom: 8,
-      },
-      inviteButton: {
+    },
+    inviteButton: {
         backgroundColor: "#0096C7",
         borderRadius: 8,
         paddingVertical: 10,
@@ -769,8 +777,8 @@ const webStyles = StyleSheet.create({
         borderWidth: 0,
         color: "white",
         cursor: "pointer",
-      },
-      closeButton: {
+    },
+    closeButton: {
         backgroundColor: "#03045E",
         borderRadius: 8,
         paddingVertical: 12,
@@ -779,7 +787,7 @@ const webStyles = StyleSheet.create({
         color: "white",
         cursor: "pointer",
         marginTop: 20,
-      },
+    },
     textArea: {
         minHeight: 80,
         textAlignVertical: "top"

@@ -268,49 +268,43 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Función para eliminar un mapa colaborativo
   const deleteCollaborativeMap = async () => {
-    if (!mapToDelete) return;
+    // Asegúrate de tener definidos tanto mapToDelete como userId (por ejemplo, obtenido del contexto o estado de autenticación)
+    if (!mapToDelete || !userId) return;
 
     try {
-      setLoading(true); // Mostrar indicador de carga
+      setLoading(true);
+      console.log(`Intentando eliminar mapa con ID: ${mapToDelete} para el usuario: ${userId}`);
 
-      // Simulamos la eliminación aunque el backend falle
-      console.log(`Intentando eliminar mapa con ID: ${mapToDelete}`);
+      // Se arma la URL incluyendo ambos parámetros según la ruta: '/delete/:mapId/:userId'
+      const response = await fetch(`${API_URL}/api/maps/delete/${mapToDelete}/${userId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
 
-      try {
-        const response = await fetch(`${API_URL}/api/maps/${mapToDelete}`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          console.log("Respuesta del servidor:", data);
-        }
-      } catch (deleteError) {
-        console.log("Error en la petición de eliminación, continuando localmente:", deleteError);
+      // Se verifica si la respuesta es en formato JSON y se procesa
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log("Respuesta del servidor:", data);
       }
 
-      // Actualizamos la UI independientemente de la respuesta del servidor
+      // Actualización de la lista de mapas en el estado
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
-
       Alert.alert("Éxito", "Mapa colaborativo eliminado correctamente");
+
     } catch (error) {
       console.error("Error al eliminar mapa colaborativo:", error);
-
-      // Aún si hay error, eliminamos de la UI para mejorar experiencia
+      // Aunque ocurra error, se actualiza la UI para reflejar que el mapa ha sido eliminado localmente
       setMaps(maps.filter(map => map.id !== mapToDelete));
       setShowDeleteConfirm(false);
       setMapToDelete("");
-
       Alert.alert(
         "Información",
         "El mapa ha sido eliminado de tu lista, pero puede haber un problema con el servidor."
       );
+
     } finally {
       setLoading(false);
     }
