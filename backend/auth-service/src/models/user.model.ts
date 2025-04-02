@@ -2,14 +2,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToOne,
   OneToMany,
   ManyToMany,
   JoinColumn,
   JoinTable,
-  ManyToOne,
 } from 'typeorm';
 import { UserProfile } from "../../../user-service/src/models/userProfile.model";
 import { Friend } from "../../../social-service/src/models/friend.model"
@@ -21,10 +18,7 @@ import { UserDistrict } from '../../../map-service/src/models/user-district.mode
 //TODO Aún está pendiente de hacer y corregir la importación
 //import { Plan } from './Plan';
 
-/**
- * Rol posible para el usuario (ejemplo).
- * Ajusta si necesitas más roles.
- */
+
 export enum Role {
   USER = 'USER',
   ADMIN = 'ADMIN',
@@ -97,12 +91,4 @@ export class User {
   @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
   userDistrict!: UserDistrict[];
 
-  /**
-   * Columnas de auditoría (fechas de creación y actualización).
-   */
-  // @CreateDateColumn()
-  // createdAt!: Date;
-
-  // @UpdateDateColumn()
-  // updatedAt!: Date;
 }
