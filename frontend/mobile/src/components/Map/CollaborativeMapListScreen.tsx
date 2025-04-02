@@ -439,7 +439,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             <Icon name="person-add" size={20} color="#2196F3" />
           </TouchableOpacity>
 
-          {isCreator && (
+          
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
               onPress={(e) => {
@@ -450,7 +450,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             >
               <Icon name="delete" size={20} color="#f44336" />
             </TouchableOpacity>
-          )}
+          
         </View>
       </TouchableOpacity>
     );

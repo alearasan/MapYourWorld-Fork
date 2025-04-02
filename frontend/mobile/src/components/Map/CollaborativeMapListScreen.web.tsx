@@ -342,18 +342,18 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                     >
                         <Icon name="person-add" size={20} color="#2196F3" />
                     </TouchableOpacity>
-                    {isCreator && (
-                        <TouchableOpacity
-                            style={[webStyles.actionButton, webStyles.deleteButton]}
-                            onPress={(e) => {
-                                e.stopPropagation();
-                                setMapToDelete(item.id);
-                                setShowDeleteConfirm(true);
-                            }}
-                        >
-                            <Icon name="delete" size={20} color="#f44336" />
-                        </TouchableOpacity>
-                    )}
+
+                    <TouchableOpacity
+                        style={[webStyles.actionButton, webStyles.deleteButton]}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            setMapToDelete(item.id);
+                            setShowDeleteConfirm(true);
+                        }}
+                    >
+                        <Icon name="delete" size={20} color="#f44336" />
+                    </TouchableOpacity>
+
                 </View>
             </TouchableOpacity>
         );

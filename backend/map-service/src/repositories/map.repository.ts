@@ -149,18 +149,17 @@ export default class MapRepository {
             throw new Error(`User with id ${userId} not found`);
         }
 
-        if (!pois || pois.length === 0) {
-            throw new Error(`No hay POIs asociados al mapa con id ${mapId}`);
-        }
-        for (const poi of pois) {
-            if (poi.user.id === userId) {
-                await this.poiRepo.delete(poi.id);
+        if (pois) {
+            for (const poi of pois) {
+                if (poi.user.id === userId) {
+                    await this.poiRepo.delete(poi.id);
+                }
             }
         }
 
         user.maps_joined = user.maps_joined.filter(map => map.id !== mapId);
         await this.userRepo.save(user);
-        
+
 
         // Filtrar los usuarios que se han unido, removiendo el usuario que desea abandonar
         map.users_joined = map.users_joined.filter(user => user.id !== userId);
