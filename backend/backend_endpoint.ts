@@ -10,7 +10,6 @@ import pointOfInterest from './map-service/src/routes/poi.routes';
 import regionRoutes from './map-service/src/routes/region.routes';
 import friendRoutes from './social-service/src/routes/friend.routes';
 import collabMapRoutes from './auth-service/src/routes/collab.map.routes';
-import paymentRoutes from './payment-service/src/routes/payment.routes';
 import photoRoutes from './social-service/src/routes/photo.routes'
 import { initializeDatabase } from './database/appDataSource';
 import { createUsers } from './map-service/src/mocks/district_create';
@@ -69,7 +68,6 @@ app.use('/api/poi', pointOfInterest);
 app.use('/api/friends', friendRoutes);
 app.use('/api/maps', mapRoutes);
 app.use('/api/collabMap', collabMapRoutes);
-app.use('/api/payment', paymentRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/stripe', StripeRoutes)

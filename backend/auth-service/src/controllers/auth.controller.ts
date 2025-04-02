@@ -3,13 +3,12 @@
  */
 
 import { Request, Response } from 'express';
-import { User, Role } from '../models/user.model';
+import { Role } from '../models/user.model';
 import { validationResult } from 'express-validator';
-import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
+import { generateToken } from '../../../../shared/config/jwt.config';
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
-import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario

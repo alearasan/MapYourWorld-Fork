@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
     color: APP_TEAL,
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
   },
   message: {
     fontSize: 16,
