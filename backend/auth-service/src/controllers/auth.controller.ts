@@ -23,7 +23,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, username, firstName, lastName, picture } = req.body;
+    const { email, password, username, firstName, lastName, picture, acceptTerms} = req.body;
+    if (!acceptTerms) {
+      res.status(400).json({ error: "Debes aceptar los términos y condiciones" });
+      return;
+    }
     const user = await authService.registerUser({
       email,
       password,
