@@ -393,7 +393,30 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al desbloquear el distrito en el mapa colaborativo:", error);
     }
   };
-  
+  const handleMapPress = (coordinate: { latitude: number; longitude: number }) => {
+    let poiDistrict: Distrito | null = null;
+    for (const d of distritosBackend) {
+      if (isPointInPolygon(coordinate, d.coordenadas)) {
+        poiDistrict = d;
+        break;
+      }
+    }
+    if (!poiDistrict) {
+      Alert.alert("Ubicación no válida", "No puedes crear un punto de interés fuera de un distrito.");
+      return;
+    }
+    if (!poiDistrict.isUnlocked) {
+      Alert.alert("Distrito bloqueado", `El distrito "${poiDistrict.nombre}" está bloqueado.`);
+      return;
+    }
+    setPointOfInterest({
+      ...pointOfInterest,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      district: poiDistrict,
+    });
+    setShowForm(true);
+  };
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
@@ -784,6 +807,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               longitudeDelta: 0.1,
             }}
             showsUserLocation={true}
+            onPress={(e) => {
+              const { latitude, longitude } = e.nativeEvent.coordinate;
+              handleMapPress({ latitude, longitude });
+            }}
           >
            {distritosBackend.map((distrito, index) => {
   return (
