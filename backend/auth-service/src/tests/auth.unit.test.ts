@@ -55,6 +55,24 @@ jest.mock('../../../map-service/src/repositories/map.repository', () => {
   };
 });
 
+// Add this with your other jest.mock calls at the top of the file
+jest.mock('../../../payment-service/repositories/subscription.repository', () => {
+  const mockSubscriptionRepo = {
+    create: jest.fn().mockResolvedValue(true),
+    findActiveByUserId: jest.fn(),
+    update: jest.fn()
+  };
+  
+  return {
+    SubscriptionRepository: jest.fn().mockImplementation(() => mockSubscriptionRepo)
+  };
+});
+
+// Also mock the POI service that's used in registerUser
+jest.mock('../../../map-service/src/services/poi.service', () => ({
+  createPOIsOnLagMaps: jest.fn().mockResolvedValue(true)
+}));
+
 // Simulamos el AuthRepository
 jest.mock('../repositories/auth.repository', () => {
   const mockRepo = {
@@ -124,7 +142,8 @@ describe('Auth Service', () => {
         role: 'USER',
         username: 'newuser', 
         firstName: 'New',
-        lastName: 'User' 
+        lastName: 'User',
+        picture: '',
       };
   
       // Configurar mocks
