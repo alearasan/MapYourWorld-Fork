@@ -90,5 +90,4 @@ export class User {
 
   @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
   userDistrict!: UserDistrict[];
-
 }
