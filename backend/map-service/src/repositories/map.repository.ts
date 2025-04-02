@@ -2,14 +2,17 @@ import { Repository } from 'typeorm';
 import { Map } from '../models/map.model'; // Importa tu entidad
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 import { User } from '../../../auth-service/src/models/user.model';
+import { Friend } from '../../../social-service/src/models/friend.model';
 
 export default class MapRepository {
     private mapRepo: Repository<Map>;
     private userRepo: Repository<User>;
+    private friendRepo: Repository<Friend>;
 
     constructor() {
         this.mapRepo = AppDataSource.getRepository(Map);
         this.userRepo = AppDataSource.getRepository(User);
+        this.friendRepo = AppDataSource.getRepository(Friend);
     }
 
     async createMap(mapData: Omit<Map, 'id'>): Promise<Map> {
@@ -133,6 +136,7 @@ export default class MapRepository {
 
     async deleteMap(mapId: string, userId: string): Promise<void> {
         const map = await this.getMapById(mapId);
+
         const user = await this.userRepo.findOne({ where: { id: userId } });
         if (!user) {
             throw new Error(`User with id ${userId} not found`);
@@ -145,6 +149,7 @@ export default class MapRepository {
 
         // Si después de remover al usuario ya no hay usuarios, se elimina el mapa
         if (map.users_joined.length === 0) {
+            await this.friendRepo.delete({ map: { id: mapId } });
             await this.mapRepo.delete(mapId);
         } else {
             // Si aún quedan usuarios, se guarda el cambio en el mapa
