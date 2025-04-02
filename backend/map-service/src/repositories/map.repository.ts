@@ -3,16 +3,21 @@ import { Map } from '../models/map.model'; // Importa tu entidad
 import { AppDataSource } from '../../../database/appDataSource'; // Importa la instancia de conexión
 import { User } from '../../../auth-service/src/models/user.model';
 import { Friend } from '../../../social-service/src/models/friend.model';
+import { PointOfInterest } from '../models/poi.model';
+import { PointOfInterestRepository } from '../repositories/poi.repostory';
 
 export default class MapRepository {
     private mapRepo: Repository<Map>;
     private userRepo: Repository<User>;
     private friendRepo: Repository<Friend>;
+    private poiRepo: Repository<PointOfInterest>;
+    poiRepository = new PointOfInterestRepository();
 
     constructor() {
         this.mapRepo = AppDataSource.getRepository(Map);
         this.userRepo = AppDataSource.getRepository(User);
         this.friendRepo = AppDataSource.getRepository(Friend);
+        this.poiRepo = AppDataSource.getRepository(PointOfInterest);
     }
 
     async createMap(mapData: Omit<Map, 'id'>): Promise<Map> {
@@ -136,19 +141,33 @@ export default class MapRepository {
 
     async deleteMap(mapId: string, userId: string): Promise<void> {
         const map = await this.getMapById(mapId);
+        const pois = await this.poiRepository.getPointsOfInterestByMapId(mapId);
+
 
         const user = await this.userRepo.findOne({ where: { id: userId } });
         if (!user) {
             throw new Error(`User with id ${userId} not found`);
         }
+
+        if (!pois || pois.length === 0) {
+            throw new Error(`No hay POIs asociados al mapa con id ${mapId}`);
+        }
+        for (const poi of pois) {
+            if (poi.user.id === userId) {
+                await this.poiRepo.delete(poi.id);
+            }
+        }
+
         user.maps_joined = user.maps_joined.filter(map => map.id !== mapId);
         await this.userRepo.save(user);
+        
 
         // Filtrar los usuarios que se han unido, removiendo el usuario que desea abandonar
         map.users_joined = map.users_joined.filter(user => user.id !== userId);
 
         // Si después de remover al usuario ya no hay usuarios, se elimina el mapa
         if (map.users_joined.length === 0) {
+
             await this.friendRepo.delete({ map: { id: mapId } });
             await this.mapRepo.delete(mapId);
         } else {
