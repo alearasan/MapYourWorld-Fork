@@ -39,5 +39,5 @@ jobs:
             -Dsonar.projectKey=ISPP-Grupo-7_MapYourWorld
             -Dsonar.organization=ispp-grupo-7
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info=frontend/coverage/lcov.info,backend/coverage/lcov.info
-            -Dsonar.coverage.exclusions=**
+            -Dsonar.coverage.exclusions=**/models/**,**/controllers/**,**/routes/**
             -Dsonar.coverage.inclusions=backend/**/src/services/**/*.ts,backend/**/services/**/*.ts,frontend/mobile/src/components/**/*.tsx
