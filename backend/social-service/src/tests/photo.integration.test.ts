@@ -42,6 +42,7 @@ const mockPoi: PointOfInterest = {
   } as Point,
   category: Category.MONUMENTOS,
   images: 'https://example.com/image.jpg',
+  isBusiness: false,
   createdAt: new Date('2023-06-15T10:00:00Z'),
   user: {
     id: 'user-123',
@@ -58,7 +59,6 @@ const mockPoi: PointOfInterest = {
       firstName: 'Test',
       lastName: 'User'
     },
-
     subscription: {
       id: 'sub-123',
       plan: PlanType.FREE,
