@@ -8,6 +8,10 @@ import { FriendStatus } from '../models/friend.model';
 export const createFriendController = async (req: Request, res: Response): Promise<void> => {
   try {
     const {requesterId, receiverId, mapId} = req.body; 
+    if (!requesterId || !receiverId) {
+      res.status(400).json({ message: 'Faltan parámetros requeridos.' });
+      return;
+    }
     const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
     res.status(201).json(newFriend);
   } catch (error) {
