@@ -11,7 +11,6 @@ import {
 import { UserProfile } from "../../../user-service/src/models/userProfile.model";
 import { Friend } from "../../../social-service/src/models/friend.model"
 //TODO Aún está pendiente de hacer y corregir la importación
-//import { Estadistics } from '@backend/user-service/src/models/userProfile.model';
 //TODO Aún está pendiente de hacer y corregir la importación
 import { Map } from '../../../map-service/src/models/map.model';
 import { Subscription } from '../../../payment-service/models/subscription.model';
@@ -91,5 +90,4 @@ export class User {
 
   @OneToMany(() => UserDistrict, (userDistrict) => userDistrict.user)
   userDistrict!: UserDistrict[];
-
 }
