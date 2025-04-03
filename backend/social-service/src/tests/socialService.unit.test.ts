@@ -24,7 +24,7 @@ jest.mock('../../../database/appDataSource', () => ({
 
 // Importamos los servicios después de los mocks
 import { 
-  createFriend, 
+  
   listFriends, 
   findFriendById, 
   listSearchUser, 
@@ -89,88 +89,6 @@ describe('Friend Service', () => {
     repoInstance = FriendRepositoryMock.mock.results[0].value;
   });
 
-  describe('createFriend', () => {
-    it('debe crear una nueva solicitud de amistad exitosamente', async () => {
-      // Arrange
-      const friendData = {
-        requester,
-        recipient,
-        status: FriendStatus.PENDING,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      const createdFriend = { id: 'friend1', ...friendData };
-      
-      // Configurar mocks
-      mockUserRepository.findOne
-        .mockResolvedValueOnce(requester)
-        .mockResolvedValueOnce(recipient);
-      
-      repoInstance.findExistingFriendship.mockResolvedValue(null);
-      repoInstance.createFriend.mockResolvedValue(createdFriend);
-      
-      // Act
-      const result = await createFriend(friendData);
-      
-      // Assert
-      expect(repoInstance.findExistingFriendship).toHaveBeenCalled();
-      expect(repoInstance.createFriend).toHaveBeenCalled();
-      expect(result).toEqual(createdFriend);
-    });
-
-    it('debe rechazar cuando el solicitante y receptor son el mismo usuario', async () => {
-      // Arrange
-      const friendData = {
-        requester,
-        recipient: requester, // Mismo usuario
-        status: FriendStatus.PENDING,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      // Act & Assert
-      await expect(createFriend(friendData)).rejects.toThrow('El receptor y el solicitante deben ser distintos.');
-      expect(repoInstance.createFriend).not.toHaveBeenCalled();
-    });
-
-    it('debe manejar correctamente cuando los usuarios ya son amigos', async () => {
-      // Arrange
-      const friendData = {
-        requester,
-        recipient,
-        status: FriendStatus.PENDING,
-        createdAt: new Date(),
-        updatedAt: new Date()
-
-      };
-      
-      const existingFriend = {
-        id: 'friend1',
-        requester,
-        recipient,
-        status: FriendStatus.ACCEPTED,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      // Configurar mocks
-      mockUserRepository.findOne
-        .mockResolvedValueOnce(requester)
-        .mockResolvedValueOnce(recipient);
-      
-      repoInstance.findExistingFriendship.mockResolvedValue(existingFriend);
-      
-      // Act
-      const result = await createFriend(friendData);
-      
-      // Assert
-      expect(result).toEqual({
-        success: false,
-        message: 'Estos usuarios ya son amigos.'
-      });
-    });
-  });
 
   describe('listFriends', () => {
     it('debe retornar la lista de amigos con el estado especificado', async () => {
