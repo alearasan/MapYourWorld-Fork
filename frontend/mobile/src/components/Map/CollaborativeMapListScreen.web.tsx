@@ -61,6 +61,8 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
     const [mapToDelete, setMapToDelete] = useState<string>("");
 
+    const [subscription, setSubscription] = useState<any>(null);
+
     // Colores para los jugadores (se mantiene el mismo orden que en la versión móvil)
     const playerColors = [
         "#2196F3", // Azul (propietario)
@@ -103,6 +105,24 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
         if (userId) {
             fetchCollaborativeMaps();
         }
+    }, [userId]);
+
+    useEffect(() => {
+        const fetchSubscription = async () => {
+              if (!userId) return;
+              try {
+                const response = await fetch(`${API_URL}/api/subscriptions/active/${userId}`, {
+                  method: "GET",
+                  headers: { "Content-Type": "application/json" },
+                });
+                if (!response.ok) throw new Error(response.statusText);
+                const data = await response.json();
+                setSubscription(data);
+              } catch (error) {
+                console.error("Error al obtener la subscripción", error);
+              }
+            };
+            fetchSubscription();
     }, [userId]);
 
     // Función para obtener los mapas colaborativos
@@ -162,6 +182,11 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
     // Función para crear un nuevo mapa colaborativo
     const createCollaborativeMap = async () => {
+
+        if (subscription && subscription.plan !== "PREMIUM") {
+            throw new Error("Solo los usuarios premium pueden crear mapas colaborativos");
+          }
+
         if (!mapName.trim()) {
             setErrors({ mapName: "El nombre es obligatorio" });
             return;
@@ -363,6 +388,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
 
     // Modal para crear un nuevo mapa colaborativo
     const renderCreateModal = () => (
+        subscription && subscription.plan === "PREMIUM" ? (
         <Modal
             visible={showCreateModal}
             transparent={true}
@@ -460,6 +486,40 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                 </View>
             </View>
         </Modal>
+        ) : (
+            <Modal
+                    visible={showCreateModal}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowCreateModal(false)}
+                  >
+                    <View style={webStyles.modalContainer}>
+                      <View style={webStyles.modalContent}>
+                        <Text style={webStyles.modalTitle}>Oops</Text>
+                        <Text style={webStyles.inputLabel}>
+                          Tienes que ser usuario premium para desbloquear esta funcionalidad
+                        </Text>
+                        <View style={webStyles.modalButtons}>
+                          <TouchableOpacity
+                            style={[webStyles.modalButton, webStyles.cancelButton]}
+                            onPress={() => setShowCreateModal(false)}
+                          >
+                            <Text style={[webStyles.buttonText, { color: "#fff" }]}>Volver</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[webStyles.modalButton, webStyles.createButton]}
+                            onPress={() => {
+                              setShowCreateModal(false);
+                              navigation.navigate('Payment');  // Redirige a la página de pago
+                            }}
+                          >
+                            <Text style={webStyles.buttonText}>Mejorar a Premium</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </Modal>
+        )
     );
 
 

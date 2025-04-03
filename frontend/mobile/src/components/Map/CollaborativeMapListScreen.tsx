@@ -59,6 +59,7 @@ const CollaborativeMapListScreen: React.FC = () => {
   // Estado para la confirmación de eliminación
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [mapToDelete, setMapToDelete] = useState<string>("");
+  const [subscription, setSubscription] = useState<any>(null);
 
   // Colores para los jugadores
   const playerColors = [
@@ -115,6 +116,28 @@ const CollaborativeMapListScreen: React.FC = () => {
       fetchCollaborativeMaps();
     }
   }, [userId]);
+
+    useEffect(() => {
+      const fetchSubscription = async () => {
+        try {
+          if (!userId) return;
+          const response = await fetch(`${API_URL}/api/subscriptions/active/${userId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+          if (!response.ok) {
+            throw new Error(`Error en la solicitud de subscripción: ${response.statusText}`);
+          }
+          const data = await response.json();
+          setSubscription(data);
+        } catch (error) {
+          console.error("Error al obtener la subscripción", error);
+        }
+      };
+  
+      fetchSubscription();
+      
+    }, [userId]);
 
   // Función para obtener los mapas colaborativos
   const fetchCollaborativeMaps = async () => {
@@ -192,6 +215,10 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Función para crear un nuevo mapa colaborativo
   const createCollaborativeMap = async () => {
+    
+    if (subscription && subscription.plan !== "PREMIUM") {
+      throw new Error("Solo los usuarios premium pueden crear mapas colaborativos");
+    }
     if (!mapName.trim()) {
       setErrors({ mapName: "El nombre es obligatorio" });
       return;
@@ -458,115 +485,139 @@ const CollaborativeMapListScreen: React.FC = () => {
 
   // Modal para crear un nuevo mapa colaborativo
   const renderCreateModal = () => (
-    <Modal
-      visible={showCreateModal}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowCreateModal(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Pressable onPress={Keyboard.dismiss}>
-            <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
-
-            <Text style={styles.inputLabel}>Nombre del mapa*</Text>
-            <TextInput
-              style={[styles.input, errors.mapName ? { borderColor: "#e53e3e" } : {}]}
-              placeholder="Ej: Exploración de Sevilla"
-              value={mapName}
-              onChangeText={(text) => {
-                setMapName(text);
-                if (errors.mapName) setErrors({ mapName: "" });
-              }}
-              maxLength={30}
-            />
-            {errors.mapName ? (
-              <Text style={{ color: "#e53e3e", marginBottom: 8, fontSize: 14 }}>
-                {errors.mapName}
-              </Text>
-            ) : null}
-
-            <Text style={styles.inputLabel}>Descripción</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Descripción del mapa colaborativo"
-              value={mapDescription}
-              onChangeText={setMapDescription}
-              multiline={true}
-              maxLength={100}
-            />
-
-            <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
-            <View style={styles.pickerContainer}>
-              {[2, 3, 4, 5, 6].map((num) => {
-                // Determinar qué colores mostrar según el número seleccionado
-                const isSelected = maxUsers === num;
-                const buttonStyle = isSelected
-                  ? styles.pickerItemSelected
-                  : styles.pickerItem;
-
-                // Determinar el color de fondo según el índice si está seleccionado o no
-                const backgroundColor = isSelected
-                  ? playerColors[0] // Color del propietario siempre es el primero
-                  : (num <= maxUsers ? playerColors[num - 1] : "#f0f0f0");
-
-                return (
-                  <TouchableOpacity
-                    key={num}
-                    style={[
-                      styles.pickerItem,
-                      { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }
-                    ]}
-                    onPress={() => setMaxUsers(num)}
-                  >
-                    <Text
-                      style={[
-                        styles.pickerText,
-                        isSelected && styles.pickerTextSelected,
-                      ]}
+    subscription && subscription.plan === "PREMIUM" ? (
+      <Modal
+        visible={showCreateModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCreateModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Pressable onPress={Keyboard.dismiss}>
+              <Text style={styles.modalTitle}>Crear Mapa Colaborativo</Text>
+  
+              <Text style={styles.inputLabel}>Nombre del mapa*</Text>
+              <TextInput
+                style={[styles.input, errors.mapName ? { borderColor: "#e53e3e" } : {}]}
+                placeholder="Ej: Exploración de Sevilla"
+                value={mapName}
+                onChangeText={(text) => {
+                  setMapName(text);
+                  if (errors.mapName) setErrors({ mapName: "" });
+                }}
+                maxLength={30}
+              />
+              {errors.mapName ? (
+                <Text style={{ color: "#e53e3e", marginBottom: 8, fontSize: 14 }}>
+                  {errors.mapName}
+                </Text>
+              ) : null}
+  
+              <Text style={styles.inputLabel}>Descripción</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Descripción del mapa colaborativo"
+                value={mapDescription}
+                onChangeText={setMapDescription}
+                multiline={true}
+                maxLength={100}
+              />
+  
+              <Text style={styles.inputLabel}>Número máximo de usuarios (2-6)</Text>
+              <View style={styles.pickerContainer}>
+                {[2, 3, 4, 5, 6].map((num) => {
+                  const isSelected = maxUsers === num;
+                  const buttonStyle = isSelected
+                    ? styles.pickerItemSelected
+                    : styles.pickerItem;
+                  const backgroundColor = isSelected
+                    ? playerColors[0]
+                    : (num <= maxUsers ? playerColors[num - 1] : "#f0f0f0");
+  
+                  return (
+                    <TouchableOpacity
+                      key={num}
+                      style={[styles.pickerItem, { backgroundColor: isSelected ? playerColors[0] : "#f0f0f0" }]}
+                      onPress={() => setMaxUsers(num)}
                     >
-                      {num}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.playerPreview}>
-              {[...Array(maxUsers)].map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.playerColorCircle,
-                    { backgroundColor: playerColors[index] }
-                  ]}
-                />
-              ))}
-            </View>
-            <Text style={styles.playerPreviewText}>
-              Vista previa de colores de jugadores
+                      <Text
+                        style={[styles.pickerText, isSelected && styles.pickerTextSelected]}
+                      >
+                        {num}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+  
+              <View style={styles.playerPreview}>
+                {[...Array(maxUsers)].map((_, index) => (
+                  <View
+                    key={index}
+                    style={[styles.playerColorCircle, { backgroundColor: playerColors[index] }]}
+                  />
+                ))}
+              </View>
+              <Text style={styles.playerPreviewText}>
+                Vista previa de colores de jugadores
+              </Text>
+  
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setShowCreateModal(false)}
+                >
+                  <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.createButton]}
+                  onPress={createCollaborativeMap}
+                >
+                  <Text style={styles.buttonText}>Crear</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    ) : (
+      <Modal
+        visible={showCreateModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCreateModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Oops</Text>
+            <Text style={styles.inputLabel}>
+              Tienes que ser usuario premium para desbloquear esta funcionalidad
             </Text>
-
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowCreateModal(false)}
               >
-                <Text style={[styles.buttonText, { color: "#fff" }]}>Cancelar</Text>
+                <Text style={[styles.buttonText, { color: "#fff" }]}>Volver</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.modalButton, styles.createButton]}
-                onPress={createCollaborativeMap}
+                onPress={() => {
+                  setShowCreateModal(false);
+                  navigation.navigate('Payment');  // Redirige a la página de pago
+                }}
               >
-                <Text style={styles.buttonText}>Crear</Text>
+                <Text style={styles.buttonText}>Mejorar a Premium</Text>
               </TouchableOpacity>
             </View>
-          </Pressable>
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+    )
   );
+  
 
 
   // Modal para confirmar la eliminación de un mapa
