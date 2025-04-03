@@ -866,7 +866,7 @@ const webStyles = StyleSheet.create({
         paddingBottom: 8,
     },
     inviteButton: {
-        backgroundColor: "#0096C7",
+        backgroundColor: "#14b8a6",
         borderRadius: 8,
         paddingVertical: 10,
         paddingHorizontal: 20,
