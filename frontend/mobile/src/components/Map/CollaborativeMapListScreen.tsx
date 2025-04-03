@@ -37,6 +37,7 @@ type NavigationProps = NavigationProp<RootStackParamList, 'CollaborativeMapListS
 const CollaborativeMapListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
   const [maps, setMaps] = useState<CollaborativeMap[]>([]);
+  const [map, setMap] = useState<CollaborativeMap | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
@@ -60,6 +61,7 @@ const CollaborativeMapListScreen: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [mapToDelete, setMapToDelete] = useState<string>("");
   const [subscription, setSubscription] = useState<any>(null);
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
 
   // Colores para los jugadores
   const playerColors = [
@@ -385,47 +387,61 @@ const CollaborativeMapListScreen: React.FC = () => {
     }
   };
 
+  const getAvailableFriends = () => {
+    return friends.filter(
+      (friend) =>
+        !invitedFriends.includes(friend.id) &&
+        !map?.users_joined.some((user) => user.id === friend.id)
+    );
+  };
+
   const renderInviteFriendsModal = () => {
+    const availableFriends = getAvailableFriends();
     return (
       <Modal
-        visible={showInviteModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowInviteModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Invitar Amigos</Text>
-            <Text style={styles.modalSubtitle}>
-              Máximo 5 amigos (6 usuarios en total)
-            </Text>
-
-            <FlatList
-              data={friends}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.invitedItem}>
-                  <Text style={styles.friendName}>{item.name}</Text>
-                  <TouchableOpacity
-                    style={styles.inviteButton}
-                    onPress={() => sendFriendRequest(item.id)}
-                  >
-                    <Text style={styles.inviteButtonText}>Invitar</Text>
-                  </TouchableOpacity>
+                visible={showInviteModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowInviteModal(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Invitar Amigos</Text>
+                    <Text style={styles.modalSubtitle}>
+                      Máximo 5 amigos (6 usuarios en total)
+                    </Text>
+          
+                    {availableFriends.length === 0 ? (
+                      <Text style={styles.noFriendsText}>
+                        Tus amigos ya se han unido a este mapa.
+                      </Text>
+                    ) : (
+                      <FlatList
+                        data={availableFriends}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                          <View style={styles.invitedItem}>
+                            <Text style={styles.friendName}>{item.name}</Text>
+                            <TouchableOpacity
+                              style={styles.inviteButton}
+                              onPress={() => sendFriendRequest(item.id)}
+                            >
+                              <Text style={styles.inviteButtonText}>Invitar</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      />
+                    )}
+          
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setShowInviteModal(false)}
+                    >
+                      <Text style={styles.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              )}
-            />
-
-            {/* Botón para cerrar el modal */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowInviteModal(false)}
-            >
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+              </Modal>
     );
   };
 
@@ -462,6 +478,7 @@ const CollaborativeMapListScreen: React.FC = () => {
             onPress={(e) => {
               e.stopPropagation();
               setSelectedMapId(item.id);
+              setMap(item);
               setShowInviteModal(true);
             }}
           >
@@ -822,6 +839,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 24,
     textAlign: "center",
+  },
+  noFriendsText: {
+    textAlign: "center",
+    color: "#666",
+    marginVertical: 10,
+    fontSize: 16,
   },
   createEmptyButton: {
     backgroundColor: "#2196F3",
