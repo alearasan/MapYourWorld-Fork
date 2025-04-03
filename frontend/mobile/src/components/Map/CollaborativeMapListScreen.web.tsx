@@ -37,6 +37,7 @@ type NavigationProps = NavigationProp<RootStackParamList, 'CollaborativeMapListS
 const CollaborativeMapListScreenWeb: React.FC = () => {
     const navigation = useNavigation<NavigationProps>();
     const [maps, setMaps] = useState<CollaborativeMap[]>([]);
+    const [map, setMap] = useState<CollaborativeMap | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [userId, setUserId] = useState<string>("");
@@ -62,6 +63,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     const [mapToDelete, setMapToDelete] = useState<string>("");
 
     const [subscription, setSubscription] = useState<any>(null);
+    const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
 
     // Colores para los jugadores (se mantiene el mismo orden que en la versión móvil)
     const playerColors = [
@@ -364,6 +366,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
                         onPress={(e) => {
                             e.stopPropagation();
                             setSelectedMapId(item.id);
+                            setMap(item);
                             setShowInviteModal(true);
                         }}
                     >
@@ -523,36 +526,67 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
     );
 
 
+    const getAvailableFriends = () => {
+        return friends.filter(
+          (friend) =>
+            !invitedFriends.includes(friend.id) &&
+            !map?.users_joined.some((user) => user.id === friend.id)
+        );
+      };
+    const InviteButton: React.FC<{ friendId: string; onInvite: (id: string) => void }> = ({ friendId, onInvite }) => {
+        const [isPressed, setIsPressed] = useState(false);
+        return (
+          <button
+            style={{
+              ...webStyles.inviteButton,
+              transform: isPressed ? "scale(0.95)" : "scale(1)",
+              transition: "transform 0.1s",
+            }}
+            onMouseDown={() => setIsPressed(true)}
+            onMouseUp={() => setIsPressed(false)}
+            onMouseLeave={() => setIsPressed(false)}
+            onClick={() => onInvite(friendId)}
+          >
+            Invitar
+          </button>
+        );
+      };
     // Modal para invitar a un usuario al mapa colaborativo
     const renderInviteFriendsModal = () => {
         if (!showInviteModal) return null;
+        const availableFriends = getAvailableFriends();
+      
         return (
-            <div
-                style={webStyles.modalOverlay}
-                onClick={(e) => {
-                    if (e.target === e.currentTarget) setShowInviteModal(false);
-                }}
-            >
-                <div style={webStyles.modalContent}>
-                    <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
-                    <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
-                    <div style={{ maxHeight: 150, overflowY: "auto" }}>
-                        {friends.map((friend) => (
-                            <div key={friend.id} style={webStyles.invitedItem}>
-                                <span style={webStyles.friendName}>{friend.name}</span>
-                                <button style={webStyles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
-                                    Invitar
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                    <button style={webStyles.closeButton} onClick={() => setShowInviteModal(false)}>
-                        Cerrar
-                    </button>
-                </div>
+          <div
+            style={webStyles.modalOverlay}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowInviteModal(false);
+            }}
+          >
+            <div style={webStyles.modalContent}>
+              <h2 style={webStyles.modalTitle}>Invitar Amigos</h2>
+              <p style={webStyles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
+              <div style={{ maxHeight: 150, overflowY: "auto" }}>
+              {availableFriends.length === 0 ? (
+                <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
+                  Tus amigos ya se han unido a este mapa.
+                </p>
+              ) : (
+                availableFriends.map((friend) => (
+                  <div key={friend.id} style={webStyles.invitedItem}>
+                    <span style={webStyles.friendName}>{friend.name}</span>
+                    <InviteButton friendId={friend.id} onInvite={sendFriendRequest} />
+                  </div>
+                ))
+              )}
             </div>
+              <button style={webStyles.closeButton} onClick={() => setShowInviteModal(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
         );
-    };
+      };
 
     // Modal para confirmar la eliminación de un mapa
     const renderDeleteConfirmModal = () => (
