@@ -868,22 +868,28 @@ const webStyles = StyleSheet.create({
     inviteButton: {
         backgroundColor: "#14b8a6",
         borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingTop: 16,      // Aumenta el espacio superior
+        paddingBottom: 16,   // Aumenta el espacio inferior
+        paddingLeft: 16,     // Aumenta el espacio a la izquierda
+        paddingRight: 16,    // Aumenta el espacio a la derecha
         borderWidth: 0,
         color: "white",
         cursor: "pointer",
-    },
-    closeButton: {
+        fontSize: 16,        // Aumenta el tamaño del texto
+      },
+      closeButton: {
         backgroundColor: "#03045E",
         borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 16,
+        paddingLeft: 16,
+        paddingRight: 16,
         borderWidth: 0,
         color: "white",
         cursor: "pointer",
         marginTop: 20,
-    },
+        fontSize: 16,
+      },
     textArea: {
         minHeight: 80,
         textAlignVertical: "top"
