@@ -7,16 +7,31 @@ import { FriendStatus } from '../models/friend.model';
  */
 export const createFriendController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {requesterId, receiverId, mapId} = req.body; // Datos de la solicitud de amistad
-    const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
-    res.status(201).json(newFriend);
+    const { requesterId, receiverId, mapId } = req.body;
+
+    const result = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
+
+    
+    if ("success" in result) {
+      res.status(400).json(result); // Código 400 si no se pudo crear la solicitud
+      return;
+    }
+    res.status(201).json({
+      success: true,
+      message: "Solicitud enviada correctamente",
+      friend: result, // Devuelve la solicitud creada
+    });
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Error al crear amistad:', 
-      error: error instanceof Error ? error.message : error 
+    res.status(500).json({
+      success: false,
+      message: "Error al crear amistad",
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
+
+
+
 
 /**
  * Controlador para listar solicitudes de amistad según estado.

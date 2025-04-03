@@ -349,7 +349,7 @@ const CollaborativeMapListScreen: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+        Alert.alert("Invitación enviada", `Has invitado a `+ data.friend.recipient.profile.username);
       }
     } catch (error) {
       console.error("Error al enviar solicitud:", error);

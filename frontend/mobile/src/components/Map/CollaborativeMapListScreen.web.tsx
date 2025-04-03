@@ -300,9 +300,11 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
             console.log("Respuesta del backend:", response);
             const data = await response.json();
 
-            if (data.success) {
-                Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
-            }
+      if (data.success) {
+        window.alert("Invitación enviada");
+      }else {
+        window.alert("El usuario ya tiene otra invitación pendiente o ya forma parte del mapa colaborativo.");  
+      }
         } catch (error) {
             console.error("Error al enviar solicitud:", error);
         }

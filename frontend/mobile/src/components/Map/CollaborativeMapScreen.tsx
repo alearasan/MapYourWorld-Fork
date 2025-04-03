@@ -515,24 +515,27 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para invitar a un amigo al mapa colaborativo
-    const sendFriendRequest = async (friendId: string) => {
-      try {
-        console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
-        const response = await fetch(`${API_URL}/api/friends/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
-        });
-        console.log("Respuesta del backend:", response);
-        const data = await response.json();
-        
-        if (data.success) {
-          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
-        }
-      } catch (error) {
-        console.error("Error al enviar solicitud:", error);
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+      });
+      console.log("Respuesta del backend:", response);
+      const data = await response.json();
+      console.log("Respuesta invitacion:", data); // Verifica la estructura en consola
+      
+      if (data.success) {
+        Alert.alert("Invitación enviada", `Has invitado a `+ data.friend.recipient.profile.username);
+      } else {
+        Alert.alert("No se pudo enviar la invitación", "El usuario ya forma parte del mapa o tiene una invitación pendiente.");
       }
-    };
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
