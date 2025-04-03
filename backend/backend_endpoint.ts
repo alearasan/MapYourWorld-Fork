@@ -25,12 +25,34 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: '*', // Permite orígenes seguros
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+const allowedOrigins = [
+  "https://app1.mapyourworld.es",
+  "https://app2.mapyourworld.es",
+  "https://app3.mapyourworld.es",
+  "https://mapyourworld.es",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || process.env.NODE_ENV !== "production") {
+        return callback(null, true); // Permitir cualquier origen en desarrollo
+      }
+      if (allowedOrigins.includes(origin)||origin.includes("mapyourworld")) {
+        return callback(null, true); // Permitir solo orígenes específicos en producción
+      }
+      return callback(new Error("Not allowed by CORS")); // Bloquear origen no autorizado
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(helmet());
+app.use(
+  helmet({
+    xssFilter: true, // Activa X-XSS-Protection: 1; mode=block
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

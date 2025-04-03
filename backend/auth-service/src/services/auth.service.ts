@@ -128,13 +128,13 @@ export const loginUser = async (email: string, password: string): Promise<{ user
     // 1. Buscar usuario por email
     const user = await repo.findWithPassword(email);
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new Error('Credenciales inválidas');
     }
 
     // 2. Verificar contraseña
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error('Credenciales incorrectas');
+      throw new Error('Credenciales inválidas');
     }
 
     // 3. Verificar que la cuenta esté activa
