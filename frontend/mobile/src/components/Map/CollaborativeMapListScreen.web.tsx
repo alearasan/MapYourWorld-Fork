@@ -328,7 +328,7 @@ const CollaborativeMapListScreenWeb: React.FC = () => {
       if (data.success) {
         window.alert("Invitación enviada");
       }else {
-        window.alert("El usuario ya tiene otra invitación pendiente o ya forma parte del mapa colaborativo.");  
+        window.alert("El usuario ya tiene otra invitación pendiente para unirse a mapa.");  
       }
         } catch (error) {
             console.error("Error al enviar solicitud:", error);
