@@ -138,7 +138,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
-  
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const { user } = useAuth();
   useEffect(() => {
       console.log("Usuario actual en Social:", user);
@@ -692,8 +692,16 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         console.error("Error al obtener amigos:", error);
       }
     };
+    const getAvailableFriends = () => {
+      return friends.filter(
+        (friend) =>
+          !invitedFriends.includes(friend.id) &&
+          !mapUsers.some((user) => user.id === friend.id)
+      );
+    };
 
     const renderInviteFriendsModal = () => {
+      const availableFriends = getAvailableFriends();
       return (
         <Modal
           visible={showInviteModal}
@@ -708,23 +716,28 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 Máximo 5 amigos (6 usuarios en total)
               </Text>
     
-              <FlatList
-                data={friends}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.invitedItem}>
-                    <Text style={styles.friendName}>{item.name}</Text>
-                    <TouchableOpacity 
-                      style={styles.inviteButton} 
-                      onPress={() => sendFriendRequest(item.id)}
-                    >
-                      <Text style={styles.inviteButtonText}>Invitar</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
+              {availableFriends.length === 0 ? (
+                <Text style={styles.noFriendsText}>
+                  Tus amigos ya se han unido a este mapa.
+                </Text>
+              ) : (
+                <FlatList
+                  data={availableFriends}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.invitedItem}>
+                      <Text style={styles.friendName}>{item.name}</Text>
+                      <TouchableOpacity
+                        style={styles.inviteButton}
+                        onPress={() => sendFriendRequest(item.id)}
+                      >
+                        <Text style={styles.inviteButtonText}>Invitar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+              )}
     
-              {/* Botón para cerrar el modal */}
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setShowInviteModal(false)}
@@ -973,6 +986,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     elevation: 5,
+  },
+  noFriendsText: {
+    textAlign: "center",
+    color: "#666",
+    marginVertical: 10,
+    fontSize: 16,
   },
   modalTitle: {
     fontSize: 20,

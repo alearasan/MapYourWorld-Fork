@@ -651,15 +651,17 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
     });
     setShowForm(true);
   };
-
+  const getAvailableFriends = () =>
+    friends.filter(
+      (friend) =>
+        !invitedFriends.includes(friend.id) &&
+        !mapUsers.some((user) => user.id === friend.id)
+    );
   // Modal para invitar amigos con lista filtrada de quienes ya fueron invitados o están unidos
   const renderInviteFriendsModal = () => {
     if (!showInviteModal) return null;
-    const availableFriends = friends.filter(
-      (friend) =>
-        !invitedFriends.includes(friend.id) &&
-        !mapUsers.some((mu) => mu.id === friend.id)
-    );
+    const availableFriends = getAvailableFriends();
+  
     return (
       <div
         style={styles.modalOverlay}
@@ -671,13 +673,19 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
           <h2 style={styles.modalTitle}>Invitar Amigos</h2>
           <p style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
-            {availableFriends.map((friend) => (
+          {availableFriends.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
+              Tus amigos ya se han unido a este mapa.
+            </p>
+          ) : (
+            availableFriends.map((friend) => (
               <div key={friend.id} style={styles.invitedItem}>
                 <span style={styles.friendName}>{friend.name}</span>
                 <InviteButton friendId={friend.id} onInvite={sendFriendRequest} />
               </div>
-            ))}
-          </div>
+            ))
+          )}
+        </div>
           <button style={styles.closeButton} onClick={() => setShowInviteModal(false)}>
             Cerrar
           </button>
