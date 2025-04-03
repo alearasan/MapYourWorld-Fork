@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#0096C7", // Tono medio para el botón
+    backgroundColor: "#14b8a6", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,

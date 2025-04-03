@@ -917,7 +917,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 1001,
   },
   inviteButton: {
-    backgroundColor: "#0096C7",
+    backgroundColor: "#14b8a6",
     borderRadius: 8,
     padding: "10px 20px",
     border: "none",
