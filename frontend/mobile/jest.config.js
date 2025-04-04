@@ -13,6 +13,9 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverage: true,
+  collectCoverageFrom: [
+    'src/components/**/*.*'
+  ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
   
 }; 
