@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput, Button } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput, Button, Modal, StyleSheet  } from 'react-native';
 import { styled } from 'nativewind';
 import { API_URL } from '../../constants/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { request } from 'http';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from "../../navigation/types";
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
 const StyledScrollView = styled(ScrollView);
 const StyledInput = styled(TextInput);
 
+
+interface CollaborativeMap {
+  id: string;
+  name: string;
+  description: string;
+  is_colaborative: boolean;
+  users_joined: {
+    id: string;
+    username: string;
+  }[];
+  created_at?: string;
+}
+type NavigationProps = NavigationProp<RootStackParamList, 'SocialScreen'>;
 const SocialScreen = () => {
   const [friendRequests, setFriendRequests] = useState<{ id: string; name: string; requestType: string, mapId: string}[]>([]);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
@@ -19,11 +34,74 @@ const SocialScreen = () => {
   const [activeTab, setActiveTab] = useState<'amigos' | 'solicitudes' | 'buscar'>('amigos');
   const [userId, setUserId] = useState<string | null>(null);
   const { user } = useAuth();
+  const [maps, setMaps] = useState<CollaborativeMap[]>([]);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const navigation = useNavigation<NavigationProps>();
   
   // Verificamos el usuario con un console.log
   useEffect(() => {
     console.log("Usuario actual en Social:", user);
   }, [user]);
+
+  useEffect(() => {
+        const fetchSubscription = async () => {
+          try {
+            if (!userId) return;
+            const response = await fetch(`${API_URL}/api/subscriptions/active/${userId}`, {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            if (!response.ok) {
+              throw new Error(`Error en la solicitud de subscripción: ${response.statusText}`);
+            }
+            const data = await response.json();
+            setSubscription(data);
+          } catch (error) {
+            console.error("Error al obtener la subscripción", error);
+          }
+        };
+        const fetchCollaborativeMaps = async () => {
+          try {
+            if (!userId) {
+              console.warn("No se encontró el ID del usuario");
+              return;
+            }
+        
+            console.log(`Obteniendo mapas colaborativos para el usuario: ${userId}`);
+            const response = await fetch(`${API_URL}/api/maps/collaborative/user/${userId}`);
+        
+            if (!response.ok) {
+              console.warn(`Error en la petición: ${response.status}`);
+              setMaps([]); // Limpia en caso de error
+              return;
+            }
+        
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+              console.warn("La respuesta no es JSON válido");
+              setMaps([]);
+              return;
+            }
+        
+            const data = await response.json();
+            console.log("Respuesta de mapas colaborativos:", data);
+        
+            if (data.success && data.maps) {
+              setMaps(data.maps);
+            } else {
+              setMaps([]);
+            }
+          } catch (error) {
+            console.error("Error al obtener los mapas colaborativos:", error);
+            setMaps([]);
+          } finally {
+            console.log("Petición de mapas colaborativos finalizada");
+          }
+        };
+        fetchCollaborativeMaps();
+        fetchSubscription();
+  }, [userId]);
 
   useEffect(() => {
     if (user && user.id) {
@@ -62,6 +140,9 @@ const SocialScreen = () => {
       console.error("Error al obtener amigos:", error);
     }
   };
+
+  
+  
 
   // Obtener solicitudes de amistad pendientes
   const fetchFriendRequests = async (userId: string) => {
@@ -110,28 +191,37 @@ const SocialScreen = () => {
 
 
   const joinMap = async (friendId: string, status: 'ACCEPTED' | 'DELETED', mapId: string) => {
-    console.log(`Uniendo a mapa ${mapId} con estado ${userId}`);
+
+    console.log(`Uniendo a mapa ${mapId} con estado ${status} para el usuario ${userId}`);
+
+    if (subscription?.plan !== "PREMIUM" && status === 'ACCEPTED' && maps.length >= 1) {
+      setShowUpgradeModal(true);
+      return;
+    }
+  
     try {
       const response = await fetch(`${API_URL}/api/collabMap/join/${mapId}/${userId}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json", 
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ friendId }), // Aquí se incluye el friendId
+        body: JSON.stringify({ friendId }),
       });
       const data = await response.json();
+  
       if (data.success) {
-        if (status === 'ACCEPTED' && user) {
-          Alert.alert("Invitación Aceptada, te has unido al mapa");
+        if (status === 'ACCEPTED') {
+          Alert.alert("Invitación aceptada", "Te has unido al mapa.");
         } else {
-          Alert.alert("Invitación Rechazada", `La invitación ha sido eliminada.`);
+          Alert.alert("Invitación rechazada", "La invitación ha sido eliminada.");
         }
         setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
       }
     } catch (error) {
-      console.error(`Error al actualizar Invitación (${status}):`, error);
+      console.error(`Error al actualizar invitación (${status}):`, error);
     }
   };
+  
 
   const searchFriends = async () => {
     try {
@@ -269,6 +359,7 @@ const SocialScreen = () => {
   );
 
   return (
+  <>
     <StyledScrollView className="flex-1 p-6 bg-gray-100">
       {/* Tabs */}
       <StyledView className="flex-row justify-around mb-8">
@@ -281,11 +372,105 @@ const SocialScreen = () => {
           </TouchableOpacity>
         ))}
       </StyledView>
-  
+
       {activeTab === 'amigos' && renderFriends()}
       {activeTab === 'solicitudes' && renderRequests()}
       {activeTab === 'buscar' && renderSearch()}
     </StyledScrollView>
-  );
+
+    {/* Modal premium */}
+    <Modal
+      visible={showUpgradeModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setShowUpgradeModal(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Oops</Text>
+          <Text style={styles.inputLabel}>
+            Tienes que ser usuario premium para unirte a más de un mapa colaborativo.
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setShowUpgradeModal(false)}
+            >
+              <Text style={[styles.buttonText, { color: "#fff" }]}>Volver</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.createButton]}
+              onPress={() => {
+                setShowUpgradeModal(false);
+                navigation.navigate("Payment");
+              }}
+            >
+              <Text style={styles.buttonText}>Mejorar a Premium</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  </>
+);
+
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo semitransparente
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 12,
+    color: "#333",
+  },
+  inputLabel: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  cancelButton: {
+    backgroundColor: "#aaa",
+  },
+  createButton: {
+    backgroundColor: "#2196F3",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});
+
 export default SocialScreen; 
