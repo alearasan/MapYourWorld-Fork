@@ -262,7 +262,7 @@ const SocialScreen = () => {
       const data = await response.json();
       
       if (data.success) {
-        Alert.alert("Solicitud de amistad enviada", `Has enviado uan solicitud de amistad a `+ data.friend.recipient.profile.username);
+        Alert.alert("Solicitud de amistad enviada", `Has enviado una solicitud de amistad a `+ data.friend.recipient.profile.username);
       } else {
          Alert.alert("No se pudo enviar la solicitud de amistad", "El usuario ya es tu amigo o tiene una solicitud pendiente.");
       }
