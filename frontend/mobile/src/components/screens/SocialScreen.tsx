@@ -47,13 +47,13 @@ const SocialScreen = () => {
       const response = await fetch(`${API_URL}/api/friends/friends/${userId}`);
       const data = await response.json();
   
-      console.log("Respuesta del backend:", data); // Verifica la estructura en consola
+      console.log("Respuesta de lista de amigos", data); // Verifica la estructura en consola
   
       if (Array.isArray(data)) {
         // Si la respuesta es directamente un array de usuarios, lo asignamos
         setFriends(data.map((user) => ({
           id: user.id,
-          name: user.email, // Puedes usar otra propiedad si el backend la tiene
+          name: user.profile.username, // Puedes usar otra propiedad si el backend la tiene
         })));
       } else {
         console.warn("Formato inesperado en la respuesta de amigos:", data);
@@ -72,11 +72,12 @@ const SocialScreen = () => {
         setFriendRequests(
           data.map((friend) => ({
             id: friend.id,
-            name: friend.requester.email,
+            name: friend.requester.profile.username,
             requestType: friend.requestType,
             mapId: friend.requestType === 'MAP' ? friend.map.id || null : null,
           }))
         );
+         
       } else {
         console.warn("Formato inesperado de la respuesta:", data);
       }
@@ -95,10 +96,10 @@ const SocialScreen = () => {
       if (data.success) {
         if (status === 'ACCEPTED' && user) {
           setFriends([...friends, { id: friendId, name: data.name }]);
-          Alert.alert("Solicitud Aceptada", `${data.name} ahora es tu amigo.`);
+          Alert.alert("Solicitud Aceptada", ` Ahora sois amigos, ¡A explorar!.`);
           fetchFriends(user.id);
         } else {
-          Alert.alert("Solicitud Rechazada", `${data.name} ha sido eliminada.`);
+          Alert.alert("Solicitud Rechazada", `La solicitud ha sido eliminada.`);
         }
         setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
       }
@@ -123,7 +124,7 @@ const SocialScreen = () => {
         if (status === 'ACCEPTED' && user) {
           Alert.alert("Invitación Aceptada, te has unido al mapa");
         } else {
-          Alert.alert("Invitación Rechazada", `${data.name} ha sido eliminada.`);
+          Alert.alert("Invitación Rechazada", `La invitación ha sido eliminada.`);
         }
         setFriendRequests(friendRequests.filter((r) => r.id !== friendId));
       }
@@ -138,14 +139,14 @@ const SocialScreen = () => {
       const response = await fetch(`${API_URL}/api/friends/search/${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
   
-      console.log("🔍 Respuesta del backend:", data); // Debug para verificar el formato
+      console.log("🔍 Respuesta de la busqueda:", data); // Debug para verificar el formato
   
       if (Array.isArray(data)) {
         // ✅ Transformamos los datos para que coincidan con el formato `{ id, name }`
         setSearchResults(
-          data.map((user: { id: string; email: string }) => ({
+          data.map((user: { id: string; profile: { username: string } }) => ({
             id: user.id,
-            name: user.email, // Se usa `email` como `name`
+            name: user.profile.username, // Se usa `email` como `name`
           }))
         );
       } else {
@@ -171,7 +172,9 @@ const SocialScreen = () => {
       const data = await response.json();
       
       if (data.success) {
-        Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
+        Alert.alert("Solicitud de amistad enviada", `Has enviado uan solicitud de amistad a `+ data.friend.recipient.profile.username);
+      } else {
+         Alert.alert("No se pudo enviar la solicitud de amistad", "El usuario ya es tu amigo o tiene una solicitud pendiente.");
       }
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
@@ -246,7 +249,7 @@ const SocialScreen = () => {
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
       <StyledInput
         className="border p-2 mb-4 rounded-lg"
-        placeholder="Buscar amigos..."
+        placeholder="Buscar amigos por nombre de usuario"
         value={searchQuery}
         onChangeText={setSearchQuery}
       />

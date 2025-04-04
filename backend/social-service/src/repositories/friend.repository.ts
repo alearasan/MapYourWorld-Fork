@@ -23,6 +23,8 @@ export default class FriendRepository {
       .andWhere('friend.status = :status', { status })
       .leftJoinAndSelect('friend.requester', 'requester')
       .leftJoinAndSelect('friend.recipient', 'recipient')
+      .leftJoinAndSelect('recipient.profile', 'profileRecipient')
+      .leftJoinAndSelect('requester.profile', 'profileRequester')
       .getMany();
   }
 
@@ -102,6 +104,7 @@ export default class FriendRepository {
       .where('friend.recipientId = :userId', { userId })
       .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
       .leftJoinAndSelect('friend.requester', 'requester')
+      .leftJoinAndSelect('requester.profile', 'profile')
       .leftJoinAndSelect('friend.map', 'map')
       .getMany();
   }
