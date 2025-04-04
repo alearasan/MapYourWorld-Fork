@@ -138,7 +138,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
-  
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const { user } = useAuth();
   useEffect(() => {
       console.log("Usuario actual en Social:", user);
@@ -318,21 +318,16 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         const assignedColors: { [key: string]: string } = {}; // idUsuario -> color
 
         // Recorrer usuarios y asignar colores únicos
-        const usersWithColors = data.users.map((user: { id: string; username: string; color?: string }, index: number) => {
-          let color = user.color; // Intentamos recuperar su color de la BD
-          
+        const usersWithColors = data.users.map((user: any, index: number) => {
+          let color = user.color;
           if (!color) {
-            // Buscar el primer color disponible que no esté asignado aún
             const availableColorIndex = USER_COLORS.findIndex((col) => !Object.values(assignedColors).includes(col));
-            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080"; // Gris si no hay colores disponibles
-            
-            // Guardamos la asignación en el objeto temporal
+            color = availableColorIndex !== -1 ? USER_COLORS[availableColorIndex] : "#808080";
             assignedColors[user.id] = color;
           }
-
           return {
             id: user.id,
-            username: user.username || `Usuario ${index + 1}`,
+            username: user.profile?.username || `Usuario ${index + 1}`,
             color: color
           };
         });
@@ -393,7 +388,30 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
       console.error("Error al desbloquear el distrito en el mapa colaborativo:", error);
     }
   };
-  
+  const handleMapPress = (coordinate: { latitude: number; longitude: number }) => {
+    let poiDistrict: Distrito | null = null;
+    for (const d of distritosBackend) {
+      if (isPointInPolygon(coordinate, d.coordenadas)) {
+        poiDistrict = d;
+        break;
+      }
+    }
+    if (!poiDistrict) {
+      Alert.alert("Ubicación no válida", "No puedes crear un punto de interés fuera de un distrito.");
+      return;
+    }
+    if (!poiDistrict.isUnlocked) {
+      Alert.alert("Distrito bloqueado", `El distrito "${poiDistrict.nombre}" está bloqueado.`);
+      return;
+    }
+    setPointOfInterest({
+      ...pointOfInterest,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+      district: poiDistrict,
+    });
+    setShowForm(true);
+  };
 
   // Función para inicializar el mapa colaborativo
   const initializeMap = async () => {
@@ -497,24 +515,27 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
   };
 
   // Función para invitar a un amigo al mapa colaborativo
-    const sendFriendRequest = async (friendId: string) => {
-      try {
-        console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
-        const response = await fetch(`${API_URL}/api/friends/create`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
-        });
-        console.log("Respuesta del backend:", response);
-        const data = await response.json();
-        
-        if (data.success) {
-          Alert.alert("Solicitud enviada", `Has enviado una solicitud a ${data.name}`);
-        }
-      } catch (error) {
-        console.error("Error al enviar solicitud:", error);
+  const sendFriendRequest = async (friendId: string) => {
+    try {
+      console.log(`mapa colaborativo ${mapId} para ${friendId} enviada por ${user?.id}`);
+      const response = await fetch(`${API_URL}/api/friends/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+      });
+      console.log("Respuesta del backend:", response);
+      const data = await response.json();
+      console.log("Respuesta invitacion:", data); // Verifica la estructura en consola
+      
+      if (data.success) {
+        Alert.alert("Invitación enviada", `Has invitado a `+ data.friend.recipient.profile.username);
+      } else {
+        Alert.alert("No se pudo enviar la invitación", "El usuario ya tiene una invitación pendiente para este mapa.");
       }
-    };
+    } catch (error) {
+      console.error("Error al enviar solicitud:", error);
+    }
+  };
 
   // Función para iniciar el seguimiento de ubicación
   const startLocationTracking = async () => {
@@ -671,8 +692,16 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
         console.error("Error al obtener amigos:", error);
       }
     };
+    const getAvailableFriends = () => {
+      return friends.filter(
+        (friend) =>
+          !invitedFriends.includes(friend.id) &&
+          !mapUsers.some((user) => user.id === friend.id)
+      );
+    };
 
     const renderInviteFriendsModal = () => {
+      const availableFriends = getAvailableFriends();
       return (
         <Modal
           visible={showInviteModal}
@@ -687,23 +716,28 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
                 Máximo 5 amigos (6 usuarios en total)
               </Text>
     
-              <FlatList
-                data={friends}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.invitedItem}>
-                    <Text style={styles.friendName}>{item.name}</Text>
-                    <TouchableOpacity 
-                      style={styles.inviteButton} 
-                      onPress={() => sendFriendRequest(item.id)}
-                    >
-                      <Text style={styles.inviteButtonText}>Invitar</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              />
+              {availableFriends.length === 0 ? (
+                <Text style={styles.noFriendsText}>
+                  Tus amigos ya se han unido a este mapa.
+                </Text>
+              ) : (
+                <FlatList
+                  data={availableFriends}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.invitedItem}>
+                      <Text style={styles.friendName}>{item.name}</Text>
+                      <TouchableOpacity
+                        style={styles.inviteButton}
+                        onPress={() => sendFriendRequest(item.id)}
+                      >
+                        <Text style={styles.inviteButtonText}>Invitar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+              )}
     
-              {/* Botón para cerrar el modal */}
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setShowInviteModal(false)}
@@ -784,6 +818,10 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               longitudeDelta: 0.1,
             }}
             showsUserLocation={true}
+            onPress={(e) => {
+              const { latitude, longitude } = e.nativeEvent.coordinate;
+              handleMapPress({ latitude, longitude });
+            }}
           >
            {distritosBackend.map((distrito, index) => {
   return (
@@ -949,6 +987,12 @@ const styles = StyleSheet.create({
     padding: 20,
     elevation: 5,
   },
+  noFriendsText: {
+    textAlign: "center",
+    color: "#666",
+    marginVertical: 10,
+    fontSize: 16,
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -974,7 +1018,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   inviteButton: {
-    backgroundColor: "#0096C7", // Tono medio para el botón
+    backgroundColor: "#14b8a6", // Tono medio para el botón
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
