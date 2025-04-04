@@ -38,6 +38,9 @@ const UserAchievementsScreen = () => {
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
+  const [filter, setFilter] = useState<'user' | 'all'>('user');
+
+
   const showAlert = (
     title: string,
     message: string,
@@ -94,9 +97,33 @@ const UserAchievementsScreen = () => {
       }
     };
 
+    const fetchAllAchievements = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/api/achievements`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        setAchievements(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al obtener todos los logros", error);
+        setError("Error al obtener todos los logros");
+        setLoading(false);
+      }
+    };
+
+
     fetchSubscription();
-    fetchAchievements();
-  }, [user]);
+    if (filter === 'user') {
+      fetchAchievements();
+    } else {
+      fetchAllAchievements();
+    }
+  }, [user, filter]);
+
 
   const createAchievement = async () => {
     if (!achievementName.trim()) {
@@ -152,7 +179,7 @@ const UserAchievementsScreen = () => {
         }}
       >
         <div style={{ marginBottom: 20 }}>
-          <ActivityIndicator size="large" color="#2bbbad" />
+          <ActivityIndicator size="large" color="#14b8a6" />
         </div>
         <div style={{ color: '#4b5563', fontSize: 16 }}>Cargando logros...</div>
       </div>
@@ -184,26 +211,76 @@ const UserAchievementsScreen = () => {
         backgroundColor: '#f9fafb',
         margin: '0 auto',
         minWidth: '60%',
+        maxHeight: '100vh',
+        overflowY: 'auto',
         padding: 16,
         marginTop: 16,
-        minHeight: '100vh',
-        boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 0 8px rgba(0, 0, 0, 0.1)',
       }}
     >
-      {/* Cabecera */}
+
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          backgroundColor: 'rgb(43, 187, 173)',
-          padding: '12px 16px',
-          borderRadius: 40,
+          justifyContent: 'space-between',
           marginBottom: 16,
-          width: 'fit-content',
+          gap: 16,
         }}
       >
-        <button
+        {/* Contenedor de botones de filtro */}
+        <div style={{ display: 'flex', flex: 1, gap: '1rem' }}>
+          <button
+            onClick={() => setFilter('user')}
+            style={{
+              flex: 1,
+              padding: '10px 20px',
+              borderRadius: 8,
+              border: filter === 'user' ? '2px solid #14b8a6' : '1px solid #ddd',
+              backgroundColor: filter === 'user' ? '#2bbbad' : 'white',
+              color: filter === 'user' ? 'white' : '#2bbbad',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Logros obtenidos
+          </button>
+          <button
+            onClick={() => setFilter('all')}
+            style={{
+              flex: 1,
+              padding: '10px 20px',
+              borderRadius: 8,
+              border: filter === 'all' ? '2px solid #14b8a6' : '1px solid #ddd',
+              backgroundColor: filter === 'all' ? '#2bbbad' : 'white',
+              color: filter === 'all' ? 'white' : '#2bbbad',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Todos los logros
+          </button>
+        </div>
+
+        {/* Botón de crear logro */}
+        <div
+          style={{
+            backgroundColor: 'rgb(43, 187, 173)',
+            padding: '8px',
+            borderRadius: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 48,
+            height: 48,
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            flexShrink: 0,
+          }}
           onClick={() => {
             if (subscription && subscription.plan !== "PREMIUM") {
               showAlert(
@@ -218,72 +295,84 @@ const UserAchievementsScreen = () => {
               setShowCreateModal(true);
             }
           }}
-          style={{
-            backgroundColor: 'rgb(43, 187, 173)',
-            border: 'none',
-            borderRadius: '35px',
-            width: '40px',
-            height: '40px',
-            cursor: 'pointer',
-          }}
         >
           <Icon name="add" size={24} color="white" />
-        </button>
+        </div>
       </div>
 
-      {/* Lista de logros */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          rowGap: 32,
-          columnGap: 16,
-        }}
-      >
-        {achievements.map((achievement, index) => (
-          <div
-            key={index}
-            style={{
-              backgroundColor: 'white',
-              borderRadius: 12,
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              padding: 20,
-              display: 'flex',
-              alignItems: 'center',
-              minHeight: '20vh',
-            }}
-          >
-            <img
-              src={achievement.iconUrl}
-              alt={achievement.name}
-              style={{
-                width: 60,
-                height: 60,
-                marginRight: 15,
-                borderRadius: 8,
-              }}
-            />
+
+     {/* Lista de logros o mensaje vacío */}
+      {achievements.length === 0 ? (
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            color: '#6b7280',
+            fontSize: 18,
+            fontWeight: 500,
+          }}
+        >
+          {filter === 'user'
+            ? 'Aún no has obtenido logros.'
+            : 'Aún no se han creado logros.'}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            rowGap: 32,
+            columnGap: 16,
+          }}
+        >
+          {achievements.map((achievement, index) => (
             <div
-              style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column',
-                gap: '0.75rem',
+              key={index}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 12,
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                padding: 20,
+                display: 'flex',
+                alignItems: 'center',
+                minHeight: '20vh',
               }}
             >
-              <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#0d9488' }}>
-                {achievement.name}
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: 16 }}>
-                {achievement.description}
-              </p>
-              <p style={{ color: '#6b7280', fontSize: 14 }}>
-                Puntos: {achievement.points}
-              </p>
+              <img
+                src={achievement.iconUrl}
+                alt={achievement.name}
+                style={{
+                  width: 100,
+                  height: 100,
+                  marginRight: 20,
+                  borderRadius: 12,
+                  objectFit: 'cover',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                <h3 style={{ fontSize: 24, fontWeight: 'bold', color: '#0d9488' }}>
+                  {achievement.name}
+                </h3>
+                <p style={{ color: '#6b7280', fontSize: 16 }}>
+                  {achievement.description}
+                </p>
+                <p style={{ color: '#6b7280', fontSize: 14 }}>
+                  Puntos: {achievement.points}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
 
       {/* Modal de creación */}
       {showCreateModal && (
@@ -303,36 +392,41 @@ const UserAchievementsScreen = () => {
           <div
             style={{
               backgroundColor: 'white',
+              padding: 40,
               borderRadius: 12,
-              padding: 20,
-              maxWidth: 400,
-              width: '85%',
+              width: '410px',
+              maxWidth: '410px',
+              margin: '0 auto',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             }}
           >
-            {/* Título alineado a la izquierda */}
+            <style dangerouslySetInnerHTML={{ __html: customInputStyles }} />
+
             <h2
               style={{
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: 'bold',
-                textAlign: 'left',
-                marginBottom: 20,
+                marginBottom: 30,
+                textAlign: 'center',
               }}
             >
-              Crear Logro
+              ¡Crea tu propio logro!
             </h2>
 
             {/* Nombre del logro */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="input-container" style={{ marginBottom: 20 }}>
               <label
                 style={{
                   fontSize: 16,
                   fontWeight: 500,
                   marginBottom: 8,
                   display: 'block',
-                  textAlign: 'left'
+                  textAlign: 'left',
                 }}
               >
-                Nombre del logro*
+                Nombre*
               </label>
               <input
                 type="text"
@@ -340,24 +434,19 @@ const UserAchievementsScreen = () => {
                 onChange={(e) => setAchievementName(e.target.value)}
                 placeholder="Ej: Explorador Maestro"
                 maxLength={30}
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 10,
-                  width: '100%',
-                }}
+                className="input-field"
               />
             </div>
 
             {/* Descripción */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="input-container" style={{ marginBottom: 20 }}>
               <label
                 style={{
                   fontSize: 16,
                   fontWeight: 500,
                   marginBottom: 8,
                   display: 'block',
-                  textAlign: 'left'
+                  textAlign: 'left',
                 }}
               >
                 Descripción
@@ -367,25 +456,20 @@ const UserAchievementsScreen = () => {
                 onChange={(e) => setAchievementDescription(e.target.value)}
                 placeholder="Descripción del logro"
                 maxLength={100}
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 10,
-                  width: '100%',
-                  minHeight: 80,
-                }}
+                className="input-field"
+                style={{ minHeight: 80 }}
               />
             </div>
 
             {/* Puntos */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="input-container" style={{ marginBottom: 20 }}>
               <label
                 style={{
                   fontSize: 16,
                   fontWeight: 500,
                   marginBottom: 8,
                   display: 'block',
-                  textAlign: 'left'
+                  textAlign: 'left',
                 }}
               >
                 Puntos
@@ -395,24 +479,19 @@ const UserAchievementsScreen = () => {
                 value={achievementPoints.toString()}
                 onChange={(e) => setAchievementPoints(Number(e.target.value))}
                 placeholder="Puntos del logro"
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 10,
-                  width: '100%',
-                }}
+                className="input-field"
               />
             </div>
 
             {/* Ícono del logro */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="input-container" style={{ marginBottom: 20 }}>
               <label
                 style={{
                   fontSize: 16,
                   fontWeight: 500,
                   marginBottom: 8,
                   display: 'block',
-                  textAlign: 'left'
+                  textAlign: 'left',
                 }}
               >
                 Ícono del logro
@@ -422,17 +501,97 @@ const UserAchievementsScreen = () => {
                 value={achievementIcon}
                 onChange={(e) => setAchievementIcon(e.target.value)}
                 placeholder="URL del icono"
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: 8,
-                  padding: 10,
-                  width: '100%',
-                }}
+                className="input-field"
               />
             </div>
+            {/* TODO: PERMITIR DRAG DE IMAGEN */}
+            {/* Ícono del logro */}
+            {/* Campo de imagen por drag & drop */}
+            {/* <div className="input-container" style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  display: 'block',
+                  textAlign: 'left',
+                }}
+              >
+                Ícono del logro
+              </label>
+
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setAchievementIcon(reader.result as string); // base64 image
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                onClick={() => document.getElementById('icon-input')?.click()}
+                style={{
+                  border: '2px dashed #ccc',
+                  borderRadius: 8,
+                  padding: '20px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: '#f9fafb',
+                }}
+              >
+                {achievementIcon && achievementIcon !== iconPlaceholder ? (
+                  <img
+                    src={achievementIcon}
+                    alt="Preview"
+                    style={{ width: 60, height: 60, objectFit: 'cover', margin: '0 auto' }}
+                  />
+                ) : (
+                  <span style={{ color: '#888' }}>Arrastra una imagen aquí o haz clic para seleccionar</span>
+                )}
+                <input
+                  id="icon-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && file.type.startsWith('image/')) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAchievementIcon(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
+            </div> */}
+
 
             {/* Botones */}
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+            <button
+                onClick={createAchievement}
+                style={{
+                  flex: 1,
+                  padding: '12px 0',
+                  borderRadius: 8,
+                  backgroundColor: '#14b8a6',
+                  border: 'none',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  marginLeft: 8,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                }}
+              >
+                Crear
+              </button>
               <button
                 onClick={() => setShowCreateModal(false)}
                 style={{
@@ -440,33 +599,17 @@ const UserAchievementsScreen = () => {
                   padding: '12px 0',
                   borderRadius: 8,
                   backgroundColor: '#ffffff',
-                  border: '2px solid #2bbbad',
+                  borderWidth: 1,
+                  borderColor: '#e2e8f0',
                   color: '#2bbbad',
                   fontWeight: 'bold',
                   fontSize: 16,
                   marginRight: 8,
                   cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                 }}
               >
                 Cancelar
-              </button>
-
-              <button
-                onClick={createAchievement}
-                style={{
-                  flex: 1,
-                  padding: '12px 0',
-                  borderRadius: 8,
-                  backgroundColor: '#2bbbad',
-                  border: 'none',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: 16,
-                  marginLeft: 8,
-                  cursor: 'pointer',
-                }}
-              >
-                Crear
               </button>
             </div>
           </div>
@@ -487,5 +630,28 @@ const UserAchievementsScreen = () => {
     </div>
   );
 };
+
+const customInputStyles = `
+  .input-container input,
+  .input-container textarea {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    height: 44px;
+    box-sizing: border-box;
+    width: 100%;
+    appearance: none;
+  }
+  
+  .input-container textarea {
+    height: auto;
+  }
+
+  .input-container {
+    margin-bottom: 20px;
+  }
+`;
+
 
 export default UserAchievementsScreen;

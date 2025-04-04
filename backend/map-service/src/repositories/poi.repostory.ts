@@ -139,7 +139,14 @@ export class PointOfInterestRepository {
         return pois;
     };
 
-
+    
+// dado un id de usuario, quiero todos los puntos de interes de ese usuario.
+    async getPointsOfInterestByUserId(userId: string): Promise<PointOfInterest[]> {
+        const pois = await this.poiRepo.find({
+            where: { user: { id: userId } }
+        })
+        return pois;
+    }
 
 
      async createPoiInAllMaps(poiData: Omit<PointOfInterest, 'id'>): Promise<void> {

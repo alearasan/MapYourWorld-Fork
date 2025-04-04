@@ -7,8 +7,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-// import { connect as connectRabbitMQ } from '@shared/libs/rabbitmq';
-import socialRouter from './routes/social.routes';
 import photoRouter from './routes/photo.routes';
 
 // Dummy RabbitMQ connect function for development
@@ -30,8 +28,6 @@ app.use(helmet());
 app.use(express.json({ limit: '10mb' })); // Aumentar límite para subida de imágenes
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
-app.use('/api/social', socialRouter);
 app.use('/api/photos', photoRouter);
 
 // Ruta de salud para verificar que el servicio está funcionando
@@ -60,3 +56,5 @@ const startServer = async () => {
 };
 
 startServer(); 
+
+export default app;

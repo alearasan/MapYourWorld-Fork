@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as FriendService from '../services/friend.service'; // Importamos el servicio
+import * as FriendService from '../services/friend.service'; 
 import { FriendStatus } from '../models/friend.model';
 
 /**
