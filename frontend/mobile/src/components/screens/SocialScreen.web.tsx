@@ -166,7 +166,7 @@ const SocialScreenWeb = () => {
       });
       const data = await response.json();
       if (data.success) {
-              window.alert("Solicitud de amistad enviada a"+ data.friend.recipient.profile.username);
+              window.alert("Solicitud de amistad enviada a "+ data.friend.recipient.profile.username);
       } else {
               window.alert("No se pudo enviar la solicitud de amistad, el usuario ya es tu amigo o tiene una solicitud pendiente.");
       }
