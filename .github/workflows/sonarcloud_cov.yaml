@@ -40,6 +40,6 @@ jobs:
             -Dsonar.organization=ispp-grupo-7
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info=frontend/coverage/lcov.info,backend/coverage/lcov.info
             -Dsonar.test.inclusions=backend/**/tests/*.*,backend/**/src/tests/*.*,frontend/mobile/src/test/components/**/*.*
-            -Dsonar.coverage.exclusions=backend/**/src/models/*.*,backend/**/src/repositories/*.*,backend/**/src/routes/*.*,backend/**/models/*.*,backend/**/repositories/*.*,backend/**/routes/*.*
+            -Dsonar.coverage.exclusions=backend/**/src/models/*.*,backend/**/src/repositories/*.*,backend/**/src/routes/*.*,backend/**/models/*.*,backend/**/repositories/*.*,backend/**/routes/*.*,backend/**/controllers/*.*,backend/**/src/controllers/*.*
             -Dsonar.coverage.inclusions=backend/**/src/services/*.*,backend/**/services/*.*,frontend/mobile/src/components/**/*.*
 
