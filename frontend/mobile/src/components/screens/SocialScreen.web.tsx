@@ -63,7 +63,7 @@ const SocialScreenWeb = () => {
         setFriends(
           data.map((userItem: any) => ({
             id: userItem.id,
-            name: userItem.email,
+            name: userItem.profile.username,
           }))
         );
       }
@@ -80,7 +80,7 @@ const SocialScreenWeb = () => {
         setFriendRequests(
           data.map((friend: any) => ({
             id: friend.id,
-            name: friend.requester.email,
+            name: friend.requester.profile.username,
             requestType: friend.requestType,
             mapId: friend.requestType === 'MAP' ? friend.map?.id || null : null,
           }))
@@ -99,9 +99,9 @@ const SocialScreenWeb = () => {
       const data = await response.json();
       if (data.success) {
         if (status === 'ACCEPTED' && user) {
-          Alert.alert('Solicitud Aceptada', `${data.name} ahora es tu amigo.`);
+          window.alert("Ahora sois amigos, ¡A explorar!.");
         } else {
-          Alert.alert('Solicitud Rechazada', `${data.name} ha sido eliminada.`);
+          window.alert("Solicitud Rechazada La solicitud ha sido eliminada.");
         }
         // Quitamos la solicitud de la lista
         setFriendRequests((prev) => prev.filter((r) => r.id !== friendId));
@@ -125,9 +125,9 @@ const SocialScreenWeb = () => {
       const data = await response.json();
       if (data.success) {
         if (status === 'ACCEPTED' && user) {
-          Alert.alert('Invitación Aceptada', 'Te has unido al mapa.');
+          window.alert('Invitación Aceptada. !Te has unido al mapa!');
         } else {
-          Alert.alert('Invitación Rechazada', 'Has rechazado la invitación.');
+          window.alert('Invitación Rechazada la invitación ha sido eliminada.');
         }
         // Quitamos la solicitud de la lista
         setFriendRequests((prev) => prev.filter((r) => r.id !== friendId));
@@ -145,7 +145,7 @@ const SocialScreenWeb = () => {
         setSearchResults(
           data.map((userItem: any) => ({
             id: userItem.id,
-            name: userItem.email,
+            name: userItem.profile.username,
           }))
         );
       } else {
@@ -166,7 +166,9 @@ const SocialScreenWeb = () => {
       });
       const data = await response.json();
       if (data.success) {
-        Alert.alert('Solicitud enviada', `Has enviado una solicitud a ${data.name}`);
+              window.alert("Solicitud de amistad enviada a"+ data.friend.recipient.profile.username);
+      } else {
+              window.alert("No se pudo enviar la solicitud de amistad, el usuario ya es tu amigo o tiene una solicitud pendiente.");
       }
     } catch (error) {
       console.error('Error al enviar solicitud:', error);
