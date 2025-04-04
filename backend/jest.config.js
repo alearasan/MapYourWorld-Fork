@@ -5,6 +5,9 @@ module.exports = {
     "^.+\.tsx?$": ["ts-jest",{}],
   },
   collectCoverage: true,
+  collectCoverageFrom: [
+    "**/services/*.*,**/src/services/*.*",  
+  ],
   coverageReporters: ['lcov', 'text', 'text-summary'],
   
 };
