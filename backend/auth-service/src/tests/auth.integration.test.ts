@@ -154,7 +154,8 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: mockUser.password,
           username: mockUser.profile.username,
           firstName: mockUser.profile.firstName,
-          lastName: mockUser.profile.lastName
+          lastName: mockUser.profile.lastName,
+          acceptTerms: true
         });
 
       // Validar la respuesta
@@ -314,7 +315,8 @@ describe('Auth Service - Pruebas de Endpoints', () => {
           password: 'Password1!',
           username: '{{7*7}}',
           firstName: 'Usuario',
-          lastName: 'Prueba'
+          lastName: 'Prueba',
+          acceptTerms: true
         });
 
 

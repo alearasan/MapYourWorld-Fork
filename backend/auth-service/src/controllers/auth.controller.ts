@@ -3,13 +3,12 @@
  */
 
 import { Request, Response } from 'express';
-import { User, Role } from '../models/user.model';
+import { Role } from '../models/user.model';
 import { validationResult } from 'express-validator';
-import { generateToken, verifyToken } from '../../../../shared/config/jwt.config';
+import { generateToken } from '../../../../shared/config/jwt.config';
 import * as authService from '../services/auth.service';
 import { sendPasswordChangeNotification } from '../services/email.service';
 import { AuthenticatedRequest } from '../types';
-import { AuthRepository } from '../repositories/auth.repository';
 
 /**
  * Registra un nuevo usuario
@@ -23,7 +22,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, username, firstName, lastName, picture } = req.body;
+    const { email, password, username, firstName, lastName, picture, acceptTerms} = req.body;
+    if (!acceptTerms) {
+      res.status(400).json({ error: "Debes aceptar los términos y condiciones" });
+      return;
+    }
     const user = await authService.registerUser({
       email,
       password,

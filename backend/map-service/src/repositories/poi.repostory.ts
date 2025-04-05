@@ -132,13 +132,21 @@ export class PointOfInterestRepository {
             .innerJoin('poi.district', 'district')
             .innerJoin('district.region_assignee', 'region')
             .innerJoin('region.map_assignee', 'map')
+            .leftJoinAndSelect('poi.user', 'user') 
             .where('map.id = :mapId', { mapId })
             .getMany();
 
         return pois;
     };
 
-
+    
+// dado un id de usuario, quiero todos los puntos de interes de ese usuario.
+    async getPointsOfInterestByUserId(userId: string): Promise<PointOfInterest[]> {
+        const pois = await this.poiRepo.find({
+            where: { user: { id: userId } }
+        })
+        return pois;
+    }
 
 
      async createPoiInAllMaps(poiData: Omit<PointOfInterest, 'id'>): Promise<void> {
