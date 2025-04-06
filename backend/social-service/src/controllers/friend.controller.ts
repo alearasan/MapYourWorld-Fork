@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as FriendService from '../services/friend.service'; 
-import { FriendStatus } from '../models/friend.model';
+import { Friend, FriendStatus } from '../models/friend.model';
 
 /**
  * Controlador para crear una solicitud de amistad.
@@ -13,14 +13,18 @@ export const createFriendController = async (req: Request, res: Response): Promi
       return;
     }
     const newFriend = await FriendService.sendRequestFriend(requesterId, receiverId, mapId);
-    res.status(201).json(newFriend);
+    res.status(201).json({success: true, message: "Amistad creada exitosamente", friend: newFriend});
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Error al crear amistad:', 
-      error: error instanceof Error ? error.message : error 
+    res.status(500).json({
+      success: false,
+      message: "Error al crear amistad",
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
+
+
+
 
 /**
  * Controlador para listar solicitudes de amistad según estado.

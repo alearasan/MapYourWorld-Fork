@@ -132,6 +132,7 @@ export class PointOfInterestRepository {
             .innerJoin('poi.district', 'district')
             .innerJoin('district.region_assignee', 'region')
             .innerJoin('region.map_assignee', 'map')
+            .leftJoinAndSelect('poi.user', 'user') 
             .where('map.id = :mapId', { mapId })
             .getMany();
 

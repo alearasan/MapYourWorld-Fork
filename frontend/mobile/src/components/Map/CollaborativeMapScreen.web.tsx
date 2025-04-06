@@ -191,7 +191,46 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
   const [isCreatingMap, setIsCreatingMap] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // Estado para llevar control de amigos ya invitados y modal de confirmación
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  const [inviteSent, setInviteSent] = useState<{ visible: boolean; friendName?: string }>({ visible: false });
+
   const { user } = useAuth();
+
+  // Componente para el botón de invitar con efecto visual al presionarse
+  const InviteButton: React.FC<{ friendId: string; onInvite: (id: string) => void }> = ({ friendId, onInvite }) => {
+    const [isPressed, setIsPressed] = useState(false);
+    return (
+      <button
+        style={{
+          ...styles.inviteButton,
+          transform: isPressed ? "scale(0.95)" : "scale(1)",
+          transition: "transform 0.1s",
+        }}
+        onMouseDown={() => setIsPressed(true)}
+        onMouseUp={() => setIsPressed(false)}
+        onMouseLeave={() => setIsPressed(false)}
+        onClick={() => onInvite(friendId)}
+      >
+        Invitar
+      </button>
+    );
+  };
+
+  // Función para mostrar el modal de confirmación de invitación
+  const renderInviteSentModal = () => {
+    if (!inviteSent.visible) return null;
+    return (
+      <div style={styles.modalOverlay}>
+        <div style={styles.modalContent}>
+          <h2 style={styles.modalTitle}>¡Invitación Enviada!</h2>
+          <p style={styles.modalSubtitle}>
+            Se ha enviado una solicitud de amistad a {inviteSent.friendName}.
+          </p>
+        </div>
+      </div>
+    );
+  };
 
   // Cargar Leaflet dinámicamente y su CSS
   const [leafletReady, setLeafletReady] = useState(false);
@@ -368,7 +407,12 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
             color = availableColor;
             assignedColors[u.id] = color;
           }
-          return { id: u.id, username: u.username || `Usuario ${index + 1}`, color, colorIndex: USER_COLORS.indexOf(color) } as MapUser;
+          return { 
+            id: u.id, 
+            username: u.profile?.username || `Usuario ${index + 1}`, 
+            color, 
+            colorIndex: USER_COLORS.indexOf(color) 
+          } as MapUser;
         });
         setMapUsers(usersWithColors);
         const currentUser = usersWithColors.find((u) => u.id === userId);
@@ -408,39 +452,39 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   }, [showInviteModal, user]);
   
 
-const desbloquearDistrito = async (districtId: string, regionId: string) => {
-  try {
-    // Buscar el distrito en el estado actual
-    const distritoActual = distritosBackend.find((d) => d.id === districtId);
-    // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
-    if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
-      // El distrito ya tiene asignado un color; no se procede a cambiarlo.
-      return;
-    }
-    
-    const userColor = USER_COLORS[userColorIndex];
-    const response = await fetch(
-      `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ color: userColor }),
+  const desbloquearDistrito = async (districtId: string, regionId: string) => {
+    try {
+      // Buscar el distrito en el estado actual
+      const distritoActual = distritosBackend.find((d) => d.id === districtId);
+      // Suponiendo que "rgba(128, 128, 128, 0.7)" es el color por defecto de un distrito bloqueado
+      if (distritoActual && distritoActual.isUnlocked && distritoActual.color !== "rgba(128, 128, 128, 0.7)") {
+        // El distrito ya tiene asignado un color; no se procede a cambiarlo.
+        return;
       }
-    );
-    const data = await response.json();
-    if (data.success) {
-      setDistritosBackend((prev) =>
-        prev.map((d) =>
-          d.id === districtId
-            ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
-            : d
-        )
+      
+      const userColor = USER_COLORS[userColorIndex];
+      const response = await fetch(
+        `${API_URL}/api/districts/unlock/${districtId}/${userId}/${regionId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ color: userColor }),
+        }
       );
+      const data = await response.json();
+      if (data.success) {
+        setDistritosBackend((prev) =>
+          prev.map((d) =>
+            d.id === districtId
+              ? { ...d, isUnlocked: true, unlockedByUserId: userId, color: userColor }
+              : d
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error unlocking district:", error);
     }
-  } catch (error) {
-    console.error("Error unlocking district:", error);
-  }
-};
+  };
 
   // Asegurar que el mapa colaborativo existe (crear o recuperar)
   const ensureCollaborativeMapExists = async () => {
@@ -467,21 +511,32 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
     }
   };
 
+  // Función modificada para enviar solicitud de amistad con feedback visual y filtrado
   const sendFriendRequest = async (friendId: string) => {
     console.log("Enviando solicitud de amistad a:", friendId);
     console.log("Mapa actual:", mapId);
+    
+    
     try {
       const response = await fetch(`${API_URL}/api/friends/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId: mapId }),
+        body: JSON.stringify({ requesterId: user?.id, receiverId: friendId, mapId }),
       });
+  
       const data = await response.json();
+      console.log("Respuesta de la solicitud de amistad:", data);
+  
       if (data.success) {
-        alert(`Solicitud enviada a ${data.name}`);
+        window.alert("Invitación enviada");
+      }else {
+        window.alert("El usuario ya tiene otra invitación pendiente para unirse a este mapa.");  
       }
+  
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      console.error("Error al enviar la solicitud de amistad:");
+      
+      
     }
   };
 
@@ -596,10 +651,17 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
     });
     setShowForm(true);
   };
-
-  // Renderizado del modal para invitar amigos
+  const getAvailableFriends = () =>
+    friends.filter(
+      (friend) =>
+        !invitedFriends.includes(friend.id) &&
+        !mapUsers.some((user) => user.id === friend.id)
+    );
+  // Modal para invitar amigos con lista filtrada de quienes ya fueron invitados o están unidos
   const renderInviteFriendsModal = () => {
     if (!showInviteModal) return null;
+    const availableFriends = getAvailableFriends();
+  
     return (
       <div
         style={styles.modalOverlay}
@@ -611,15 +673,19 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
           <h2 style={styles.modalTitle}>Invitar Amigos</h2>
           <p style={styles.modalSubtitle}>Máximo 5 amigos (6 usuarios en total)</p>
           <div style={{ maxHeight: 150, overflowY: "auto" }}>
-            {friends.map((friend) => (
+          {availableFriends.length === 0 ? (
+            <p style={{ textAlign: "center", color: "#666", margin: 10 }}>
+              Tus amigos ya se han unido a este mapa.
+            </p>
+          ) : (
+            availableFriends.map((friend) => (
               <div key={friend.id} style={styles.invitedItem}>
                 <span style={styles.friendName}>{friend.name}</span>
-                <button style={styles.inviteButton} onClick={() => sendFriendRequest(friend.id)}>
-                  Invitar
-                </button>
+                <InviteButton friendId={friend.id} onInvite={sendFriendRequest} />
               </div>
-            ))}
-          </div>
+            ))
+          )}
+        </div>
           <button style={styles.closeButton} onClick={() => setShowInviteModal(false)}>
             Cerrar
           </button>
@@ -678,6 +744,7 @@ const desbloquearDistrito = async (districtId: string, regionId: string) => {
   return (
     <div style={styles.container}>
       {renderInviteFriendsModal()}
+      {renderInviteSentModal()}
       {showForm && (
         <div
           style={styles.modalOverlay}
@@ -850,7 +917,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 1001,
   },
   inviteButton: {
-    backgroundColor: "#0096C7",
+    backgroundColor: "#14b8a6",
     borderRadius: 8,
     padding: "10px 20px",
     border: "none",
