@@ -6,7 +6,7 @@ import { Friend, FriendStatus, RequestType } from '../models/friend.model';
 import { User } from '../../../auth-service/src/models/user.model';
 import app from '../index';
 
-const mockFriendRepository = mock<Repository<Friend>>();
+var mockFriendRepository = mock<Repository<Friend>>();
 let server: Server;
 
 jest.mock('../../../database/appDataSource', () => ({
