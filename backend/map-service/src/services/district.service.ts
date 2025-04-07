@@ -239,7 +239,7 @@ export const unlockDistrict = async (
 export const getUserUnlockedDistricts = async (userId: string): Promise<District[]> => {
   // TODO: Implementar la obtención de distritos desbloqueados por un usuario
   // 1. Consultar los registros de desbloqueo del usuario
-  const districts = await repo.getDistrictsUnlocked();
+  const districts = await repo.getDistrictsUnlocked(userId);
   return districts;
 
 };
