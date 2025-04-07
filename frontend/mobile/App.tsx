@@ -1,12 +1,15 @@
 /**
  * App principal de MapYourWorld Mobile
  */
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SafeAreaView, StatusBar, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
 import { styled } from 'nativewind';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { registerRootComponent } from 'expo';
+import { API_URL } from '@/constants/config';
+import { ImageBackground } from 'react-native';
+
 
 // Importamos las pantallas
 import WelcomeScreen from './src/components/screens/WelcomeScreen';
@@ -18,7 +21,7 @@ import CollaborativeMapListScreen from './src/components/Map/CollaborativeMapLis
 import CollaborativeMapListScreenWeb from './src/components/Map/CollaborativeMapListScreen.web';
 import HamburgerMenu from '@/components/UI/HamburgerMenu';
 import { RootStackParamList } from './src/navigation/types';
-import { AuthProvider } from './src/contexts/AuthContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import ForgotPasswordScreenMobile from './src/components/screens/ForgotPasswordScreen';
 import ForgotPasswordScreenWeb from './src/components/screens/ForgotPasswordScreen.web';
 import UserStatsScreen from './src/components/Stats/UserStatsScreen';
@@ -27,6 +30,7 @@ import AdvertisementForm from '@/components/screens/AdvertismentForm';
 import DashboardAdmin from '@/components/screens/DashboardAdmin';
 import SocialScreen from './src/components/screens/SocialScreen';
 import SocialScreenWeb from './src/components/screens/SocialScreen.web';
+import AnimatedPremiumButton from '@/components/UI/AnimatedPremiumButton';
 
 
 // Aplicamos styled a los componentes nativos para poder usar Tailwind
@@ -173,8 +177,33 @@ const SocialScreenWrapper= (props: any) => {
 }
 };
 
+
 // Componente principal de la aplicación
 const AppContent = () => {
+
+  const authData = useAuth();
+  const user = authData?.user;
+  const [subscription, setSubscription] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!user) return;
+      try {
+        const response = await fetch(`${API_URL}/api/subscriptions/active/${user.id}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const data = await response.json();
+        setSubscription(data);
+      } catch (error) {
+        console.error('Error al obtener la subscripción', error);
+      }
+    };
+
+    fetchSubscription();
+  }, [user]);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -246,23 +275,33 @@ const AppContent = () => {
                   />
                 </View>
               ),
+
               headerRight: () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <TouchableOpacity 
-                      onPress={() => navigation.navigate('Payment')}
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                      <Text style={{ marginRight: 5, fontSize: 14, color: '#0d9488' }}>
-                        Premium
-                      </Text>
-                      <Image
-                        source={require('./src/assets/images/subscription_icon.png')}
-                        style={{ width: 25, height: 25, marginRight: 10 }}
-                      />
-                    </TouchableOpacity>
+                  <View style={{ marginRight: 10 }}>
+                    {subscription.plan === "PREMIUM" ? (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('Payment')}
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <Text style={{ marginRight: 5, fontSize: 14, color: '#0d9488' }}>
+                          Premium
+                        </Text>
+                        <Image
+                          source={require('./src/assets/images/subscription_icon.png')}
+                          style={{ width: 25, height: 25, marginRight: 10 }}
+                        />
+                      </TouchableOpacity>
+                    ) : (
+                      <AnimatedPremiumButton onPress={() => navigation.navigate('Payment')} />
+                    )}
+                  </View>
                   <HamburgerMenu />
                 </View>
               ),
+              
+
+              
             })}
           />
           <Stack.Screen 
