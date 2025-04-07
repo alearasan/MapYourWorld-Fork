@@ -227,7 +227,7 @@ const UserAchievementsScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Oops</Text>
-            <Text style={styles.inputLabel, { textAlign: "center", marginBottom: 20 }}>
+            <Text style={[styles.inputLabel, { textAlign: "center", marginBottom: 20 }]}>
               Tienes que ser usuario premium para desbloquear esta funcionalidad
             </Text>
             <View style={styles.modalButtons}>

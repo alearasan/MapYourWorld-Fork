@@ -235,22 +235,37 @@ const AppContent = () => {
           
         }}/>
         <Stack.Screen 
-          name="Map" 
-          component={MapScreenWithDistritos}
-          options={{
-            headerTitle: () => (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image
-                  source={require('./src/assets/images/logo.png')} 
-                  style={{ width: 35, height: 35, marginRight: 5 }}
-                />
-                <StyledText className="text-xl font-bold ml-2 text-gray-800">MapYourWorld</StyledText>
-              </View>
-            ),
-            headerRight: () => <HamburgerMenu />,
-          }} 
-        />
-        <Stack.Screen 
+            name="Map" 
+            component={MapScreenWithDistritos}
+            options={({ navigation }) => ({
+              headerTitle: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image
+                    source={require('./src/assets/images/logo.png')}
+                    style={{ width: 35, height: 35, marginRight: 5 }}
+                  />
+                </View>
+              ),
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity 
+                      onPress={() => navigation.navigate('Payment')}
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Text style={{ marginRight: 5, fontSize: 14, color: '#0d9488' }}>
+                        Premium
+                      </Text>
+                      <Image
+                        source={require('./src/assets/images/subscription_icon.png')}
+                        style={{ width: 25, height: 25, marginRight: 10 }}
+                      />
+                    </TouchableOpacity>
+                  <HamburgerMenu />
+                </View>
+              ),
+            })}
+          />
+          <Stack.Screen 
           name="CollaborativeMapListScreen" 
           component={CollaborativeMapScreenListWithParams}
           options={{

@@ -60,9 +60,9 @@ const HamburgerMenu = () => {
               <Text style={styles.menuItemText}>Inicio</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
+            {/* <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Suscripción</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
               <Text style={styles.menuItemText}>Social</Text>
