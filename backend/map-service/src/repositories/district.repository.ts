@@ -82,9 +82,17 @@ export default class DistrictRepository {
         return await this.districtRepo.save(district);
     }
 
-    async getDistrictsUnlocked(): Promise<District[]> {
-        return await this.districtRepo.find({ where: { isUnlocked: true } });
-    }
+    
+    async getDistrictsUnlocked(userId:string): Promise<District[]> {
+        const district = await this.districtRepo.createQueryBuilder('district')
+            .leftJoinAndSelect('district.region_assignee', 'region')
+            .leftJoinAndSelect('region.map_assignee', 'map')
+            .leftJoinAndSelect('map.user_created', 'user')
+            .where('user.id= :userId', { userId })
+            .andWhere('district.isUnlocked = true')
+            .getMany();
+        return district;
+}
 
     async findDistrictContainingLocation(latitude: number, longitude: number): Promise<District | null> {
         const result = await this.districtRepo.query(`
