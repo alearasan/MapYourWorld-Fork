@@ -28,7 +28,7 @@ interface CollaborativeMap {
 type NavigationProps = NavigationProp<RootStackParamList, 'SocialScreen'>;
 const SocialScreen = () => {
   const [friendRequests, setFriendRequests] = useState<{ id: string; name: string; requestType: string, mapId: string}[]>([]);
-  const [friends, setFriends] = useState<{ id: string; name: string }[]>([]);
+  const [friends, setFriends] = useState<{ id: string; name: string; email: string; firstName: string; lastName: string }[]>([]);
   const [searchResults, setSearchResults] = useState<{ id: string; name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'amigos' | 'solicitudes' | 'buscar'>('amigos');
@@ -131,7 +131,10 @@ const SocialScreen = () => {
         // Si la respuesta es directamente un array de usuarios, lo asignamos
         setFriends(data.map((user) => ({
           id: user.id,
-          name: user.profile.username, // Puedes usar otra propiedad si el backend la tiene
+          name: user.profile.username, 
+          email: user.email,
+          firstName: user.profile.firstName,
+          lastName: user.profile.lastName
         })));
       } else {
         console.warn("Formato inesperado en la respuesta de amigos:", data);
@@ -176,7 +179,7 @@ const SocialScreen = () => {
       const data = await response.json();
       if (data.success) {
         if (status === 'ACCEPTED' && user) {
-          setFriends([...friends, { id: friendId, name: data.name }]);
+          setFriends([...friends, { id: friendId, name: data.name, email: data.email, firstName: data.firstName, lastName: data.lastName }]);
           Alert.alert("Solicitud Aceptada", ` Ahora sois amigos, ¡A explorar!.`);
           fetchFriends(user.id);
         } else {
@@ -273,17 +276,43 @@ const SocialScreen = () => {
 
   const renderFriends = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">
+      {/* Fila de encabezados */}
+      <StyledView className="flex-row justify-between items-center mb-4 border-b border-gray-200 pb-2">
+        <StyledText className="text-lg text-gray-800 font-semibold flex-1 text-center">
+          Nombre de Usuario
+        </StyledText>
+        <StyledText className="text-lg text-gray-800 font-semibold flex-1 text-center">
+          Correo
+        </StyledText>
+        <StyledText className="text-lg text-gray-800 font-semibold flex-1 text-center">
+          Nombre y Apellidos
+        </StyledText>
+      </StyledView>
       {friends.length > 0 ? (
         friends.map((friend) => (
-          <StyledView key={friend.id} className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2">
-            <StyledText className="text-lg text-gray-800 font-semibold">{friend.name}</StyledText>
+          <StyledView
+            key={friend.id}
+            className="flex-row items-center justify-between mb-4 border-b border-gray-200 pb-2"
+          >
+            <StyledText className="text-sm text-gray-500 font-semibold flex-1 text-center">
+              {friend.name}
+            </StyledText>
+            <StyledText className="text-sm text-gray-500 font-semibold flex-1 text-center">
+              {friend.email}
+            </StyledText>
+            <StyledText className="text-sm text-gray-500 font-semibold flex-1 text-center">
+              {friend.firstName} {friend.lastName}
+            </StyledText>
           </StyledView>
         ))
       ) : (
-        <StyledText className="text-gray-500 text-center">Aún no tienes amigos</StyledText>
+        <StyledText className="text-gray-500 text-center">
+          Aún no tienes amigos
+        </StyledText>
       )}
     </StyledView>
   );
+  
 
   const renderRequests = () => (
     <StyledView className="bg-white p-6 rounded-xl shadow-lg">

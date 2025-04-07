@@ -26,6 +26,9 @@ interface FriendRequest {
 interface Friend {
   id: string;
   name: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface CollaborativeMap {
@@ -142,6 +145,9 @@ const SocialScreenWeb = () => {
           data.map((userItem: any) => ({
             id: userItem.id,
             name: userItem.profile.username,
+            email: userItem.email,
+            firstName: userItem.profile.firstName,
+            lastName: userItem.profile.lastName,
           }))
         );
       }
@@ -228,6 +234,9 @@ const SocialScreenWeb = () => {
           data.map((userItem: any) => ({
             id: userItem.id,
             name: userItem.profile.username,
+            email: userItem.email,
+            firstName: userItem.profile.firstName,
+            lastName: userItem.profile.lastName,
           }))
         );
       } else {
@@ -260,10 +269,20 @@ const SocialScreenWeb = () => {
   // Renderizados parciales
   const renderFriends = () => (
     <View style={webStyles.cardContent}>
+      {/* Fila de encabezados */}
+      <View style={webStyles.headerRow}>
+        <Text style={webStyles.headerText}>Nombre de Usuario</Text>
+        <Text style={webStyles.headerText}>Correo</Text>
+        <Text style={webStyles.headerText}>Nombre y Apellidos</Text>
+      </View>
       {friends.length > 0 ? (
         friends.map((friend) => (
           <View key={friend.id} style={webStyles.itemCard}>
             <Text style={webStyles.itemText}>{friend.name}</Text>
+            <Text style={webStyles.itemText}>{friend.email}</Text>
+            <Text style={webStyles.itemText}>
+              {friend.firstName} {friend.lastName}
+            </Text>
           </View>
         ))
       ) : (
@@ -271,6 +290,8 @@ const SocialScreenWeb = () => {
       )}
     </View>
   );
+  
+  
 
   const renderRequests = () => (
     <View style={webStyles.cardContent}>
@@ -479,6 +500,8 @@ const webStyles = StyleSheet.create({
     color: '#1e293b',
     fontSize: 16,
     fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
   },
   infoText: {
     textAlign: 'center',
@@ -581,5 +604,20 @@ const webStyles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
 });
