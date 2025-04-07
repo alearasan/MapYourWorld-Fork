@@ -82,6 +82,74 @@ const LogroComponent = ({ visible, distrito }: { visible: boolean; distrito: str
   );
 };
 
+const AlertModal = ({ visible, title, message, onClose }: { visible: boolean, title: string, message: string, onClose: () => void }) => {
+  if (!visible) return null;
+  
+  return (
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1001 // Mayor que el formulario POI
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        style={{ 
+          backgroundColor: 'white',
+          borderRadius: '12px', 
+          padding: '20px',
+          maxWidth: '90%',
+          width: '350px',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <h2 style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          marginBottom: '12px',
+          color: '#2d3748'
+        }}>
+          {title}
+        </h2>
+        <p style={{
+          fontSize: '16px',
+          color: '#4a5568',
+          marginBottom: '20px'
+        }}>
+          {message}
+        </p>
+        <button 
+          style={{
+            width: '100%',
+            padding: '10px',
+            borderRadius: '8px',
+            backgroundColor: '#3182ce',
+            color: 'white',
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer'
+          }}
+          onClick={onClose}
+        >
+          Aceptar
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Componente que renderiza el mapa usando Leaflet
 const LeafletMap = ({
   location,
@@ -194,9 +262,25 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   // Estado para llevar control de amigos ya invitados y modal de confirmación
   const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
   const [inviteSent, setInviteSent] = useState<{ visible: boolean; friendName?: string }>({ visible: false });
-
+  const [alertModal, setAlertModal] = useState({
+    visible: false,
+    title: '',
+    message: ''
+  });
   const { user } = useAuth();
-
+  const showAlert = (title: string, message: string) => {
+    setAlertModal({
+      visible: true,
+      title,
+      message
+    });
+  };
+  const closeAlertModal = () => {
+    setAlertModal({
+      ...alertModal,
+      visible: false
+    });
+  };
   // Componente para el botón de invitar con efecto visual al presionarse
   const InviteButton: React.FC<{ friendId: string; onInvite: (id: string) => void }> = ({ friendId, onInvite }) => {
     const [isPressed, setIsPressed] = useState(false);
@@ -636,11 +720,11 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
       }
     }
     if (!poiDistrict) {
-      alert("Ubicación no válida: No puedes crear un punto de interés fuera de un distrito.");
+      showAlert('Ubicación no válida', 'No puedes crear un punto de interés fuera de un distrito.');
       return;
     }
     if (!poiDistrict.isUnlocked) {
-      alert(`Distrito bloqueado: El distrito "${poiDistrict.nombre}" está bloqueado.`);
+      showAlert('Distrito bloqueado', `El distrito "${poiDistrict.nombre}" está bloqueado. Desbloquéalo primero para añadir puntos de interés.`);
       return;
     }
     setPointOfInterest({
@@ -742,9 +826,17 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
   }
 
   return (
+    
     <div style={styles.container}>
       {renderInviteFriendsModal()}
       {renderInviteSentModal()}
+      <AlertModal 
+        visible={alertModal.visible}
+        title={alertModal.title}
+        message={alertModal.message}
+        onClose={closeAlertModal}
+      />
+
       {showForm && (
         <div
           style={styles.modalOverlay}
@@ -765,6 +857,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
                 };
                 setPointsOfInterest((prev) => [...prev, poiConverted]);
               }}
+              showAlert={showAlert}
             />
           </div>
         </div>
