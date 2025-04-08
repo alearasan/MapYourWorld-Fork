@@ -82,7 +82,17 @@ const HamburgerMenu = () => {
             </Text>
             </TouchableOpacity>
 
+                        
+            <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Cerrar sesión</Text>
+            </TouchableOpacity>
+
             <View style={styles.separator} />
+
+            
+            <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Social</Text>
+            </TouchableOpacity>
 
 
             <TouchableOpacity onPress={() => handleNavigate('Map')} style={styles.menuItem}>
@@ -108,18 +118,6 @@ const HamburgerMenu = () => {
               style={styles.menuItem}
             >
               <Text style={styles.menuItemText}>Logros</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity onPress={() => handleNavigate('Welcome')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Inicio</Text>
-            </TouchableOpacity>
-            
-            {/* <TouchableOpacity onPress={() => handleNavigate('Payment')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Suscripción</Text>
-            </TouchableOpacity> */}
-
-            <TouchableOpacity onPress={() => handleNavigate('SocialScreen')} style={styles.menuItem}>
-              <Text style={styles.menuItemText}>Social</Text>
             </TouchableOpacity>
 
           </View>
