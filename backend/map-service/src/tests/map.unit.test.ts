@@ -1,9 +1,5 @@
 // map.service.spec.ts
 
-import { Map } from '../models/map.model';
-import { Role, User } from '../../../auth-service/src/models/user.model';
-import { UserDistrict } from '../models/user-district.model';
-
 // --- Mocks de dependencias ---
 
 // Mocks para MapRepository
@@ -33,26 +29,40 @@ jest.mock('../repositories/map.repository', () => ({
 
 // Mocks para AuthRepository
 const findByIdMock = jest.fn();
-jest.mock('../../../auth-service/src/repositories/auth.repository', () => ({
-  AuthRepository: jest.fn().mockImplementation(() => ({
-    findById: findByIdMock,
-  })),
-  _findByIdMock: findByIdMock,
-}));
+jest.mock('../../../auth-service/src/repositories/auth.repository', () => {
+  return {
+    __esModule: true, // Esto es importante para que funcione bien con `import default`
+    default: jest.fn().mockImplementation(() => ({
+      findById: findByIdMock,
+    })),
+    _findByIdMock: findByIdMock,
+  };
+});
 
 // Mocks para UserDistrictRepository
 const createUserDistrictMock = jest.fn();
-jest.mock('../repositories/user-district.repository', () => ({
-  UserDistrictRepository: jest.fn().mockImplementation(() => ({
-    createUserDistrict: createUserDistrictMock,
-  })),
-  _createUserDistrictMock: createUserDistrictMock,
-}));
+jest.mock('../repositories/user-district.repository', () => {
+  return {
+    __esModule: true, // importa para que Jest sepa que hay una exportación default
+    default: jest.fn().mockImplementation(() => ({
+      createUserDistrict: createUserDistrictMock,
+      // aquí puedes añadir más métodos si los necesitas
+    })),
+  };
+});
 
 // Mock para district.service
 jest.mock('../../../map-service/src/services/district.service', () => ({
   createDistricts: jest.fn().mockResolvedValue(true),
 }));
+
+
+
+
+import { Map } from '../models/map.model';
+import { Role, User } from '../../../auth-service/src/models/user.model';
+import { UserDistrict } from '../models/user-district.model';
+
 
 // --- Fin de mocks ---
 

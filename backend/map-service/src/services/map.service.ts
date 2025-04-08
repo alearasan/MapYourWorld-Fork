@@ -9,7 +9,7 @@ import { Map } from '../models/map.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import MapRepository from '../repositories/map.repository';
 import { User } from '../../../auth-service/src/models/user.model';
-import { UserDistrictRepository } from '../repositories/user-district.repository';
+import UserDistrictRepository  from '../repositories/user-district.repository';
 import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 import { UserDistrict } from '../models/user-district.model';
 import { createDistricts } from '../../../map-service/src/services/district.service';
