@@ -75,7 +75,10 @@ import {
     updateDistrict,
     unlockDistrict,
     getDistrictsByMapId,
-    getUserDistrictsWithColors
+    getUserDistrictsWithColors,
+    getUserUnlockedDistricts
+
+    
 
   } from '../services/district.service';
 
@@ -409,6 +412,29 @@ describe('updateDistrict', () => {
   });
 
      
+  describe('getUserUnlockedDistricts', () => {
+    it("debe devolver un distrito desbloqueado", async() => {
+        const districtId = 'district1-uuid';
+        const expectedDistrict: District = {
+            id: districtId,
+            name: 'District 1',
+            description: 'Description of District 1',
+            boundaries: {
+                type: 'MultiPolygon',
+                coordinates: [], // Ajusta según la estructura real de Geometry
+            },
+            isUnlocked: true,
+            region_assignee: {} as any, // Ajusta según la estructura real de Region
+            userDistrict: [],
+        };
+
+
+        mockedGetDistrictsUnlocked.mockResolvedValue(expectedDistrict);
+        const result = await getUserUnlockedDistricts("user1-uuid");
+        expect(result).toEqual(expectedDistrict);
+        expect(mockedGetDistrictsUnlocked).toHaveBeenCalledWith("user1-uuid");
+    })
+});
 
 
 
