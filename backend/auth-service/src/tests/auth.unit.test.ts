@@ -17,7 +17,7 @@ import {
   resetPassword, 
   logout 
 } from '../services/auth.service';
-import { AuthRepository } from '../repositories/auth.repository';
+import AuthRepository  from '../repositories/auth.repository';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service';
 
 // Añadir mock para UserProfileRepository

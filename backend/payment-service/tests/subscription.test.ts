@@ -29,7 +29,7 @@ import {
 } from '../services/subscription.service';
 import { Subscription, PlanType } from '../models/subscription.model';
 import { User, Role } from '../../auth-service/src/models/user.model';
-import { SubscriptionRepository } from '../repositories/subscription.repository';
+import SubscriptionRepository  from '../repositories/subscription.repository';
 
 // Creamos un dummy completo de User para los tests
 const dummyUser: User = {

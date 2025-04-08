@@ -3,7 +3,7 @@ import { FriendStatus, Friend, RequestType } from '../models/friend.model';
 import { Role, User } from '../../../auth-service/src/models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import FriendRepository from '../repositories/friend.repository';
-import { AuthRepository } from '../../../auth-service/src/repositories/auth.repository';
+import AuthRepository  from '../../../auth-service/src/repositories/auth.repository';
 
 // Creamos un helper para generar datos válidos de amistad
 const createValidFriendData = (overrides: Partial<Omit<Friend, 'id'>> = {}): Omit<Friend, 'id'> => ({
