@@ -3,7 +3,7 @@ import { User, Role } from '../models/user.model';
 import { AppDataSource } from '../../../database/appDataSource';
 import { UserProfile } from '../../../user-service/src/models/userProfile.model';
 
-export class AuthRepository {
+export default class AuthRepository {
   private repository: Repository<User>;
 
   constructor() {

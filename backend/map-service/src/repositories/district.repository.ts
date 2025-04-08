@@ -9,7 +9,7 @@ import { UserDistrict } from '../models/user-district.model';
 export default class DistrictRepository {
     private districtRepo: Repository<District>;
     private regionRepo: Repository<Region>;
-    private mapRepo: Repository<Map>
+    private userDistictRepo: Repository<UserDistrict>
     private userRepo: Repository<User>
     private userDistrictRepo: Repository<UserDistrict>
 
@@ -17,7 +17,7 @@ export default class DistrictRepository {
     constructor() {
         this.districtRepo = AppDataSource.getRepository(District);
         this.regionRepo = AppDataSource.getRepository(Region);
-        this.mapRepo = AppDataSource.getRepository(Map)
+        this.userDistictRepo = AppDataSource.getRepository(UserDistrict)
         this.userRepo = AppDataSource.getRepository(User)
         this.userDistrictRepo = AppDataSource.getRepository(UserDistrict)
     }
@@ -150,4 +150,17 @@ export default class DistrictRepository {
           )
           .getMany();
       }
+
+
+    async getUserDistrictsByUserId(userId: string): Promise<UserDistrict[]> {
+        const userDistricts = await this.userDistictRepo
+        .createQueryBuilder("userDistrict")
+        .leftJoinAndSelect("userDistrict.district", "district")
+        .leftJoinAndSelect("userDistrict.user", "user")
+        .where("user.id = :userId", { userId })
+        .getMany();
+        return userDistricts;
+
+
+    }
 }
