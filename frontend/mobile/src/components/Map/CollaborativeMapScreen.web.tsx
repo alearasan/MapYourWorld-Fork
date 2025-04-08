@@ -62,6 +62,7 @@ interface POI {
     type: string;
     coordinates: number[]; // [longitude, latitude]
   };
+  category?: string;
 }
 
 interface CollaborativeMapScreenProps {
@@ -196,13 +197,64 @@ const LeafletMap = ({
     });
 
     // Agregar marcadores para cada punto de interés
+    const iconSize: [number, number] = [32, 32]; // Tamaño de los iconos en píxeles
+    const iconAnchor: [number, number] = [16, 32]; // Punto de anclaje del icono (centro inferior)
+    const popupAnchor: [number, number] = [0, -30]; // Punto de anclaje del popup (superior)
+
+    // Definir iconos personalizados para cada categoría
+    const categoryIcons: Record<string, any> = {
+      MONUMENTOS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/776/776557.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      ESTACIONES: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/2062/2062051.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      MERCADOS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/862/862819.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      PLAZAS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1282/1282259.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      }),
+      OTROS: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: iconSize,
+        iconAnchor: iconAnchor,
+        popupAnchor: popupAnchor
+      })
+    };
+
+    // Icono por defecto para POIs sin categoría
+    const defaultIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+      iconSize: iconSize,
+      iconAnchor: iconAnchor,
+      popupAnchor: popupAnchor
+    });
+
+    // Modificar el bucle que recorre los POIs para usar iconos según categoría
     pointsOfInterest.forEach((poi) => {
       const coords: [number, number] = [
         poi.location.coordinates[1], // latitude
         poi.location.coordinates[0], // longitude
       ];
-      const marker = L.marker(coords).bindPopup(
-        `<h3>${poi.name}</h3><p>${poi.description}</p>`
+      
+      // Seleccionar el icono según la categoría del POI o usar el icono por defecto
+      const icon = poi.category ? categoryIcons[poi.category] || defaultIcon : defaultIcon;
+      
+      const marker = L.marker(coords, { icon: icon }).bindPopup(
+        `<h3>${poi.name}</h3><p>${poi.description}</p>${poi.category ? `<p><strong>Categoría:</strong> ${poi.category}</p>` : ''}`
       );
       marker.addTo(map);
     });
@@ -844,8 +896,93 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
             if (e.target === e.currentTarget) setShowForm(false);
           }}
         >
-          <div style={styles.formModalContent}>
-            <h1 style={styles.formTitle}>Registrar Punto de Interés</h1>
+          <div 
+            style={{ 
+          backgroundColor: 'white',
+              borderRadius: '12px', 
+          padding: '20px',
+              maxWidth: '90%',
+              width: '380px',
+              maxHeight: '90vh', 
+          overflow: 'auto',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {/* Estilo personalizado para el formulario web */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              .form-container input, .form-container textarea {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .dropdown {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                background-color: white;
+                cursor: pointer;
+                margin-bottom: 10px;
+              }
+              
+              .form-container .section-title {
+                font-size: 18px;
+                font-weight: 500;
+                margin-bottom: 8px;
+              }
+              
+              .form-container .add-photo-btn {
+                width: 64px;
+                height: 64px;
+                border-radius: 8px;
+                border: 1px solid #d1d5db;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+              }
+              
+              .form-container .btn-primary {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #2563eb;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                margin-bottom: 10px;
+                cursor: pointer;
+                border: none;
+              }
+              
+              .form-container .btn-danger {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                background-color: #dc2626;
+                color: white;
+                font-weight: 600;
+                text-align: center;
+                cursor: pointer;
+                border: none;
+              }
+            ` }} />
+          <h1 style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              marginBottom: 8,
+              color: '#1e293b',
+            }}>
+              Registrar Punto de Interés
+            </h1>
+            <div className="form-container">
+
             <PuntoDeInteresForm
               pointOfInterest={pointOfInterest}
               setPointOfInterest={setPointOfInterest}
@@ -859,6 +996,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({
               }}
               showAlert={showAlert}
             />
+            </div>
           </div>
         </div>
       )}

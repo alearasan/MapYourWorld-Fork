@@ -853,6 +853,8 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               message={alertModal.message}
               onClose={closeAlertModal}
             />
+          <View style={styles.modalOverlay}>
+            
             <PuntoDeInteresForm
               pointOfInterest={pointOfInterest}
               setPointOfInterest={setPointOfInterest}
@@ -870,6 +872,7 @@ const CollaborativeMapScreen: React.FC<CollaborativeMapScreenProps> = ({ mapId, 
               }}
               showAlert={showAlert}
             />
+          </View>
           </Modal>
 
           <MapView

@@ -28,6 +28,7 @@ export const getUserById = async (userId: string): Promise<User | null> => {
   return await repo.findById(userId);
 };
 
+
 /**
  * Registra un nuevo usuario en el sistema
  * @param userData Datos del usuario a registrar
@@ -390,4 +391,8 @@ export const logout = async (userId: string, token?: string): Promise<boolean> =
     }
     throw new Error('Error al cerrar sesión');
   }
+};
+
+export const getUserProfileById = async (userId: string): Promise<UserProfile | null> => {
+  return await repo.findProfileByUserId(userId);
 };
