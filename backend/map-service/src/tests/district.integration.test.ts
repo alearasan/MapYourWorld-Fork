@@ -102,7 +102,7 @@ const dummyUserDistrict: UserDistrict = {
 
 beforeAll(async () => {
   // Levantamos el servidor en un puerto para test
-  server = app.listen(3005, () => {
+  server = app.listen(3011, () => {
     console.log('Servidor de integración de District Service corriendo en el puerto 3005');
   });
 });

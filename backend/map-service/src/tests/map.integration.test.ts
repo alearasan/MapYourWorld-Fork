@@ -59,7 +59,7 @@ const dummyMap: Map = {
 
 beforeAll(async () => {
   // Levantamos el servidor en un puerto para test
-  server = app.listen(3005, () => {
+  server = app.listen(3010, () => {
     console.log('Servidor de integración de Map Service corriendo en el puerto 3005');
   });
 });
