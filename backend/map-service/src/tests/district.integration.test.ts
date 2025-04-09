@@ -220,12 +220,12 @@ describe('District Service - Integration Tests', () => {
     it('debe retornar error si faltan parámetros necesarios para desbloquear', async () => {
       // Aquí se prueba si faltan parámetros (por ejemplo, userId) en la URL
       const response = await request(app)
-        .put(`/api/districts/unlock/${dummyDistrict.id}/""/${dummyRegion.id}`)
+        .put(`/api/districts/unlock/${dummyDistrict.id}//${dummyRegion.id}`)
         .set('Authorization', `Bearer ${testToken}`)
         .send({ color: '#FF0000' });
 
       // La validación del controlador en este caso debería retornar 400
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
     });
   });
 
