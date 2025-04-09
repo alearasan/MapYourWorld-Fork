@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-    27/03/2025
+    09/04/2025
 </p>
 
 ---
@@ -27,7 +27,7 @@
 
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
-| V1      | 27/03/2025| Primera versión          | Ángel Neria Acal y José María Baquero Rodríguez     |
+| V1      | 09/04/2025| Primera versión          | Ángel Neria Acal y José María Baquero Rodríguez     |
 
 
 ---
@@ -37,14 +37,14 @@
 ### 1.1. No Matchmaking
 
 
-- **(Mejora) Bienvenida**:  
+- **Bienvenida**:  
   El usuario tiene la opción de iniciar sesión con una cuenta existente o registrarse en el sistema con una nueva cuenta. También se peude realizar una gestión del usu de cookies.
   ![Registro](./Images/bienvenidaWeb.png)
   *(Caso de uso implementado en #S2)*
 
 
 - **(Mejora) Registro**:  
-  El usuario se registra en el sistema proporcionando su nombre, correo electrónico y contraseña a través de un formulario. Para completar el registro es necesario que el nuevo usuario lea y acepte los términos y condiciones de uso.
+  El usuario se registra en el sistema proporcionando su nombre, correo electrónico y contraseña a través de un formulario. Para completar el registro es necesario que el nuevo usuario lea y acepte los términos y condiciones de uso. Como mejora el usuario puede añadir una imagen de perfil.
   ![Registro](./Images/registroWeb.png)
  *(Caso de uso implementado en #S2)*
   ![Registro](./Images/terminosCondiciones.png)
@@ -55,7 +55,7 @@
   ![Login](./Images/LoginWeb.png)
   *(Caso de uso implementado en #S2)*
 
-- **(Mejora) Exploración de zonas no descubiertas**:  
+- **Exploración de zonas no descubiertas**:  
   El usuario se desplaza físicamente hacia la zona que quiere descubrir. Al llegar a la ubicación, el sistema detecta su presencia y automáticamente desbloquea la localización en su mapa personal pintandola de color verde. La posición actual del usuario se indica con un marcador en el mapa.
   ![MapaPersonal](./Images/MapaPersonalWeb.png)
   *(Caso de uso implementado en #S1)*
@@ -63,25 +63,54 @@
   *(Caso de uso implementado en #S1)*
 
 - **Registro de puntos de interés**:  
-  El usuario selecciona una zona del mapa desbloqueada en la que desea añadir un punto de interés. Al tocar la ubicación, se muestra una ventana emergente con un formulario donde debe añadir un nombre y una descripción, una categoría, que es opcional y fotografías, también opcionales. Una vez completado el proceso, el punto de interés queda registrado y aparece en el mapa interactivo con un marcador.
+  El usuario selecciona una zona del mapa desbloqueada en la que desea añadir un punto de interés. Al tocar la ubicación, se muestra una ventana emergente con un formulario donde debe añadir un nombre y una descripción, una categoría, que es opcional y fotografías, también opcionales. Una vez completado el proceso, el punto de interés queda registrado y aparece en el mapa interactivo con un marcador. Como mejora se ha adaptado el estilo del fromulario al estilo general de la web.
   ![POIFormulario](./Images/POIFormularioWeb.png)
   *(Caso de uso implementado en #S1)*
 
+  Además se ha mejorado el estilo de los puntos de interés creados, siendo más descriptivos con la categoría que tiene asociada.
   ![VerPOI](./Images/verPOIWeb.png)
   *(Caso de uso implementado en #S1)*
 
-- **(Nuevo) Suscripción**:
-  El usuario puede acceder a la pantalla de suscripción a Premium desde la opción "Suscripción" en el menú desplegable ubicado en la esquina superior derecha.
-   ![suscripcion](./Images/menuWeb.png)
+- **(Mejora) Suscripción**:
+  El usuario puede acceder a la pantalla de suscripción a Premium desde la opción "Hazte Premium" situado en la esquina superior derecha.
+   ![suscripcion](./Images/botonPremiumWeb.png)
   *(Caso de uso implementado en #S2)* 
-   Al entrar, visualizará información sobre los beneficios de ser Premium y un botón "Pagar con Stripe", que le permitirá iniciar el proceso de pago. Al pulsarlo, aparecerá la pasarela de pago de Stripe, donde deberá ingresar sus datos y confirmar la transacción. Una vez completado el pago con éxito, el sistema actualizará su estado a Premium y lollevará a su mapa. 
-   ![suscripcion](./Images/suscripcionNormalWeb.png)
+   
+   Al entrar, visualizará información sobre los beneficios de ser Premium y un botón "Pagar con Stripe", que le permitirá iniciar el proceso de pago. Al pulsarlo, aparecerá la pasarela de pago de Stripe, donde deberá ingresar sus datos y confirmar la transacción.  
+   ![suscripcion](./Images/suscripcionNormal2Web.png)
   *(Caso de uso implementado en #S2)* 
+
+  Una vez completado el pago con éxito, el sistema actualizará su estado a Premium y lo llevará a su mapa.
+  ![suscripcion](./Images/mapaPremium.png)
+  *(Caso de uso implementado en #S2)*
 
   
   Si el usuario vuelve a entrar en la sección de "Suscripción" se le indica que ya es miembro Premium y se muestra un botón "Ir a mi mapa", que le permitirá acceder a sus mapas y disfrutar de las ventajas exclusivas de los miembros Premium.
-   ![suscripcion](./Images/suscripcionPremiumlWeb.png)
-  *(Caso de uso implementado en #S2)* 
+   ![suscripcion](./Images/suscripcionPremiumWeb.png)
+  *(Caso de uso implementado en #S2)*
+
+- **(Nuevo) Estadísticas**:
+  El usuario puede acceder a la pantalla de estadísticas pulsando en "Estadísticas" en el menú desplegable de la esquina superior derecha.
+  En esta pantalla se mustra una tabla con el total de logros alcanzados, el núemro de amigos actuales del usuario, el total de puntos de interés que ha registrado el usuario entre todos los mapas a los que pertenece, el total de distritos desbloqueados y el número de mapas colaborativos a los que se ha unido.
+   ![estadisticas](./Images/estadisticasWeb.png)
+  *(Caso de uso implementado en #S3)*
+
+- **(Nuevo) Logros**:
+  El usuario puede acceder a la pantalla de logros pulsando en "Estadísticas" en el menú desplegable de la esquina superior derecha.
+  En esta pantalla se muestran dos secciones, "Logros obtenidos", "Todos los logros" y la opcion de crear sus propios logros. Mecionar que la posibilidad de crear logros es exclusiva para los usuarios premium.
+    En la sección de "Logros obtenidos" se muestran listados los logros que el usuario ha desbloqueado.
+
+   ![logros](./Images/logrosObtenidosWeb.png)
+  *(Caso de uso implementado en #S3)*
+
+  En la sección de "Todos los logros" se muestran listados todos los logros disponibles para desbloquear junto con uan descripción de cómo se desbloquea cada logro.
+   ![logros](./Images/todosLogrosWeb.png)
+  *(Caso de uso implementado en #S3)*
+
+  Si el usuario crea un nuevo logro pulsando sobre el boton "+" en la parte superior derecha, se muestra un formulario donde debe indicar el nombre del logro, una descripción, los puntos de ese nuevo logro y la url para la imagen de logo que tendrá el logro creado.
+  ![logros](./Images/crearLogrosWeb.png)
+  *(Caso de uso implementado en #S3)*
+
 
 
 ### 1.2. Matchmaking
@@ -94,12 +123,12 @@
 
 
 
-- **(Nuevo) Publicidad de empresas**:  
-  Las empresas que quieran aparecer en los mapas como puntos de interés tienen disponible la opción de "Publicítate con nosotros". Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sistema puedan añadirlo.
+- **(Mejora) Publicidad de empresas**:  
+  Las empresas que quieran aparecer en los mapas como puntos de interés tienen disponible la opción de "Publicítate con nosotros". Para ello solo deben rellenar un formulario con nombre, correo de contacto, descripción del local o empresa a publicitar y las coordenadas donde se ubica el mismo. Este formulario se envía por correo a la cuenta corporativa de MapYourworld para que los adminitradores del sistema puedan añadirlo. Se ha mejorado el formulario.
   ![Registro](./Images/publicidadWeb.png)
   *(Caso de uso implementado en #S2)*
 
-- **(Nuevo) Social:**
+- **(Mejora) Social:**
   El usuario puede acceder al apartado de Social desde el menú desplegable en la esquina superior derecha. 
  ![suscripcion](./Images/menuWeb.png)
   *(Caso de uso implementado en #S2)* 
@@ -134,7 +163,7 @@
   ![collab](./Images/verMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
 
-  Si desde dentro de un mapa colaborativo el usuario pulsa el boton de "Invitar Amigos" situado en la parte inferior de la pantalla, se muestra un listado de los amigos del usuario y junto a cada uno de los amigos la opción "Invitar" que le enviará una invitación a ese amigo al mapa actual desde el que se envía. 
+  Si desde dentro de un mapa colaborativo el usuario pulsa el boton de "Invitar Amigos" situado en la parte inferior de la pantalla, se muestra un listado de los amigos del usuario y junto a cada uno de los amigos la opción "Invitar" que le enviará una invitación a ese amigo al mapa actual desde el que se envía. Se ha mejorado el formulario para invitar amigos, ahora se listan solo los amigos que no forman parte de ese mapa.
   ![collab](./Images/invitarMapaColabWeb.png)
   *(Caso de uso implementado en #S2)*
   Esta solicitud le aparecerá al usuario amigo en la sección de social en el apartado de Solicitudes.
