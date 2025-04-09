@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mapRouter from './routes/map.routes';
 import poiRouter from './routes/poi.routes';
 import districtRouter from './routes/district.routes';
+import regionRouter from './routes/region.routes';
 import { initializeDatabase } from '../../database/appDataSource';
 
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/maps', mapRouter);
 app.use('/api/districts', districtRouter);
 app.use('/api/poi', poiRouter); // Cambia esto por la ruta correcta para regiones
+app.use('/api/regions', regionRouter);
 
 // Ruta de salud para verificar que el servicio está funcionando
 app.get('/health', (_req: Request, res: Response) => {

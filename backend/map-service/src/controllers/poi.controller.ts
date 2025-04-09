@@ -32,7 +32,7 @@ export const createPOI = async (req: AuthenticatedRequest, res: Response): Promi
     }
 
     // 💥 VALIDACIÓN DE CAMPOS REQUERIDOS 💥
-    const requiredFields = ['name', 'description', 'location', 'category', 'district', 'isBusiness'];
+    const requiredFields = ['name', 'description', 'location'];
     const missingFields = requiredFields.filter(field => poiData[field] === undefined);
 
     if (missingFields.length > 0) {

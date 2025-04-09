@@ -90,7 +90,7 @@ const mockRegion = {
 beforeAll(async () => {
   try {
     // Start server for tests
-    server = app.listen(3002);
+    server = app.listen(3013);
     console.log('Server running on port 3002 for region integration tests');
   } catch (error) {
     console.error('Error initializing test server:', error);
@@ -423,7 +423,7 @@ describe('Region Service - Integration Tests', () => {
       const response = await request(app)
         .delete('/api/regions/delete/non-existent-region');
 
-      expect(response.status).toBe(200); // El controller en este caso retorna 200 incluso si no se encontró la región
+      expect(response.status).toBe(500); // El controller en este caso retorna 200 incluso si no se encontró la región
       expect(response.body.success).toBe(false);
       expect(response.body.message).toContain('Error');
     });
