@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../contexts/AuthContext'; // Ajusta la ruta según tu proyecto
 import { Ionicons } from '@expo/vector-icons';
 import TermsAndConditions from '../UI/TermsAndConditions';
+import StaticAd from '../Ads/StaticAd';
 
 // Definir el tipo para la navegación
 type RootStackParamList = {
@@ -45,6 +46,7 @@ const RegisterScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
   const [termsAlreadyRead, setTermsAlreadyRead] = useState(false);
+  const [showAd, setShowAd] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -140,8 +142,8 @@ const RegisterScreen = () => {
         throw new Error('No se pudo registrar el usuario. Verifica los datos o intenta nuevamente.');
       }
       
-      // Registro exitoso, navegamos a la pantalla principal
-      navigation.navigate('Map');
+      // Mostrar anuncio antes de navegar a la pantalla principal
+      setShowAd(true);
     } catch (error: unknown) {
       console.error('Error al registrarse:', error);
 
@@ -156,6 +158,12 @@ const RegisterScreen = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Función para cerrar el anuncio y navegar a la pantalla principal
+  const handleCloseAd = () => {
+    setShowAd(false);
+    navigation.navigate('Map');
   };
 
   const goToLogin = () => {
@@ -182,6 +190,7 @@ const RegisterScreen = () => {
       style={styles.background}
       resizeMode="cover"
     >
+      {showAd && <StaticAd onClose={handleCloseAd} />}
       <View style={globalStyles.semi_transparent_overlay} />
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
