@@ -3,7 +3,7 @@
  * Gestiona la creación, envío y almacenamiento de notificaciones
  */
 
-import { publishEvent } from '@shared/libs/rabbitmq';
+// import { publishEvent } from '@shared/libs/rabbitmq';
 import { SecureWebSocketServer } from '@shared/websocket/secure-websocket';
 
 /**
@@ -75,6 +75,7 @@ export const sendNotification = async (
   // En implementación real: await notificationRepository.save(notification);
   
   // Publicar evento de notificación enviada
+  /*
   await publishEvent('notification.sent', {
     notificationId: notification.id,
     userId,
@@ -84,7 +85,7 @@ export const sendNotification = async (
   
   return notification;
 };
-
+*/
 /**
  * Envía notificación a múltiples usuarios
  * @param userIds Array de IDs de usuarios destinatarios
@@ -122,6 +123,7 @@ export const sendBulkNotifications = async (
   }
   
   // Publicar evento de notificaciones masivas
+  /*
   await publishEvent('notification.bulk_sent', {
     recipients: userIds.length,
     successful: sent,
@@ -132,7 +134,7 @@ export const sendBulkNotifications = async (
   
   return { sent, failed };
 };
-
+*/
 /**
  * Marca una notificación como leída
  * @param notificationId ID de la notificación
