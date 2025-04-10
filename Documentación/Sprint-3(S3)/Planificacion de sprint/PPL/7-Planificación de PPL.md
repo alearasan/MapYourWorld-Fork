@@ -3,7 +3,7 @@
   <img src="https://i.imgur.com/vlzkG4H.png" alt="Imagen Imgur" width="auto" height="200">
 </p>
 
-<h1 align="center">Planificación del Sprint 4</h1>
+<h1 align="center">Planificación de PPL</h1>
 
 <p align="center">
     Grupo 7
@@ -12,7 +12,7 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 4
+    Sprint 3
 </p>
 <p align="center">
     Pedro Pablo Santos Domínguez
@@ -29,18 +29,18 @@
 
 # Índice
 
-- [1. Planificación del Sprint 4](#1-planificación-del-sprint-2)
+- [1. Planificación de PPL](#1-planificación-de-ppl)
 - [2. Responsabilidades del equipo](#2-responsabilidades-del-equipo)
 - [3. Estimación de horas](#3-estimación-de-horas)
 - [4. Hitos del Sprint](#4-hitos-del-sprint)
 
 ---
 
-# 1. Planificación del Sprint 2
+# 1. Planificación de PPL
 
-**Duración: 21/02/2025 - 07/03/2025**
+**Duración: 14/04/2025 - 02/05/2025**
 
-**Objetivo del Sprint:** En supuesto sprint adicional, se tratara de finalizar correctamnete el proyecto, añadiendo nuevas funcionalidades y resolviendo todos los bugs.
+**Objetivo del Sprint:** En cuanto a código en la fase de PPL, se tratara de finalizar correctamente el proyecto, mejorando funcionalidades y resolviendo todos los bugs.
 
 El equipo se centrará en la implementación de las siguientes tareas clave:
 
@@ -54,7 +54,7 @@ El equipo se centrará en la implementación de las siguientes tareas clave:
 
 5. **Mejorar la calidad del código:** Implica refactorizar el código existente para hacerlo más legible, modular y mantenible. Se aplicarán estándares de codificación y se revisarán las prácticas de desarrollo para facilitar futuras ampliaciones y reducir la deuda técnica.
 
-6. **Despliegue de la cuarta versión:** Esta tarea abarca la puesta en producción de la tercera versión del proyecto. Se coordinarán todas las actividades necesarias para garantizar que la transición a producción se efectúe de forma controlada y con mínimos riesgos, verificando la estabilidad post-deployment.
+6. **Desplegar una versión mejorada de la tercera entrega:** Esta tarea abarca la puesta en producción de una mejora de la tercera versión del proyecto. Se coordinarán todas las actividades necesarias para garantizar que la transición a producción se efectúe de forma controlada y con mínimos riesgos, verificando la estabilidad post-deployment.
 
 ---
 
@@ -77,7 +77,7 @@ del proyecto. Se dividen en encargados de Backend, Frontend y Testing/Calidad.
 | **Mejoras de usuarios piloto**     | Manuel Vélez, Pedro Pablo, Alfonso Alonso Lanzarán       | Ricardo Carreño, Pablo Olivencia                       | Antonio Porcar, Alejandro Aragón               |
 | **Seguridad**                      | Manuel Vélez, Pedro Pablo Santos, Gonzalo García         | Jaime Gómez, Ángel Neria, José María Baquero Rodríguez   | Pedro Pablo Santos, Gonzalo García             |
 | **Mejorar la calidad del código**  | Claudio González, Pablo Caballero, Alberto Escobar       | Alba Ramos, Franco Dell`Aguila                         | Manuel Vélez, Pedro Pablo Santos               |
-| **Despliegue de la cuarta versión** | Alejandro Aragón                                        | Gonzalo García                                         | Alejandro Aragón                               |
+| **Despliegue tercera versión mejorada** | Alejandro Aragón                                        | Gonzalo García                                         | Alejandro Aragón                               |
 
 ---
 
@@ -99,9 +99,9 @@ medidos en horas:
 
 # 4. Hitos del Sprint
 
-- **3 de abril:**  
+- **24 de abril:**  
   Para esta fecha se espera tener completadas las tareas de "Resolver bugs", "Incrementar la cobertura" y "Mejoras de usuarios piloto". Estas actividades suman un total aproximado de **37.99 horas**.
 
-- **10 de abril:**  
-  En esta fecha, todas las tareas deberán estar completadas, incluyendo seguridad, mejora de calidad del código y el despliegue de la cuarta versión. El total acumulado de horas es de aproximadamente **35.67 horas**.
+- **1 de mayo:**  
+  En esta fecha, todas las tareas deberán estar completadas, incluyendo seguridad, mejora de calidad del código y el despliegue de la tercera versión mejorada. El total acumulado de horas es de aproximadamente **35.67 horas**.
 
