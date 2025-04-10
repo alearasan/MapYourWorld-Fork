@@ -12,22 +12,21 @@
     ISPP-MapYourWorld
 </p>
 <p align="center">
-    Sprint 2
+    Sprint 3
 </p>
 <p align="center">
-    Alfonso Luis Alonso Lanzarán, Pablo Caballero, Manuel Vélez López, Angel Neria Acal y Claudio González
+    Alfonso Luis Alonso Lanzarán, Ricardo Carreño Mariño, Claudio González Benito
 </p>
 <p align="center">
-    26/03/2025
+    10/04/2025
 </p>
 
 **CONTROL DE VERSIONES**
 
 | VERSIÓN | FECHA     | COMENTARIOS              | AUTOR              |
 |---------|-----------|--------------------------|--------------------|
-| V1      | 26/03/2025| Primera versión          | Alfonso Luis Alonso Lanzarán|
-| V1      | 27/03/2025| Prompts usados         | Claudio Gonzalez Benito|
-| V1      | 27/03/2025| Prompts usados         | Pablo Caballero María|
+| V1      | 10/04/2025| Prompts usados         | Alfonso Luis Alonso Lanzarán|
+
 ---
 
 # Índice
@@ -58,18 +57,15 @@ En cuanto al desarrollo de código, se aplicarán estas herramientas en las fase
 
 # Registro de uso de IA
 
-
 | Miembro | Intención de uso | Prompt              | ¿Requirió modificación el resultado?              |
 |---------|-----------|--------------------------|--------------------|
-|   Alfonso Luis Alonso Lanzarán y Gonzalo García Lama | Generar un documento de requisitos exhaustivo y diagrama UML del modelo conceptual      | Se usaron 6 prompts iterando sobre los documentos generados, no se describen por su extensión     |  Sí           |
+|   Alfonso Luis Alonso Lanzarán | Generar gráficas de la productividad     | quiero complementar esa gráfica que representaba la productividad en el eje y y las horas invertidas en el eje x con los datos de esta semana dibujando una linea que una los puntos que representan a una misma persona. ¿Cómo puedo hacerlo en excel?     |  Sí           |
+|   Ricardo Carreño Mariño | Investigar sobre la estrategia de marketing   | Chat, eres un Community Manager de un grupo que está realizando un proyecto sobre un juego que puedes ir por el mapa desbloqueando distritos, añadiendo puntos de interés, con una suscripción premium que añade funcionalidades extra, y demás. Necesito que me hagas una estrategia y un plan de marketing teniendo en cuenta que el público objetivo es gente joven, que donde principalmente se va a publicitar la aplicación es en TikTok, aunque también se va a publicitar en Instagram, en X y puede que en YouTube. Y necesito que dicho plan dure alrededor de tres semanas.|  Sí           |
+|   Ricardo Carreño Mariño | Investigar sobre la estrategia de marketing   | Vale chat, necesito ideas para poder realizar un anuncio sobre nuestra aplicación. Para cada idea dame que tengo que hacer, si hay algun dialogo escribemelo. Ten en cuenta que es un juego nuestra aplicación asi que nuestro publico objetivo es gente joven.|  Sí           |
+|   Ricardo Carreño Mariño | Rehacer logo   | (Se adjunta las imagenes del logo antiguo)
+CHat, necesito que rehagas un logo para una aplicación de un proyecto de la carrera. Este es el logo de la aplicación por ahora. Se llama MapYourWorld, se trata de una aplicación en la que te registras y puedes ir recorriendo el mundo, desbloqueando distintos distritos de las ciudades. Tiene mapas colabrorativos, donde con tus colegas puedes ir desbloqueando el mundo juntos. Quiero que el logo, sea minimalista pero que tambien parezca un logo actualizado y no tan simple como es este. También, el color azul que tiene quiero que lo mantengas pero lo cambies por este: #0003ff.|  Sí           |
 |   Claudio Gonzalez Benito | Resumir el feedback  | Se usaron 4 prompts para  resumir el feedback, categorizarlo y contar las repeticiones para medir importancia   |  Sí           |
 |   Claudio Gonzalez Benito | Ordenar changelog  | Se uso para ordenar un documento markdow ya generado con otra herramienta (no ia) por fecha y dejarlo con la platilla que usamos  |  Sí           |
-|Ángel Neria Acal| Uso de Stripe | ¿Estoy intentando usar stripe en react native, me puedes decir que llamadas necesito hacer a la api de stripe y que dependencias debo instalar? | Sí
-|Ángel Neria Acal| Conocer los iconos de los inputs de react-native| ¿Qué iconos existen para los Texts Inputs en react-native| No
-|Manuel Vélez López| Generar storyboards| Necesitamos una imagen estilo comic (Muy importante) en la que se muestre a 2  personas dentro de un bar que mantienen un dialogo en el que reflexionan que gracias a la aplicación de "MapYourWorld", descubrieron una taberna publicitada en dicha aplicación, en la que la comida estaba deliciosa.  Deben hablar en español y debe aparecer como una persona le muestra a la otra la aplicación en el móvil. Lo que se ve en la aplicación es un mapa con un marcador.| Sí
-|Manuel Vélez López| Generar Storyboards| Manteniendo la historia anterior, quiero que dibujes de nuevo en formato cómic, el dueño del bar en el que se encuentran las 2 personas manteniendo un dialogo reflexivo en el que se plantea publicitarse en la aplicación. El dueño debe estar mostrando la aplicación en su móvil, pero esta vez va a publicitar su negocio y encuentra que el precio es de ÚNICAMENTE 100€ al mes.| Sí
-|   Pablo Caballero María | Sintaxis de jest para tests de integración  | Se usaron 6 prompts para generar la estructura básica de un test de integración, para tenerlo como referencia  |  Sí           |
-|   Pablo Caballero María | Generación de server de sonarqube  | Se usaron 4 prompts para configurar los contenedores de docker y su conexión, y para corregir la sintaxis del archivo de configuración de sonar  |  Sí           |
 
 ---
 
