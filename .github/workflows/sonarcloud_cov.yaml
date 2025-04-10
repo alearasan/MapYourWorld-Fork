@@ -27,7 +27,7 @@ jobs:
         run: npm install --legacy-peer-deps && npm install reflect-metadata --save
         
       - name: Run tests
-        run: npm test --coverage
+        run: cd backend && npm test --coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
