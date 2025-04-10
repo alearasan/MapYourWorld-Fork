@@ -27,7 +27,8 @@
 |---------|-----------|--------------------------|--------------------|
 | V1      | 20/03/2025| Primera versión          | Claudio Gonzalez Benito |
 | V2      | 22/03/2025| Encuesta 2 | Claudio Gonzalez Benito |
-| V3      | 22/03/2025| Encuesta 3 | Claudio Gonzalez Benito |
+| V3      | 06/04/2025| Encuesta 3 | Claudio Gonzalez Benito |
+| V3.1      | 10/04/2025| Añadir trazabilidad de las mejoras con las tareas | Claudio Gonzalez Benito |
 
 <!-- omit in toc-->
 # Índice
@@ -146,9 +147,9 @@ Se han propuesto las siguientes taras en respuesta a las estadisticas resultante
 
 | Cosa que se debe mejorar | Tarea creada | Número de issue (si procede) | Equipo | Prioridad | Descripcion |
 |--------------------------|--------------|-------------------------------|--------|-----------|-------------------|
-|Claridad, diseño visual, curva de aprendizaje y funcionalidad en la pantalla de mapas colaborativos| (link cuando se cree)|(poner cuando se cree)|Frontend y Backend(si es necesario)|media| Unificar estilos con el resto de la app, tomando de referencia los mock ups o pantalla de inicio, buscando entre otras cosas suavizar los colores|
-|Claridad, diseño visual en la pantalla de mapas| (link cuando se cree)|(poner cuando se cree)|Frontend|media| Hacer que los puntos de interes tengan un estilo visual mas atractivo|
-|Navegabilidad y feedback visual en la app en general| (link cuando se cree)|(poner cuando se cree)|Frontend|media|Implementar animaciones y tutoriales de primer uso (si da tiempo)|
+|Claridad, diseño visual, curva de aprendizaje y funcionalidad en la pantalla de mapas colaborativos| [Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/261)|#261|Frontend y Backend(si es necesario)|media| Unificar estilos con el resto de la app, tomando de referencia los mock ups o pantalla de inicio, buscando entre otras cosas suavizar los colores|
+|Claridad, diseño visual en la pantalla de mapas| [Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|media| Hacer que los puntos de interes tengan un estilo visual mas atractivo|
+|Navegabilidad y feedback visual en la app en general| [Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|media|Implementar animaciones y tutoriales de primer uso (si da tiempo)|
 
 
 ## 3.5. Nota final y conclusiones
@@ -187,13 +188,13 @@ Se han propuesto las siguientes taras en respuesta a las estadisticas resultante
 
 | Cosa que se debe mejorar | Tarea creada | Número de issue (si procede) | Equipo | Prioridad | Descripcion |
 |--------------------------|--------------|-------------------------------|--------|-----------|-------------------|
-|Diseño visual y claridad en general menos registro |||frontend|media|1.En los planes Utilizar colores más diferenciados, íconos claros o un diseño más compacto para facilitar la comparación rápida entre los planes, indicar cuanto se va a pagar o si es pago unico o mensual y evitar en móviles se vea pegado a la parte inferior y cueste verlo. 2.Los términos y condiciones en el móvil cuestan leerlos. Esto puede ser porque el texto de los términos y condiciones ocupa poco comparado con todo el modal. 3.Iconos mas adecuados para el poi de monumentos, y añadirles a todos un fondo muy sutil para que el propio icono no se mezcle con los tonos del mapa. 4.En el establecimiento de puntos de interes en el mapa colaborativo arreglar los estilos. 5.Mejorar el select a la hora de elegir categoria en un punto de interés|
-|Curva de aprendizaje y funcionalidad en mapas colaborativos|||Frontend|media|1.Editar sus propios puntos de interés ya registrados en el mapa.2.En mapas colaborativos poder ver quien a puesto cada punto de interés y que se vea la foto si alguien la sube|
-|Social funcionalidad y curva de aprendizaje|||Frontend|alta|1.Mostrarse el nombre de usuario en algún lugar visible de la aplicación.2.Mostrar un poco más de información sobre cada amigo.|
-|Consistencia visual en toda la app|||Frontend|media|Consolidar un poco mas los estilos|
-|Feedback visual|||Frontend|media|avisos de "Notificacion enviada" cuando se envían solicitudes|
-|Navegabilidad|||Frontend|media|1.Organizar las diferentes pantallas de la app en iconos en una navbar, para que este todo en un vistazo y facil de acceder. 2.Que la sesión se mantenga aunque me salga al la pantalla de inicio de la app o que el icono de la app no redirija a un "Home" sino que haya un botom de logout. 3.Poder irse a la anterior vista al darle hacia atrás en el móvil o en el navegador|
-|Arreglar fallos|||Frontend y Backend|alta|Para crear un Mapa Colaborativo hay que mantener pulsado el ratón en el campo de texto, si no, no permite introducir la información. En el móvil, no se puede escribir nada. 2.En la parte de suscripción, en móvil, no se muestra correctamente la pantalla completa. 3.Al actualizar la página, siempre me redirige a la pantalla de inicio y tengo que iniciar sesión de nuevo.|
+|Diseño visual y claridad en general menos registro |[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|frontend|media|1.En los planes Utilizar colores más diferenciados, íconos claros o un diseño más compacto para facilitar la comparación rápida entre los planes, indicar cuanto se va a pagar o si es pago unico o mensual y evitar en móviles se vea pegado a la parte inferior y cueste verlo. 2.Los términos y condiciones en el móvil cuestan leerlos. Esto puede ser porque el texto de los términos y condiciones ocupa poco comparado con todo el modal. 3.Iconos mas adecuados para el poi de monumentos, y añadirles a todos un fondo muy sutil para que el propio icono no se mezcle con los tonos del mapa. 4.En el establecimiento de puntos de interes en el mapa colaborativo arreglar los estilos. 5.Mejorar el select a la hora de elegir categoria en un punto de interés|
+|Curva de aprendizaje y funcionalidad en mapas colaborativos|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#|Frontend|media|1.Editar sus propios puntos de interés ya registrados en el mapa.2.En mapas colaborativos poder ver quien a puesto cada punto de interés y que se vea la foto si alguien la sube|
+|Social funcionalidad y curva de aprendizaje|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|alta|1.Mostrarse el nombre de usuario en algún lugar visible de la aplicación.2.Mostrar un poco más de información sobre cada amigo.|
+|Consistencia visual en toda la app|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|media|Consolidar un poco mas los estilos|
+|Feedback visual|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|media|avisos de "Notificacion enviada" cuando se envían solicitudes|
+|Navegabilidad|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend|media|1.Organizar las diferentes pantallas de la app en iconos en una navbar, para que este todo en un vistazo y facil de acceder. 2.Que la sesión se mantenga aunque me salga al la pantalla de inicio de la app o que el icono de la app no redirija a un "Home" sino que haya un botom de logout. 3.Poder irse a la anterior vista al darle hacia atrás en el móvil o en el navegador|
+|Arreglar fallos|[Tarea en GitHub](https://github.com/ISPP-Grupo-7/MapYourWorld/issues/313)|#313|Frontend y Backend|alta|Para crear un Mapa Colaborativo hay que mantener pulsado el ratón en el campo de texto, si no, no permite introducir la información. En el móvil, no se puede escribir nada. 2.En la parte de suscripción, en móvil, no se muestra correctamente la pantalla completa. 3.Al actualizar la página, siempre me redirige a la pantalla de inicio y tengo que iniciar sesión de nuevo.|
 
 ## 4.5. Nota final y conclusiones
 
