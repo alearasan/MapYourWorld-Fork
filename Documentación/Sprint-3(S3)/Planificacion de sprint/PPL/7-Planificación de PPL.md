@@ -93,7 +93,7 @@ medidos en horas:
 | **Mejoras de usuarios piloto** | 12                   | 18                   | 14                  |   14.33             |
 | **Seguridad**  | 11                   | 19                   | 16                  | 15.17            |  
 |  **Mejorar la calidad del código**             | 14                    | 20                    | 16                 |     16.33         |
-| **Despliegue de la cuarta versión**  | 3                    | 6                    | 4                   |  4.17            |
+| **Despliegue de la tercera versión mejorada**  | 3                    | 6                    | 4                   |  4.17            |
 
 ---
 
