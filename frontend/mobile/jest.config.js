@@ -6,7 +6,7 @@ module.exports = {
     'node_modules/(?!(react-native|@react-native|react-navigation|@react-navigation|@expo|expo|styled-components|styled-components/native)/)',
   ],
   collectCoverageFrom: [
-    'src/components/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.*',
     '!**/node_modules/**',
   ],
   moduleNameMapper: {
