@@ -110,10 +110,9 @@ jobs:
               "Authorization": f"Bearer {gh_token}",
               "Accept": "application/vnd.github+json"
           }
-
           for finding in findings:
               issue_title = f"[{finding['severity']}] {finding['title']}"
-              issue_body = f\"\"\"
+              issue_body = f"""
           **Severity**: {finding['severity']}
           **File**: {finding.get('file_path', 'N/A')}
           **Description**:
@@ -121,7 +120,7 @@ jobs:
           {finding['description']}
 
           -- Imported from DefectDojo
-          \"\"\"
+          """
               payload = {
                   "title": issue_title,
                   "body": issue_body,
@@ -133,4 +132,3 @@ jobs:
                   print(f"✅ Created Issue: {issue_title}")
               else:
                   print(f"❌ Failed to create issue: {issue_response.status_code} {issue_response.text}")
-          EOF
