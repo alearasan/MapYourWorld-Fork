@@ -49,8 +49,9 @@ jobs:
             -H "Authorization: Token ${DOJO_TOKEN}" \
             -F scan_type="SonarQube API Import" \
             -F tool_config_id=1 \
-            -F sonar_project_key=alearasan_MapYourWorld \
-            -F sonar_branch=main \
+            -F sonar_project_key="alearasan_MapYourWorld" \
+            -F sonar_branch="main" \
             -F product_name="MapYourWorld Fork" \
             -F engagement_name="Interactive test" \
-            -F auto_create_context=true
+            -F auto_create_context=true \
+            -F push_to_git_provider=true
