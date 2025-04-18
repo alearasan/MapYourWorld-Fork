@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: SonarCloud Analysis and DefectDojo Import to GitHub Issues
 
 on:
   push:
@@ -14,8 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for better results
-          
+          fetch-depth: 0
+
       - name: Install Node.js manually
         run: |
           curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
@@ -25,14 +25,14 @@ jobs:
           
       - name: Install dependencies
         run: npm install --legacy-peer-deps && npm install reflect-metadata --save
-        
+
       - name: Run tests
         run: cd backend && npm test --coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GB_TOKEN: ${{ secrets.GH_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   dojo-import:
@@ -55,3 +55,82 @@ jobs:
             -F engagement_name="Interactive test" \
             -F auto_create_context=true \
             -F push_to_git_provider=true
+
+  dojo-to-github-issues:
+    needs: dojo-import
+    runs-on: ubuntu-latest
+    if: needs.dojo-import.result == 'success'
+    steps:
+      - name: Install Python dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install requests
+
+      - name: Create GitHub Issues from DefectDojo findings
+        env:
+          DOJO_URL: ${{ secrets.DOJO_URL }}
+          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+          GB_REPO: ${{ secrets.GB_REPO }}
+          GB_PAT: ${{ secrets.GB_PAT }}
+        run: |
+          python3 - <<EOF
+          import requests
+
+          dojo_url = "${DOJO_URL}"
+          dojo_token = "${DOJO_TOKEN}"
+          gb_repo = "${GB_REPO}"
+          gb_token = "${GB_PAT}"
+
+          headers = {
+              "Authorization": f"Token {dojo_token}",
+              "Accept": "application/json"
+          }
+
+          url = f"{dojo_url}/api/v2/findings/"
+          findings = []
+          page = 1
+
+          while True:
+              params = {"push_to_git_provider": "true", "active": "true", "verified": "true", "limit": 100, "offset": (page-1)*100}
+              response = requests.get(url, headers=headers, params=params)
+              if response.status_code != 200:
+                  print("Error getting findings", response.text)
+                  break
+
+              data = response.json()
+              findings += data.get("results", [])
+              if not data.get("next"):
+                  break
+              page += 1
+
+          print(f"Found {len(findings)} findings to push...")
+
+          github_headers = {
+              "Authorization": f"Bearer {gb_token}",
+              "Accept": "application/vnd.github+json"
+          }
+
+          for finding in findings:
+              issue_title = f"[{finding['severity']}] {finding['title']}"
+              issue_body = f\"\"\"
+**Severity**: {finding['severity']}
+**File**: {finding.get('file_path', 'N/A')}
+**Description**:
+
+{finding['description']}
+
+-- Imported from DefectDojo
+\"\"\"
+              payload = {
+                  "title": issue_title,
+                  "body": issue_body,
+                  "labels": ["DefectDojo"]
+              }
+              github_url = f"https://api.github.com/repos/{gb_repo}/issues"
+              issue_response = requests.post(github_url, headers=github_headers, json=payload)
+              if issue_response.status_code == 201:
+                  print(f"✅ Created Issue: {issue_title}")
+              else:
+                  print(f"❌ Failed to create issue: {issue_response.status_code} {issue_response.text}")
+          EOF
