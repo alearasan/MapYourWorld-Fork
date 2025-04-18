@@ -21,7 +21,7 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
 
     try {
       const newMap = await MapService.createColaborativeMap(MapData, userId);
-      console.log("Mapa colaborativo creado con éxito:", newMap);
+      console.log("Mapa colaborativo creado con éxito:", null);
       res.status(201).json({ 
         success: true, 
         message: 'Mapa colaborativo creado correctamente'
@@ -37,7 +37,7 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
           name: MapData.name,
           description: MapData.description,
           is_colaborative: true,
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
           users_joined: [{ id: userId, username: 'Usuario Simulado' }]
         }
       });
