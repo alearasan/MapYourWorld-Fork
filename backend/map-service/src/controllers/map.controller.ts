@@ -36,7 +36,7 @@ export const createMapColaborative = async (req: Request, res: Response): Promis
           id: `map-${Date.now()}`,
           name: MapData.name,
           description: MapData.description,
-          is_colaborative: true,
+          is_colaborative: false,
           createdAt: new Date(),
           users_joined: [{ id: userId, username: 'Usuario Simulado' }]
         }
