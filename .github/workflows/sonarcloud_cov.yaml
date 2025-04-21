@@ -70,7 +70,7 @@ jobs:
           DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
         run: |
           python3 <<EOF
-          import requests, json
+          import requests, json, os
 
           headers = {
               "Authorization": f"Bearer '${{ env.GH_TOKEN }}'",
@@ -120,7 +120,7 @@ jobs:
               "-F", "deduplication_on_engagement=true"
           ])
           EOF
-          
+
   dojo-to-github-issues:
     needs: dojo-import
     runs-on: ubuntu-latest
