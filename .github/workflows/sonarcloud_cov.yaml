@@ -55,7 +55,8 @@ jobs:
             -F engagement_name="Interactive test" \
             -F auto_create_context=true \
             -F push_to_git_provider=true \
-            -F close_old_findings=true
+            -F close_old_findings=true \
+            -F deduplication_on_engagement=true
 
   dojo-to-github-issues:
     needs: dojo-import
