@@ -126,6 +126,8 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.dojo-import.result == 'success'
     steps:
+      - name: Wait for 5 minutes
+        run: sleep 300
       - name: Install Python dependencies
         run: |
           sudo apt-get update
@@ -159,14 +161,7 @@ jobs:
           offset = 0
 
           while True: 
-              params = {
-              "active": "true",
-              "verified": "true",
-              "duplicate": "false",
-              "false_p": "false",
-              "limit": 100,
-              "offset": offset
-            }
+              params = {"active": "true", "limit": 100, "offset": offset}
               response = requests.get(url, headers=headers, params=params)
               if response.status_code != 200:
                   print("Error getting findings", response.text)
