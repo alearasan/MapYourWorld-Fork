@@ -58,6 +58,69 @@ jobs:
             -F close_old_findings=true \
             -F deduplication_on_engagement=true
 
+  dependabot-to-dojo:
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    if: needs.sonarcloud.result == 'success'
+    steps:
+      - name: Export Dependabot alerts to JSON and upload to DefectDojo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          DOJO_URL: ${{ secrets.DOJO_URL }}
+          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+        run: |
+          python3 <<EOF
+          import requests, json
+
+          headers = {
+              "Authorization": f"Bearer '${{ env.GH_TOKEN }}'",
+              "Accept": "application/vnd.github+json"
+          }
+
+          alerts = []
+          page = 1
+          while True:
+              url = f"https://api.github.com/repos/alearasan/MapYourWorld-Fork/dependabot/alerts?per_page=100&page={page}"
+              resp = requests.get(url, headers=headers)
+              if resp.status_code != 200:
+                  print("Error:", resp.text)
+                  break
+              page_data = resp.json()
+              if not page_data:
+                  break
+              alerts.extend(page_data)
+              page += 1
+
+          findings = []
+          for alert in alerts:
+              findings.append({
+                  "title": alert['security_advisory']['summary'],
+                  "severity": alert.get('security_advisory', {}).get('severity', 'Info').capitalize(),
+                  "description": alert.get('security_advisory', {}).get('description', 'No description'),
+                  "file_path": alert.get('dependency', {}).get('manifest_path', 'N/A'),
+                  "mitigation": alert.get('security_advisory', {}).get('recommendation', ''),
+              })
+
+          with open("dependabot-findings.json", "w") as f:
+              json.dump(findings, f, indent=2)
+
+          print(f"Exported {len(findings)} findings.")
+
+          # Upload to DefectDojo
+          import subprocess
+          subprocess.run([
+              "curl", "-X", "POST", f"{os.environ['DOJO_URL']}/api/v2/import-scan/",
+              "-H", f"Authorization: Token {os.environ['DOJO_TOKEN']}",
+              "-F", "scan_type=Generic Findings Import",
+              "-F", "file=@dependabot-findings.json",
+              "-F", "product_name=MapYourWorld Fork",
+              "-F", "engagement_name=Dependabot Auto Scan",
+              "-F", "auto_create_context=true",
+              "-F", "close_old_findings=true",
+              "-F", "deduplication_on_engagement=true"
+          ])
+          EOF
+          
   dojo-to-github-issues:
     needs: dojo-import
     runs-on: ubuntu-latest
@@ -95,7 +158,7 @@ jobs:
           page = 1
 
           while True: 
-              params = {"offset": (page-1)*100}
+              params = {"active": "true", "offset": (page-1)*100}
               response = requests.get(url, headers=headers, params=params)
               if response.status_code != 200:
                   print("Error getting findings", response.text)
