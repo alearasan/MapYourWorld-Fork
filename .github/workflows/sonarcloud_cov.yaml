@@ -170,6 +170,7 @@ jobs:
               if not data.get("next"):
                   break
               page += 1
+              offset += 100
 
           print(f"Found {len(findings)} findings to push...")
 
