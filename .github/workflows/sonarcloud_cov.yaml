@@ -117,7 +117,7 @@ jobs:
           existing_titles = []  # <- Asegúrate de inicializarlo
 
           for finding in findings:
-              issue_title = f"[{finding['severity']}] {finding['title']}"
+              issue_title = f"[{finding['severity']}] {finding['title']}  {finding['id']}"
               if issue_title in existing_titles:
                   print(f"⚠️ Skipped duplicate: {issue_title}")
                   continue
