@@ -145,5 +145,3 @@ jobs:
             
             # --- Añadimos la pausa aquí ---
             time.sleep(0.5)
-EOF
-
