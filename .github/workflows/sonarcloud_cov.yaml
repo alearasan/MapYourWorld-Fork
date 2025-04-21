@@ -159,7 +159,14 @@ jobs:
           offset = 0
 
           while True: 
-              params = {"active": "true", "limit": 100, "offset": offset}
+              params = {
+              "active": "true",
+              "verified": "true",
+              "duplicate": "false",
+              "false_p": "false",
+              "limit": 100,
+              "offset": offset
+            }
               response = requests.get(url, headers=headers, params=params)
               if response.status_code != 200:
                   print("Error getting findings", response.text)
