@@ -57,7 +57,6 @@ jobs:
             -F push_to_git_provider=true \
             -F close_old_findings=true
 
-
   dojo-to-github-issues:
     needs: dojo-import
     runs-on: ubuntu-latest
@@ -114,13 +113,36 @@ jobs:
               "Accept": "application/vnd.github+json"
           }
 
-          existing_titles = []  # <- Asegúrate de inicializarlo
+          # 1. Obtener todas las issues existentes de GitHub
+          existing_titles = []
+          github_url = f"https://api.github.com/repos/{gh_repo}/issues"
+          page = 1
 
+          while True:
+              params = {"state": "open", "per_page": 100, "page": page}
+              issues_response = requests.get(github_url, headers=github_headers, params=params)
+              if issues_response.status_code != 200:
+                  print("Error fetching existing GitHub issues:", issues_response.text)
+                  break
+
+              issues = issues_response.json()
+              if not issues:
+                  break
+
+              for issue in issues:
+                  existing_titles.append(issue["title"])
+
+              page += 1
+
+          print(f"Found {len(existing_titles)} existing GitHub issues.")
+
+          # 2. Crear nuevas issues solo si no existen
           for finding in findings:
-              issue_title = f"[{finding['severity']}] {finding['title']}  {finding['id']}"
+              issue_title = f"[{finding['severity']}] {finding['title']} {finding['id']}"
               if issue_title in existing_titles:
-                  print(f"⚠️ Skipped duplicate: {issue_title}")
+                  print(f"⚠️ Skipped existing issue: {issue_title}")
                   continue
+
               issue_body = f"""
           **Severity**: {finding['severity']}
           **File**: {finding.get('file_path', 'N/A')}
@@ -130,18 +152,19 @@ jobs:
 
           -- Imported from DefectDojo
           """
+
               payload = {
                   "title": issue_title,
                   "body": issue_body,
                   "labels": ["DefectDojo"]
               }
-              github_url = f"https://api.github.com/repos/{gh_repo}/issues"
+
               issue_response = requests.post(github_url, headers=github_headers, json=payload)
               if issue_response.status_code == 201:
                   print(f"✅ Created Issue: {issue_title}")
                   existing_titles.append(issue_title)
               else:
                   print(f"❌ Failed to create issue: {issue_response.status_code} {issue_response.text}")
-              
-              # --- Añadimos la pausa aquí ---
+
               time.sleep(0.5)
+          EOF
