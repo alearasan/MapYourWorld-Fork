@@ -94,8 +94,9 @@ jobs:
           findings = []
           page = 1
 
-          while True:
-              response = requests.get(url, headers=headers)
+          while True: 
+              params = {"offset": (page-1)*100}
+              response = requests.get(url, headers=headers, params=params)
               if response.status_code != 200:
                   print("Error getting findings", response.text)
                   break
