@@ -72,7 +72,7 @@ jobs:
           DOJO_URL: ${{ secrets.DOJO_URL }}
           DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
           GH_REPO: ${{ secrets.GH_REPO }}
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           python3 - <<EOF
           import requests
@@ -80,7 +80,7 @@ jobs:
           dojo_url = "${DOJO_URL}"
           dojo_token = "${DOJO_TOKEN}"
           gh_repo = "${GH_REPO}"
-          gh_token = "${GH_PAT}"
+          gh_token = "${GH_TOKEN}"
 
           headers = {
               "Authorization": f"Token {dojo_token}",
