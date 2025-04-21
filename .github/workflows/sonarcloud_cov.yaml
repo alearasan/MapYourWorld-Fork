@@ -155,7 +155,7 @@ jobs:
 
           url = f"{dojo_url}/api/v2/findings/"
           findings = []
-          page = 1
+          offset = 0
 
           while True: 
               params = {"active": "true", "limit": 100, "offset": offset}
