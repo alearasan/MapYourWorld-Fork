@@ -36,99 +36,114 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   dojo-import:
-    needs: sonarcloud
-    runs-on: ubuntu-latest
-    if: needs.sonarcloud.result == 'success'
-    steps:
-      - name: Import Sonar findings into DefectDojo
-        env:
-          DOJO_URL: ${{ secrets.DOJO_URL }}
-          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
-        run: |
-          curl -s -S -X POST "${DOJO_URL}/api/v2/import-scan/" \
-            -H "Authorization: Token ${DOJO_TOKEN}" \
-            -F scan_type="SonarQube API Import" \
-            -F tool_config_id=1 \
-            -F sonar_project_key="alearasan_MapYourWorld" \
-            -F sonar_branch="main" \
-            -F product_name="MapYourWorld Fork" \
-            -F engagement_name="Interactive test" \
-            -F auto_create_context=true \
-            -F push_to_git_provider=true
+  needs: sonarcloud
+  runs-on: ubuntu-latest
+  if: needs.sonarcloud.result == 'success'
+  steps:
+    - name: Import Sonar findings into DefectDojo
+      env:
+        DOJO_URL: ${{ secrets.DOJO_URL }}
+        DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+      run: |
+        curl -s -S -X POST "${DOJO_URL}/api/v2/import-scan/" \
+          -H "Authorization: Token ${DOJO_TOKEN}" \
+          -F scan_type="SonarQube API Import" \
+          -F tool_config_id=1 \
+          -F sonar_project_key="alearasan_MapYourWorld" \
+          -F sonar_branch="main" \
+          -F product_name="MapYourWorld Fork" \
+          -F engagement_name="Interactive test" \
+          -F auto_create_context=true \
+          -F push_to_git_provider=true \
+          -F close_old_findings=true
+
 
   dojo-to-github-issues:
-    needs: dojo-import
-    runs-on: ubuntu-latest
-    if: needs.dojo-import.result == 'success'
-    steps:
-      - name: Install Python dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip3 install requests
+  needs: dojo-import
+  runs-on: ubuntu-latest
+  if: needs.dojo-import.result == 'success'
+  steps:
+    - name: Install Python dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+        pip3 install requests
 
-      - name: Create GitHub Issues from DefectDojo findings
-        env:
-          DOJO_URL: ${{ secrets.DOJO_URL }}
-          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
-          GH_REPO: ${{ secrets.GH_REPO }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          python3 - <<EOF
-          import requests
+    - name: Create GitHub Issues from DefectDojo findings
+      env:
+        DOJO_URL: ${{ secrets.DOJO_URL }}
+        DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+        GH_REPO: ${{ secrets.GH_REPO }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        python3 - <<EOF
+        import requests
+        import time
 
-          dojo_url = "${DOJO_URL}"
-          dojo_token = "${DOJO_TOKEN}"
-          gh_repo = "${GH_REPO}"
-          gh_token = "${GH_TOKEN}"
+        dojo_url = "${DOJO_URL}"
+        dojo_token = "${DOJO_TOKEN}"
+        gh_repo = "${GH_REPO}"
+        gh_token = "${GH_TOKEN}"
 
-          headers = {
-              "Authorization": f"Token {dojo_token}",
-              "Accept": "application/json"
-          }
+        headers = {
+            "Authorization": f"Token {dojo_token}",
+            "Accept": "application/json"
+        }
 
-          url = f"{dojo_url}/api/v2/findings/"
-          findings = []
-          page = 1
+        url = f"{dojo_url}/api/v2/findings/"
+        findings = []
+        page = 1
 
-          while True:
-              params = {"active": "true", "offset": (page-1)*100}
-              response = requests.get(url, headers=headers, params=params)
-              if response.status_code != 200:
-                  print("Error getting findings", response.text)
-                  break
+        while True:
+            params = {"active": "true", "offset": (page-1)*100}
+            response = requests.get(url, headers=headers, params=params)
+            if response.status_code != 200:
+                print("Error getting findings", response.text)
+                break
 
-              data = response.json()
-              findings += data.get("results", [])
-              if not data.get("next"):
-                  break
-              page += 1
+            data = response.json()
+            findings += data.get("results", [])
+            if not data.get("next"):
+                break
+            page += 1
 
-          print(f"Found {len(findings)} findings to push...")
+        print(f"Found {len(findings)} findings to push...")
 
-          github_headers = {
-              "Authorization": f"Bearer {gh_token}",
-              "Accept": "application/vnd.github+json"
-          }
-          for finding in findings:
-              issue_title = f"[{finding['severity']}] {finding['title']}"
-              issue_body = f"""
-          **Severity**: {finding['severity']}
-          **File**: {finding.get('file_path', 'N/A')}
-          **Description**:
+        github_headers = {
+            "Authorization": f"Bearer {gh_token}",
+            "Accept": "application/vnd.github+json"
+        }
 
-          {finding['description']}
+        existing_titles = []  # <- Asegúrate de inicializarlo
 
-          -- Imported from DefectDojo
-          """
-              payload = {
-                  "title": issue_title,
-                  "body": issue_body,
-                  "labels": ["DefectDojo"]
-              }
-              github_url = f"https://api.github.com/repos/{gh_repo}/issues"
-              issue_response = requests.post(github_url, headers=github_headers, json=payload)
-              if issue_response.status_code == 201:
-                  print(f"✅ Created Issue: {issue_title}")
-              else:
-                  print(f"❌ Failed to create issue: {issue_response.status_code} {issue_response.text}")
+        for finding in findings:
+            issue_title = f"[{finding['severity']}] {finding['title']}"
+            if issue_title in existing_titles:
+                print(f"⚠️ Skipped duplicate: {issue_title}")
+                continue
+            issue_body = f"""
+        **Severity**: {finding['severity']}
+        **File**: {finding.get('file_path', 'N/A')}
+        **Description**:
+
+        {finding['description']}
+
+        -- Imported from DefectDojo
+        """
+            payload = {
+                "title": issue_title,
+                "body": issue_body,
+                "labels": ["DefectDojo"]
+            }
+            github_url = f"https://api.github.com/repos/{gh_repo}/issues"
+            issue_response = requests.post(github_url, headers=github_headers, json=payload)
+            if issue_response.status_code == 201:
+                print(f"✅ Created Issue: {issue_title}")
+                existing_titles.append(issue_title)
+            else:
+                print(f"❌ Failed to create issue: {issue_response.status_code} {issue_response.text}")
+            
+            # --- Añadimos la pausa aquí ---
+            time.sleep(0.5)
+EOF
+
