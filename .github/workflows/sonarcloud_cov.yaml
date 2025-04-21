@@ -36,26 +36,26 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   dojo-import:
-  needs: sonarcloud
-  runs-on: ubuntu-latest
-  if: needs.sonarcloud.result == 'success'
-  steps:
-    - name: Import Sonar findings into DefectDojo
-      env:
-        DOJO_URL: ${{ secrets.DOJO_URL }}
-        DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
-      run: |
-        curl -s -S -X POST "${DOJO_URL}/api/v2/import-scan/" \
-          -H "Authorization: Token ${DOJO_TOKEN}" \
-          -F scan_type="SonarQube API Import" \
-          -F tool_config_id=1 \
-          -F sonar_project_key="alearasan_MapYourWorld" \
-          -F sonar_branch="main" \
-          -F product_name="MapYourWorld Fork" \
-          -F engagement_name="Interactive test" \
-          -F auto_create_context=true \
-          -F push_to_git_provider=true \
-          -F close_old_findings=true
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    if: needs.sonarcloud.result == 'success'
+    steps:
+      - name: Import Sonar findings into DefectDojo
+        env:
+          DOJO_URL: ${{ secrets.DOJO_URL }}
+          DOJO_TOKEN: ${{ secrets.DOJO_TOKEN }}
+        run: |
+          curl -s -S -X POST "${DOJO_URL}/api/v2/import-scan/" \
+            -H "Authorization: Token ${DOJO_TOKEN}" \
+            -F scan_type="SonarQube API Import" \
+            -F tool_config_id=1 \
+            -F sonar_project_key="alearasan_MapYourWorld" \
+            -F sonar_branch="main" \
+            -F product_name="MapYourWorld Fork" \
+            -F engagement_name="Interactive test" \
+            -F auto_create_context=true \
+            -F push_to_git_provider=true \
+            -F close_old_findings=true
 
 
   dojo-to-github-issues:
